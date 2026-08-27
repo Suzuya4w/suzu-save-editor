@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Suzu Save Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      html, body {
+        background-color: #000000;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        background-color: #000000;
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.6s;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+      }
+
+      #initial-loader.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .boot-sequence {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        color: #F3F4F6;
+        font-family: 'JetBrains Mono', monospace;
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease-out;
+      }
+
+      #initial-loader.fade-out .boot-sequence {
+        transform: translateY(40px);
+        opacity: 0;
+      }
+
+      .loader-glitch {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        position: relative;
+        text-shadow: 3px 3px 0px #FF7A00;
+        opacity: 0;
+        animation: bootUp 0.8s ease-out 0.2s forwards;
+      }
+
+      .progress-container {
+        width: 240px;
+        height: 2px;
+        background-color: #27272a;
+        margin-top: 24px;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        animation: bootUp 0.8s ease-out 0.5s forwards;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background-color: #FF7A00;
+        box-shadow: 0 0 10px #FF7A00;
+        animation: scanLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      .loader-status {
+        font-size: 0.75rem;
+        color: #71717a;
+        margin-top: 16px;
+        letter-spacing: 0.15em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 0;
+        animation: bootUp 0.8s ease-out 0.8s forwards;
+      }
+
+      .blinking-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1.2em;
+        background-color: #FF7A00;
+        animation: blink 1s step-end infinite;
+        vertical-align: middle;
+      }
+
+      @keyframes bootUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      @keyframes scanLine {
+        0% { width: 0%; transform: translateX(-100%); }
+        50% { width: 100%; transform: translateX(0); }
+        100% { width: 100%; transform: translateX(100%); }
+      }
+    </style>
+  </head>
+  <body class="bg-black text-[#F3F4F6] font-sans antialiased selection:bg-[#FF7A00]/30 overflow-hidden overscroll-y-none">
+    
+    <div id="initial-loader">
+      <div class="boot-sequence">
+        <div class="loader-glitch">SUZU_SAVE</div>
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="loader-status">
+          <span>INITIALIZING_ENVIRONMENT</span>
+          <span class="blinking-cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="root" class="h-[100dvh] w-screen overflow-hidden overscroll-none"></div>
+    
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suzu Save Editor - Authentication</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .content-box {
+            position: relative;
+            padding: 40px;
+            box-shadow: 8px 8px 0px #000;
+
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .content-box::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: radial-gradient(
+                250px circle at var(--x, 50%) var(--y, 50%), 
+                #FF7A00 0%, 
+                #1a1a1a 100%
+            );
+            z-index: -2;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: #0a0a0a;
+            z-index: -1;
+        }
+
+        h1 {
+            color: #FF7A00;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0;
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        p {
+            color: #a1a1aa;
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        p:nth-of-type(1) { animation-delay: 0.2s; }
+        p:nth-of-type(2) { animation-delay: 0.4s; }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        a.btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #FF7A00;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0px #fff;
+            text-transform: uppercase;
+            transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideUp 0.5s ease-out 0.6s forwards;
+        }
+
+        a.btn:hover {
+            background-color: #fff;
+            box-shadow: 6px 6px 0px #FF7A00;
+            transform: translate(-2px, -2px);
+        }
+
+        a.btn:active {
+            box-shadow: 0px 0px 0px #FF7A00;
+            transform: translate(4px, 4px);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            from { text-shadow: 0 0 0px rgba(255,122,0,0); }
+            to { text-shadow: 0 0 12px rgba(255,122,0,0.6); }
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-box">
+        <h1>Authentication Successful</h1>
+        <p>Returning you to the Suzu Save Editor<span class="loading-dots"></span></p>
+        <p>If your browser prompts you to open an application, please click <b>Allow</b> or <b>Open</b>.</p>
+
+        <a href="#" id="fallback-link" class="btn">Click here if nothing happens</a>
+    </div>
+
+    <script>
+        const box = document.querySelector('.content-box');
+
+        let isHovering = false;
+        let autoAngle = 0;
+
+        box.addEventListener('mouseenter', () => {
+            isHovering = true;
+        });
+
+        box.addEventListener('mousemove', (e) => {
+            if (isHovering) {
+                const rect = box.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                box.style.setProperty('--x', `${x}px`);
+                box.style.setProperty('--y', `${y}px`);
+            }
+        });
+
+        box.addEventListener('mouseleave', () => {
+            isHovering = false;
+        });
+
+        function animateIdleGlow() {
+            if (!isHovering) {
+                autoAngle += 0.03;
+
+                const autoX = 50 + Math.sin(autoAngle) * 50; 
+                const autoY = 50 + Math.cos(autoAngle) * 50;
+
+                box.style.setProperty('--x', `${autoX}%`);
+                box.style.setProperty('--y', `${autoY}%`);
+            }
+
+            requestAnimationFrame(animateIdleGlow);
+        }
+
+        animateIdleGlow();
+
+        const hash = window.location.hash;
+        const appUrl = "suzu://auth/callback" + hash;
+        document.getElementById('fallback-link').href = appUrl;
+
+        setTimeout(() => {
+            window.location.href = appUrl; 
+        }, 1000);
+    </script>
+</body>
+</html>

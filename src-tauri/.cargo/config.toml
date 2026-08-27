@@ -1,0 +1,5 @@
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+aes,+sse2"]
+
+[target.aarch64-linux-android]
+rustflags = ["-C", "target-feature=+aes,+neon"]

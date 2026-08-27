@@ -1,0 +1,527 @@
+[
+	{
+		"name": "Junimo Hut",
+		"displayName": "[LocalizedText Strings\\Buildings:JunimoHut_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Junimo Hut.png",
+		"textureSize": {
+			"X": 256,
+			"Y": 64
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Earth Obelisk",
+		"displayName": "[LocalizedText Strings\\Buildings:EarthObelisk_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Earth Obelisk.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Water Obelisk",
+		"displayName": "[LocalizedText Strings\\Buildings:WaterObelisk_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Water Obelisk.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Desert Obelisk",
+		"displayName": "[LocalizedText Strings\\Buildings:DesertObelisk_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Desert Obelisk.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Island Obelisk",
+		"displayName": "[LocalizedText Strings\\Buildings:IslandObelisk_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Island Obelisk.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Gold Clock",
+		"displayName": "[LocalizedText Strings\\Buildings:GoldClock_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 2
+		},
+		"texture": "Gold Clock.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 80
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Coop",
+		"displayName": "[LocalizedText Strings\\Buildings:Coop_Name]",
+		"footprint": {
+			"X": 6,
+			"Y": 3
+		},
+		"texture": "Coop.png",
+		"textureSize": {
+			"X": 96,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 96,
+			"Height": 112
+		},
+		"maxOccupants": 4,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Barn",
+		"displayName": "[LocalizedText Strings\\Buildings:Barn_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 4
+		},
+		"texture": "Barn.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 112,
+			"Height": 112
+		},
+		"maxOccupants": 4,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Well",
+		"displayName": "[LocalizedText Strings\\Buildings:Well_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 3
+		},
+		"texture": "Well.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 80
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Silo",
+		"displayName": "[LocalizedText Strings\\Buildings:Silo_Name]",
+		"footprint": {
+			"X": 3,
+			"Y": 3
+		},
+		"texture": "Silo.png",
+		"textureSize": {
+			"X": 48,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 240
+	},
+	{
+		"name": "Mill",
+		"displayName": "[LocalizedText Strings\\Buildings:Mill_Name]",
+		"footprint": {
+			"X": 4,
+			"Y": 2
+		},
+		"texture": "Mill.png",
+		"textureSize": {
+			"X": 224,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 64,
+			"Height": 128
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Shed",
+		"displayName": "[LocalizedText Strings\\Buildings:Shed_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 3
+		},
+		"texture": "Shed.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Fish Pond",
+		"displayName": "[LocalizedText Strings\\Buildings:FishPond_Name]",
+		"footprint": {
+			"X": 5,
+			"Y": 5
+		},
+		"texture": "Fish Pond.png",
+		"textureSize": {
+			"X": 160,
+			"Y": 176
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": -1,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Cabin",
+		"displayName": "[LocalizedText Strings\\Buildings:Cabin_Name]",
+		"footprint": {
+			"X": 5,
+			"Y": 3
+		},
+		"texture": "Stone Cabin.png",
+		"textureSize": {
+			"X": 240,
+			"Y": 112
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 80,
+			"Height": 112
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Pet Bowl",
+		"displayName": "[LocalizedText Strings\\Buildings:PetBowl_Name]",
+		"footprint": {
+			"X": 2,
+			"Y": 2
+		},
+		"texture": "Pet Bowl.png",
+		"textureSize": {
+			"X": 96,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 32,
+			"Y": 0,
+			"Width": 32,
+			"Height": 32
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Stable",
+		"displayName": "[LocalizedText Strings\\Buildings:Stable_Name]",
+		"footprint": {
+			"X": 4,
+			"Y": 2
+		},
+		"texture": "Stable.png",
+		"textureSize": {
+			"X": 64,
+			"Y": 96
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Slime Hutch",
+		"displayName": "[LocalizedText Strings\\Buildings:SlimeHutch_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 4
+		},
+		"texture": "Slime Hutch.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 112
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 112,
+			"Height": 112
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Big Coop",
+		"displayName": "[LocalizedText Strings\\Buildings:BigCoop_Name]",
+		"footprint": {
+			"X": 6,
+			"Y": 3
+		},
+		"texture": "Big Coop.png",
+		"textureSize": {
+			"X": 96,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 96,
+			"Height": 112
+		},
+		"maxOccupants": 8,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Deluxe Coop",
+		"displayName": "[LocalizedText Strings\\Buildings:DeluxeCoop_Name]",
+		"footprint": {
+			"X": 6,
+			"Y": 3
+		},
+		"texture": "Deluxe Coop.png",
+		"textureSize": {
+			"X": 96,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 96,
+			"Height": 112
+		},
+		"maxOccupants": 12,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Big Barn",
+		"displayName": "[LocalizedText Strings\\Buildings:BigBarn_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 4
+		},
+		"texture": "Big Barn.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 112,
+			"Height": 112
+		},
+		"maxOccupants": 8,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Deluxe Barn",
+		"displayName": "[LocalizedText Strings\\Buildings:DeluxeBarn_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 4
+		},
+		"texture": "Deluxe Barn.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 112,
+			"Height": 112
+		},
+		"maxOccupants": 12,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Big Shed",
+		"displayName": "[LocalizedText Strings\\Buildings:BigShed_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 3
+		},
+		"texture": "Big Shed.png",
+		"textureSize": {
+			"X": 112,
+			"Y": 128
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Shipping Bin",
+		"displayName": "[LocalizedText Strings\\Buildings:ShippingBin_Name]",
+		"footprint": {
+			"X": 2,
+			"Y": 1
+		},
+		"texture": "Shipping Bin.png",
+		"textureSize": {
+			"X": 32,
+			"Y": 32
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 0,
+			"Height": 0
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Farmhouse",
+		"displayName": "Farmhouse",
+		"footprint": {
+			"X": 9,
+			"Y": 5
+		},
+		"texture": "houses.png",
+		"textureSize": {
+			"X": 272,
+			"Y": 432
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 0,
+			"Width": 160,
+			"Height": 144
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	},
+	{
+		"name": "Greenhouse",
+		"displayName": "[LocalizedText Strings\\Buildings:Greenhouse_Name]",
+		"footprint": {
+			"X": 7,
+			"Y": 6
+		},
+		"texture": "Greenhouse.png",
+		"textureSize": {
+			"X": 240,
+			"Y": 320
+		},
+		"sourceRect": {
+			"X": 0,
+			"Y": 160,
+			"Width": 112,
+			"Height": 160
+		},
+		"maxOccupants": 20,
+		"hayCapacity": 0
+	}
+]

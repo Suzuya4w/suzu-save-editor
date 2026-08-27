@@ -1,0 +1,1434 @@
+{
+  "mails": [
+    {
+      "id": "Robin",
+      "desc": "Hey there! I had some extra wood lying around... I thought maybe you could use it. Take care!      -..."
+    },
+    {
+      "id": "Demetrius",
+      "desc": "Dear @, I was conducting a field study the other day, and I found this specimen.  I hope you find it..."
+    },
+    {
+      "id": "Linus",
+      "desc": "Hello, friend. The mountain lake has been kind to me lately. I'd like to share my good fortune with ..."
+    },
+    {
+      "id": "Pierre",
+      "desc": "Dear valued customer, Thanks for visiting 'Pierre's'! Enclosed is your 'Cash-back Rewards Program' r..."
+    },
+    {
+      "id": "Caroline",
+      "desc": "Dear @, Here's a vegetable from the little garden I keep out back. You probably have more veggies th..."
+    },
+    {
+      "id": "George",
+      "desc": "Found some good quality stone.  Maybe you can build with it or something.      -George ..."
+    },
+    {
+      "id": "Evelyn",
+      "desc": "Hello there, dear,  I hope your farm is doing well.  I'm sending you a little something from my kitc..."
+    },
+    {
+      "id": "Pam",
+      "desc": "Hey.  I found this in a drawer somewhere. Thought you could use it.       -Pam ..."
+    },
+    {
+      "id": "Lewis",
+      "desc": "@, I'm really glad you've become part of our community! I've enclosed a 500g check from the Stardew ..."
+    },
+    {
+      "id": "Gus",
+      "desc": "@! I made you a little treat this morning in the saloon. Dig in!       -Your friend, Gus..."
+    },
+    {
+      "id": "Clint",
+      "desc": "Um, Hello...      Sorry, I'm not good at writing letters. I made one metal bar too many, and I thoug..."
+    },
+    {
+      "id": "Jodi",
+      "desc": "Dear @, I ordered too much fertilizer for the garden!! I bet you can put it to some good use. Take c..."
+    },
+    {
+      "id": "Kent",
+      "desc": "Hello, @. This item was collecting dust in the tool shed. I figured you might be able to use it.    ..."
+    },
+    {
+      "id": "Emily",
+      "desc": "Hi! How are you doing? I hope you enjoy the gift I've sent you... Well, goodbye! +       -Emily ..."
+    },
+    {
+      "id": "Marnie",
+      "desc": "Dear @, You're such a good neighbor I thought I'd send over some animal feed to make your job easier..."
+    },
+    {
+      "id": "Shane",
+      "desc": "Hey, I thought it would be fun to send you a letter. I don't really know what to write, though.  Her..."
+    },
+    {
+      "id": "Wizard",
+      "desc": "Greetings, young adept. I have enclosed in this package an item of arcane significance. Use it wisel..."
+    },
+    {
+      "id": "Sandy",
+      "desc": "Greetings from Calico Desert! Come visit me soon, I'm really bored out here :(. I've included a gift..."
+    },
+    {
+      "id": "afterSamShow",
+      "desc": "@, the show was a rockin' success! I wanted to say thanks again for all your help in creating this a..."
+    },
+    {
+      "id": "afterArtShow",
+      "desc": "Dear @, Thanks again for coming to my art show. It was such a success! I sold nearly all of my sculp..."
+    },
+    {
+      "id": "haleyGarden",
+      "desc": "@, I thought it would be fun to write you a note.  I had so much fun with the cows yesterday... I'm ..."
+    },
+    {
+      "id": "PennyCleanTrailer",
+      "desc": "Sorry about what happened at my place yesterday... My mom can get into bad moods sometimes. Please j..."
+    },
+    {
+      "id": "Duck",
+      "desc": "Dear @, You've proven your ability to raise chickens, so I'm now selling ducks at my shop!          ..."
+    },
+    {
+      "id": "Rabbits",
+      "desc": "Dear @, I now have rabbits in the animal shop! They will provide you with fluffy wool ...and more!  ..."
+    },
+    {
+      "id": "Sheep",
+      "desc": "Dear @, You've proven your ability to raise cows, so I'm now selling sheep at my shop!           -Ma..."
+    },
+    {
+      "id": "Goats",
+      "desc": "Dear @, I now have goats available for purchase at the animal shop. You've done well so far!        ..."
+    },
+    {
+      "id": "Pigs",
+      "desc": "Dear @, You've come a long way since you first arrived. As a result, I've decided to start selling p..."
+    },
+    {
+      "id": "SeaAmulet",
+      "desc": "@, I'm going to give you this advice because I like you and I want you to stay in Pelican Town. If t..."
+    },
+    {
+      "id": "Bouquet",
+      "desc": "@, It seems like you're starting to get close with some of the townspeople. If you want to show some..."
+    },
+    {
+      "id": "RobinCooking",
+      "desc": "Dear @, here is an old recipe that my grandma passed down to me. Enjoy!       -Robin..."
+    },
+    {
+      "id": "DemetriusCooking",
+      "desc": "I wanted to say 'thanks' for taking an interest in my work. Here's a cooking recipe that I like.    ..."
+    },
+    {
+      "id": "LinusCooking",
+      "desc": "@, how are you doing? I've enclosed some instructions on how to make one of my favorite fish recipes..."
+    },
+    {
+      "id": "PierreCooking",
+      "desc": "TOP SECRET: Here's the recipe for my famous blueberry tart. Don't tell anyone! I'm giving it to you ..."
+    },
+    {
+      "id": "CarolineCooking",
+      "desc": "Dear @, Nothing is more satisfying than cooking with fresh vegetables from your own garden! I've enc..."
+    },
+    {
+      "id": "GeorgeCooking",
+      "desc": "Figured I'd give you this recipe I had laying around. Try not to burn it.     -George..."
+    },
+    {
+      "id": "EvelynCooking",
+      "desc": "Dear @, I usually don't give out my recipes... but since you've been such a sweetheart to George and..."
+    },
+    {
+      "id": "PamCooking",
+      "desc": "Hey Kid, here's the recipe for a little treat my pappy used to make. Cook it slow.     -Pam..."
+    },
+    {
+      "id": "LewisCooking",
+      "desc": "@, remember to eat healthy, or you won't have enough energy to work hard! I'm including one of my fa..."
+    },
+    {
+      "id": "GusCooking",
+      "desc": "Dear @, Here's a recipe from my saloon. I only share this with my good friends!     -Gus..."
+    },
+    {
+      "id": "ClintCooking",
+      "desc": "Well, I know a couple of recipes. I thought I'd send you one... maybe it'll help you mine more ore o..."
+    },
+    {
+      "id": "JodiCooking",
+      "desc": "@, this recipe of mine won 1st place in a cooking competition! I hope you like it. Thanks for being ..."
+    },
+    {
+      "id": "KentCooking",
+      "desc": "Picked up this recipe overseas. Enjoy. Want to say thanks for making me feel welcome.      -Kent..."
+    },
+    {
+      "id": "EmilyCooking",
+      "desc": "@! Flip this letter over for instructions on how to make a super-healthy meal! You'll feel energized..."
+    },
+    {
+      "id": "MarnieCooking",
+      "desc": "Dear neighbor, When I'm not taking care of animals I like to experiment in the kitchen. Since we've ..."
+    },
+    {
+      "id": "ShaneCooking",
+      "desc": "@, I found this recipe in a magazine and I thought it sounded interesting. Feel free to give me a ta..."
+    },
+    {
+      "id": "SandyCooking",
+      "desc": "Dear @, I was so bored out here in the desert that I wrote you a letter. There's a recipe for a deli..."
+    },
+    {
+      "id": "WillyCooking",
+      "desc": "Dear @, I'd like to share an ol' cooking recipe my pappy used to make. It's important the fish is FR..."
+    },
+    {
+      "id": "mom1",
+      "desc": "Dear @,   How are you doing, sweety? I've missed you so much since you left. I hope the farming life..."
+    },
+    {
+      "id": "mom2",
+      "desc": "Dear @,   It's been so long since I heard from you, dear. Things are the same as ever back home. I m..."
+    },
+    {
+      "id": "mom3",
+      "desc": "Dear @,   I saw an article about you in the local paper! It sounds like the country life is a good f..."
+    },
+    {
+      "id": "mom4",
+      "desc": "Dear @,  How are things going? You must really be making a fortune on that farm. Don't forget your d..."
+    },
+    {
+      "id": "dad1",
+      "desc": "Dear @,   Have you settled into your new life yet? I can't believe you're all grown up now... Time s..."
+    },
+    {
+      "id": "dad2",
+      "desc": "Dear @,   How is the country life going for you? It's been lonely here without you, but I'm proud of..."
+    },
+    {
+      "id": "dad3",
+      "desc": "Dear @,   I read an article about you in the local paper! I'm so impressed with your progress on the..."
+    },
+    {
+      "id": "dad4",
+      "desc": "Dear @,  I know you're busy on the farm and that's why you can't visit. I understand. You've been wo..."
+    },
+    {
+      "id": "newsstory",
+      "desc": "Greetings, @. It is our pleasure to inform you that your farm will be featured in next week's 'up & ..."
+    },
+    {
+      "id": "pierreBackpack",
+      "desc": "ADVERTISEMENT: \"I keep finding cool stuff, but my backpack is full!\"  Does this sound like you? Well..."
+    },
+    {
+      "id": "pierreHours",
+      "desc": "ADVERTISEMENT:  Pierre's General Store is now open 7 days a week![#]Pierre's Extended Hours..."
+    },
+    {
+      "id": "robinKitchenLetter",
+      "desc": "Dear Farmer @,  I'd like to apologize for joking about your Grandpa's old cottage when we first met...."
+    },
+    {
+      "id": "quest10",
+      "desc": "@, I've heard you've been giving some people a hand around town! Everyone seems really thankful. I'm..."
+    },
+    {
+      "id": "quest35",
+      "desc": "Dear @, You've been such a help around town since you moved here... everyone keeps telling me all th..."
+    },
+    {
+      "id": "quest100",
+      "desc": "@, I am pleased to announce that you've been chosen as \"Neighbor of the year\"! That comes with a 10,..."
+    },
+    {
+      "id": "CF_Fish",
+      "desc": "Dear @,  Your angling skills surpass even my ol' Pappy's... I'm impressed.   This stardrop's been pa..."
+    },
+    {
+      "id": "adoptionLetter",
+      "desc": "Dear @ and spouse, Congratulations! Your adoption application has been approved. We're working hard ..."
+    },
+    {
+      "id": "stardewHeroMine",
+      "desc": "Secret Message: If you can reach the bottom of the mines one more time, a secret awaits you. Be care..."
+    },
+    {
+      "id": "fertilizers",
+      "desc": "Dear neighbor, I hope you are feeling settled in your new home. I am writing to let you know that Pi..."
+    },
+    {
+      "id": "fertilizers2",
+      "desc": "Dear @, I am now selling higher quality fertilizers, as well as new crop selections! See you soon.  ..."
+    },
+    {
+      "id": "abbySpiritBoard",
+      "desc": "Hi @. One of these days you should come to my room after dark... Maybe around 8pm.  I want to show y..."
+    },
+    {
+      "id": "pennySpa",
+      "desc": "Meet me in the bath house after dark.     -Penny[#]Penny's Note..."
+    },
+    {
+      "id": "incubator",
+      "desc": "Dear @,  Thank you for purchasing a coop upgrade! In addition to doubling the capacity of your coop,..."
+    },
+    {
+      "id": "hatter",
+      "desc": "Hi.  Me sell hats. Okay, poke?  Come to old old old haus, poke. Bring coines.  -hat mouse[#]Hiyo, Po..."
+    },
+    {
+      "id": "Beat_PK",
+      "desc": "Congratulations!!  You beat 'Journey Of The Prairie King', and were randomly selected in our exclusi..."
+    },
+    {
+      "id": "JunimoKart",
+      "desc": "Congratulations!!  You beat all the levels in 'JunimoKart'... you're actually the first person in th..."
+    },
+    {
+      "id": "elliottReading",
+      "desc": "@, I have great news... my novel is finished!! I'm giving a public reading this afternoon at the lib..."
+    },
+    {
+      "id": "elliottBoat",
+      "desc": "Meet me at the docks on a sunny morning. I've got something in mind.     -Elliott[#]Elliott's Note..."
+    },
+    {
+      "id": "harveyBalloon",
+      "desc": "@, I have a surprise for you. Meet me by the railroad tracks.     -Harvey[#]Harvey's Surprise..."
+    },
+    {
+      "id": "samMessage",
+      "desc": "@, meet me in front of my house tonight after dark.     -Sam[#]Sam's Note..."
+    },
+    {
+      "id": "joshMessage",
+      "desc": "@, meet me at the saloon tonight after dark.     -Alex[#]Alex' Invitation..."
+    },
+    {
+      "id": "lewisStatue",
+      "desc": "@,  In the future, I'd appreciate it very much if you refrained from placing my PRIVATE belongings i..."
+    },
+    {
+      "id": "marnieAutoGrabber",
+      "desc": "@, I've got a new item in stock... It's called the \"Auto-Grabber\".  This thing can milk your cows an..."
+    },
+    {
+      "id": "EmilyClothingTherapy",
+      "desc": "@, I have this crazy new idea that I want to involve you in... It's called \"Clothing Therapy\".  Plea..."
+    },
+    {
+      "id": "EmilyCamping",
+      "desc": "@, Let's go camping!    Meet me in the secret woods after 10pm.   Love, Emily[#]Emily's Invitation..."
+    },
+    {
+      "id": "EmilyDoneCamping",
+      "desc": "Thanks for joining me last night... I had a great time. I'm actually glad that bear showed up!  See ..."
+    },
+    {
+      "id": "foundLostTools",
+      "desc": "Dear @, Someone dropped your tools into the lost and found bin last night.  Stop by the mayor's offi..."
+    },
+    {
+      "id": "fishing2",
+      "desc": "I've got some new items in stock... A deluxe fishing pole and some bait that you can attach to it! Y..."
+    },
+    {
+      "id": "fishing6",
+      "desc": "Come by the shop and check out the new rods I'm selling. They're the best money can buy... and you c..."
+    },
+    {
+      "id": "wizardJunimoNote",
+      "desc": "My sources tell me you've been poking around inside the old community center. Why don't you pay me a..."
+    },
+    {
+      "id": "winter_18",
+      "desc": "Dear @, I would like to give you some information about an upcoming event: the Feast of the Winter S..."
+    },
+    {
+      "id": "ccBulletinThankYou",
+      "desc": "Dear @, Everyone around town has been talking about your great generosity lately! Apparently, packag..."
+    },
+    {
+      "id": "guildQuest",
+      "desc": "I see you've been exploring the old mine. You've got the adventurer's spirit, that much I can tell. ..."
+    },
+    {
+      "id": "skullCave",
+      "desc": "I see you've entered the Skull Cavern. Well done. I've got a better challenge for you, kid. Make it ..."
+    },
+    {
+      "id": "robinWell",
+      "desc": "Robin here! I know there's a lot of stone scattered around your farm. If you have a surplus, you mig..."
+    },
+    {
+      "id": "landslideDone",
+      "desc": "To our valued JojaMart customers: Our team members have removed the landslide caused by our drilling..."
+    },
+    {
+      "id": "QiChallengeComplete",
+      "desc": "You did it.  I'm very impressed.  Enjoy your reward.    -Qi. ..."
+    },
+    {
+      "id": "spring_2_1",
+      "desc": "Hello there, Just got back from a fishing trip. You should come down to the beach some time. I've go..."
+    },
+    {
+      "id": "spring_12",
+      "desc": "Dear @, Tomorrow we're holding the Egg Festival in the town square.   You should arrive between 9 AM..."
+    },
+    {
+      "id": "spring_15_1",
+      "desc": "Hello, dear...  I know you're just getting started as a gardener, so I wanted to give you a little t..."
+    },
+    {
+      "id": "spring_23",
+      "desc": "Dear @, Tomorrow we're all getting together for the Flower Dance.  If you can find a partner, you mi..."
+    },
+    {
+      "id": "summer_10",
+      "desc": "Dear @, Tomorrow we're all gathering at the beach for the annual Pelican Town Luau.  The highlight o..."
+    },
+    {
+      "id": "summer_28",
+      "desc": "Dear @, Tonight at around 10 o'clock PM, a rare and beautiful event will take place.  The moonlight ..."
+    },
+    {
+      "id": "fall_9",
+      "desc": "Dear @, One week from today, we are holding the Stardew Valley Fair in the town square! It's the big..."
+    },
+    {
+      "id": "fall_15",
+      "desc": "Dear @, I just want to remind you that the Stardew Valley Fair is happening tomorrow. Don't forget t..."
+    },
+    {
+      "id": "fall_26",
+      "desc": "Dear @, Notice a chill in the air? It could just be the approach of winter... Or it could be the tin..."
+    },
+    {
+      "id": "winter_7",
+      "desc": "Dear @, Tomorrow we're all gathering in front of Marnie's house for the Festival of Ice.  It's a cel..."
+    },
+    {
+      "id": "winter_14",
+      "desc": "Starting tomorrow, a traveling merchant fleet will dock at Pelican Town for the yearly night market...."
+    },
+    {
+      "id": "spring_11_1",
+      "desc": "MISSING: I lost my favorite Axe! If you find it, please return ASAP. I'm having a tough time without..."
+    },
+    {
+      "id": "spring_19_1",
+      "desc": "Farmer @- I have a request for you. I need fresh cauliflower for a recipe I want to make. Could you ..."
+    },
+    {
+      "id": "summer_3_1",
+      "desc": "@- This is embarrassing... I lost my lucky purple shorts. I'm telling you because I think I can trus..."
+    },
+    {
+      "id": "summer_14_1",
+      "desc": "Hey Kid, My throat's about as dry as a desert bone. I'm real thirsty for a pale ale. You got one? Re..."
+    },
+    {
+      "id": "summer_20_1",
+      "desc": "@- I'm gathering data on the correlation between soil alkalinity and crop fructose levels. Long stor..."
+    },
+    {
+      "id": "summer_25_1",
+      "desc": "To Farmer @: My knee's acting up again, and you know what helps?  Rubbing the darn thing with hot pe..."
+    },
+    {
+      "id": "fall_3_1",
+      "desc": "Dear @, I'd like to give my cows a special treat. They're such good girls and hungry, too. Could you..."
+    },
+    {
+      "id": "fall_8_1",
+      "desc": "Hello, It's blackberry season right now. The bushes are full of them. I want to pick some, but I los..."
+    },
+    {
+      "id": "fall_19_1",
+      "desc": "@- I'd like to buy a pumpkin from you. My daughter and I want to carve a jack-o-lantern for the upco..."
+    },
+    {
+      "id": "winter_2_1",
+      "desc": "Hey, I've got a little challenge for you:     Catch me a squid. You can fish them from the ocean at ..."
+    },
+    {
+      "id": "winter_6_1",
+      "desc": "I've got an unusual request. Could you keep this a secret?  I want you to deliver an amethyst to Emi..."
+    },
+    {
+      "id": "winter_12_1",
+      "desc": "@- I am researching the forgotten art of shadow divination. I require an item known as 'Void Essence..."
+    },
+    {
+      "id": "winter_17_1",
+      "desc": "@, Sorry to bother you again, but I need another favor. I got a new hammer and I want to try it on a..."
+    },
+    {
+      "id": "winter_21_1",
+      "desc": "@- How are you doing? Hope the winter hasn't been too hard on you. Anyway, I'm writing to ask you fo..."
+    },
+    {
+      "id": "winter_26_1",
+      "desc": "Dear @- I want to make fish stew, but I need an albacore! I know they're almost out of season... sor..."
+    },
+    {
+      "id": "spring_1_2",
+      "desc": "Notice:  The price of raw materials at Robin's shop and Clint's shop has increased.[#]Raw Material P..."
+    },
+    {
+      "id": "spring_6_2",
+      "desc": "@- I'm really craving a fresh apricot. I haven't been able to find one at the store, so I'm asking y..."
+    },
+    {
+      "id": "spring_15_2",
+      "desc": "Dear @, I'd like to surprise my husband with a gift. He's a big fan of leeks. Could you bring me one..."
+    },
+    {
+      "id": "spring_21_2",
+      "desc": "NOTICE Pierre here... I really, really want a plate of sashimi. I'll pay top coin to whoever brings ..."
+    },
+    {
+      "id": "summer_6_2",
+      "desc": "Fisherman Wanted I need a good pufferfish specimen. I'm conducting an experiment on the toxin create..."
+    },
+    {
+      "id": "summer_15_2",
+      "desc": "Dear Farmer @, I'd like to give my wife a starfruit for our anniversary. Are you growing any on your..."
+    },
+    {
+      "id": "summer_21_2",
+      "desc": "@, I need truffle oil. Don't ask me why.  -Mayor Lewis..."
+    },
+    {
+      "id": "fall_6_2",
+      "desc": "Wanted: 1 Fresh Lobster for a marvelous bisque I'm creating. Who: Gus, proprietor of the Stardrop Sa..."
+    },
+    {
+      "id": "fall_19_2",
+      "desc": "NOTICE Does anybody have one of them battery packs? My TV remote died, and it's a real hassle gettin..."
+    },
+    {
+      "id": "winter_5_2",
+      "desc": "@, I'm creating an enchanted staff of phenomenal power. However, I'm missing something: an Iridium B..."
+    },
+    {
+      "id": "winter_13_2",
+      "desc": "I've got another challenge for you: Catch me a Lingcod. They don't go down easy, but I know you can ..."
+    },
+    {
+      "id": "winter_19_2",
+      "desc": "Dear @, I'm at my wit's end. I desperately want to make a Coco-no-no at the saloon, but I have no wa..."
+    },
+    {
+      "id": "winter_24",
+      "desc": "Dear @, Tomorrow is the Feast of the Winter Star. Did you get a gift for your 'secret friend'... %se..."
+    },
+    {
+      "id": "passedOut1_Billed_Male",
+      "desc": "Dear Mr. @, Last night, a Joja team member found you incapacitated. A medical team was dispatched to..."
+    },
+    {
+      "id": "passedOut1_Billed_Female",
+      "desc": "Dear Ms. @, Last night, a Joja team member found you incapacitated. A medical team was dispatched to..."
+    },
+    {
+      "id": "passedOut1_NotBilled_Male",
+      "desc": "Dear Mr. @, Last night, a Joja team member found you incapacitated. A medical team was dispatched to..."
+    },
+    {
+      "id": "passedOut1_NotBilled_Female",
+      "desc": "Dear Ms. @, Last night, a Joja team member found you incapacitated. A medical team was dispatched to..."
+    },
+    {
+      "id": "passedOut2",
+      "desc": "@,  You're lucky I found you last night! You were unconscious, and someone was searching your pocket..."
+    },
+    {
+      "id": "passedOut3_Billed",
+      "desc": "@, Someone dropped you off at the clinic last night. You'd passed out from exhaustion! You've got to..."
+    },
+    {
+      "id": "passedOut3_NotBilled",
+      "desc": "@, Someone dropped you off at the clinic last night. You'd passed out from exhaustion! You've got to..."
+    },
+    {
+      "id": "passedOut4",
+      "desc": "@,   Found you face-down in the mud during my 3:00 AM sweep.  You should try to make it home a littl..."
+    },
+    {
+      "id": "elliottLetter1",
+      "desc": "@, my love,  I've just arrived in Grampleton, to start the tour. I've forgotten how hectic the city ..."
+    },
+    {
+      "id": "elliottLetter2",
+      "desc": "My dear @,  The first reading went well, though the audience was a bit smaller than I'd hoped. Still..."
+    },
+    {
+      "id": "elliottLetter3",
+      "desc": "My sweet @,  Last night in Zuzu City was quite the experience! It seems there's a large literary sce..."
+    },
+    {
+      "id": "elliottLetter4",
+      "desc": "In dreams, when graced with lofty view I gaze upon the sunlit sea What distant shores I've traveled ..."
+    },
+    {
+      "id": "elliottLetter5",
+      "desc": "My dear @,  I won't bore you with any more details about my readings. They are mostly the same.  I'm..."
+    },
+    {
+      "id": "elliottLetter6",
+      "desc": "My dear @,  This will be my last letter before I return home. I've had a fine trip... though nothing..."
+    },
+    {
+      "id": "MarlonRecovery",
+      "desc": "@, Found your lost item.  Be more careful next time!    -Marlon..."
+    },
+    {
+      "id": "RarecrowSociety",
+      "desc": "Dear @,  Your dedication is truly impressive...  Only a select few manage to acquire the complete Ra..."
+    },
+    {
+      "id": "CarolineTea",
+      "desc": "Dear @,  Thanks for stopping by my sunroom yesterday. I usually drink tea alone, but it was fun to s..."
+    },
+    {
+      "id": "WoodChipper",
+      "desc": "Hey @,  Just wanted to let you know about a new item I'm carrying... it's called a 'Wood Chipper'.  ..."
+    },
+    {
+      "id": "willyBackRoomInvitation",
+      "desc": "@,  I've unlocked the back room of the shop. Come by when you have a chance. There's something I wan..."
+    },
+    {
+      "id": "KrobusCrafting",
+      "desc": "@, I'm not sure how the human message system works, so I asked Wizard to help me write this letter. ..."
+    },
+    {
+      "id": "georgeGifts",
+      "desc": "Dear @,  Thank you so much for the leeks. They look fresh and delicious. George will love them.  Tod..."
+    },
+    {
+      "id": "robinResource",
+      "desc": "Hey @,  Congratulations on completing my little challenge. I'm impressed!  As an added bonus, I've i..."
+    },
+    {
+      "id": "ClintReward",
+      "desc": "Um, Hello...      Thanks for helping me clear out those monsters.  I'm not scared at all! ...But it ..."
+    },
+    {
+      "id": "ClintReward2",
+      "desc": "Um, Hello...      Thanks for helping me clear out more monsters.  Maybe next time, I'll take care of..."
+    },
+    {
+      "id": "willyBugWadCutscene",
+      "desc": "     -Willy..."
+    },
+    {
+      "id": "MSB_Pierre",
+      "desc": "Dear @,  I guess people didn't take to 'Pierre's Prime Produce' like I'd hoped...  Anyways, here's m..."
+    },
+    {
+      "id": "MSB_Lewis",
+      "desc": "@, I wanted to thank you for taking care of my special order. All of the hard work you've done has b..."
+    },
+    {
+      "id": "WizardReward",
+      "desc": "The specimen you delivered offered great insight into the machinations of the fell beings we call 'm..."
+    },
+    {
+      "id": "WizardReward2",
+      "desc": "Thanks to the ectoplasm you delivered to me, I've made a major breakthrough in the field of arcane e..."
+    },
+    {
+      "id": "DemetriusReward",
+      "desc": "Hi @,  Thanks for your help with the fish. Nature is usually good at keeping things balanced, but so..."
+    },
+    {
+      "id": "willyHours",
+      "desc": "Good news!  The ol' boat is seaworthy once again, thanks to you!  Stop by the back room whenever you..."
+    },
+    {
+      "id": "linusTrashCleanup",
+      "desc": "Hi @,  Thanks for helping me clean up around the valley. The waters are looking much cleaner. I thin..."
+    },
+    {
+      "id": "gusGiantOmelet",
+      "desc": "Hi @,  Thanks for the eggs. The yolks look amazing... I think this will be my best omelet yet!  Plea..."
+    },
+    {
+      "id": "pamNewChannel",
+      "desc": "Hey kid,  Thanks for the 'juice'. It definitely had a ...one-of-a-kind... flavor.  By the way, have ..."
+    },
+    {
+      "id": "emilyStones",
+      "desc": "Hi @,  Thanks again for the wonderful gemstones. These will be perfect for my energy re-alignment wo..."
+    },
+    {
+      "id": "carolineSO",
+      "desc": "Hi @,  Lewis told me that you've been shipping a lot of ingredients from the island! It's great to h..."
+    },
+    {
+      "id": "WillyTropicalFish",
+      "desc": "@,  Congrats on a successful island fishing trip. I'm proud of ya!  Here, take this special fish tan..."
+    },
+    {
+      "id": "passedOutIsland",
+      "desc": "@,  You never showed up at the boat, so I went lookin' for ya.  Found you sprawled out in the dirt, ..."
+    },
+    {
+      "id": "passedOutIsland_Leo",
+      "desc": "Hi @,  Last night, I found you slumbering in the dark. It wasn't a very safe place, so the bird frie..."
+    },
+    {
+      "id": "guntherBones",
+      "desc": "Hi @,  Thanks for all the bones. I've got a lot to sort through here! To think, each fragment belong..."
+    },
+    {
+      "id": "LeoCooking",
+      "desc": "@, Here's a food from my home, that me and my family enjoy. Hope you like it.     -Leo  P.S. Willy h..."
+    },
+    {
+      "id": "FizzIntro",
+      "desc": "Hello.  I've heard you're working on a very special challenge.  I have the 'perfect' solution to hel..."
+    },
+    {
+      "id": "GreenRainGus",
+      "desc": "Saw the weather report last night.  I'm not sure what will happen, but if anyone wants to take shelt..."
+    },
+    {
+      "id": "DesertFestival",
+      "desc": "Dear @,  Tomorrow begins a 3-day festival in Calico Desert.  With the bus back in order, we're all d..."
+    },
+    {
+      "id": "MarniePetAdoption",
+      "desc": "Dear @,  From what I can tell, you've been taking really good care of your pet! I'm really happy abo..."
+    },
+    {
+      "id": "MarniePetRejectedAdoption",
+      "desc": "Dear @,  I hope this letter finds you well.  I know you decided against adopting a pet when I last a..."
+    }
+  ],
+  "events": [
+    {
+      "id": "92",
+      "desc": "AnimalShop Event: e 91/i 78/t 900 1700"
+    },
+    {
+      "id": "3910674",
+      "desc": "AnimalShop Event: f Shane 1000"
+    },
+    {
+      "id": "3910974",
+      "desc": "AnimalShop Event: f Shane 1700/e 3910975/p Shane"
+    },
+    {
+      "id": "3900074",
+      "desc": "AnimalShop Event: f Shane 2000/e 2118991/p Shane"
+    },
+    {
+      "id": "1848481",
+      "desc": "ArchaeologyHouse Event: f Elliott 2000/t 1300 1900/n elliottReading"
+    },
+    {
+      "id": "0",
+      "desc": "ArchaeologyHouse Event: n somethingToDonate/l somethingWasDonated"
+    },
+    {
+      "id": "6963327",
+      "desc": "Backwoods Event: f Abigail 3500/O Abigail/t 610 1700"
+    },
+    {
+      "id": "38",
+      "desc": "BathHouse_Pool Event: f Penny 2500/t 1900 2400/n pennySpa"
+    },
+    {
+      "id": "13",
+      "desc": "Beach Event: f Haley 1500/z winter/t 1000 1600"
+    },
+    {
+      "id": "20",
+      "desc": "Beach Event: f Alex 500/z winter/p Alex/w sunny"
+    },
+    {
+      "id": "288847",
+      "desc": "Beach Event: f Alex 2000/p Alex/w sunny/G !IS_PASSIVE_FESTIVAL_TODAY SquidFest"
+    },
+    {
+      "id": "29",
+      "desc": "Beach Event: f Sebastian 2000/t 1200 2300/w rainy"
+    },
+    {
+      "id": "43",
+      "desc": "Beach Event: f Elliott 2500/w sunny/t 700 1300/G !IS_PASSIVE_FESTIVAL_TODAY SquidFest"
+    },
+    {
+      "id": "733330",
+      "desc": "Beach Event: f Sam 750/w sunny/t 700 1500/z winter/y 1"
+    },
+    {
+      "id": "739330",
+      "desc": "Beach Event: t 600 1710/*n spring_2_1"
+    },
+    {
+      "id": "711130",
+      "desc": "Beach Event: t 600 1710/f Willy 1500"
+    },
+    {
+      "id": "7771191",
+      "desc": "Beach Event: t 2000 2500/f Krobus 3500/w sunny"
+    },
+    {
+      "id": "3131209",
+      "desc": "Beach Event: n willyBugWadCutscene"
+    },
+    {
+      "id": "9348571",
+      "desc": "BoatTunnel Event: Hl willyBoatFixed"
+    },
+    {
+      "id": "60367",
+      "desc": "BusStop Event: u 0"
+    },
+    {
+      "id": "4081148",
+      "desc": "BusStop Event: e 47/t 1600 1900"
+    },
+    {
+      "id": "9581348",
+      "desc": "BusStop Event: e 2128292/t 1600 1800"
+    },
+    {
+      "id": "520702",
+      "desc": "BusStop Event: a 11 23 11 24/t 600 1600/z spring/z fall/z summer"
+    },
+    {
+      "id": "39",
+      "desc": "ElliottHouse Event: f Elliott 500/p Elliott"
+    },
+    {
+      "id": "423502",
+      "desc": "ElliottHouse Event: f Elliott 1500/p Elliott"
+    },
+    {
+      "id": "5",
+      "desc": "Farm Event: e 3/v Abigail/t 600 800"
+    },
+    {
+      "id": "47",
+      "desc": "Farm Event: f Sam 2000/t 600 800/e 44"
+    },
+    {
+      "id": "2146991",
+      "desc": "Farm Event: y 3/H"
+    },
+    {
+      "id": "55",
+      "desc": "Farm Event: f Leah 2000/t 600 800/z winter/n LeahArtShowSuggestion"
+    },
+    {
+      "id": "63",
+      "desc": "Farm Event: y 2/t 600 1800/H"
+    },
+    {
+      "id": "992553",
+      "desc": "Farm Event: t 600 1130/n copperFound"
+    },
+    {
+      "id": "900553",
+      "desc": "Farm Event: t 600 1130/Hn ccPantry/A cc_Greenhouse/w sunny"
+    },
+    {
+      "id": "992253",
+      "desc": "Farm Event: t 600 1130/f Leah 1500/w sunny"
+    },
+    {
+      "id": "65",
+      "desc": "Farm Event: m 25000/t 600 1200/H"
+    },
+    {
+      "id": "66",
+      "desc": "Farm Event: e 295672/t 600 700/H"
+    },
+    {
+      "id": "690006",
+      "desc": "Farm Event: n slimeHutchBuilt/H"
+    },
+    {
+      "id": "1590166",
+      "desc": "Farm Event: m 1000/t 600 930/d Mon Tue Thu Sat Sun/w sunny/h cat/H"
+    },
+    {
+      "id": "897405",
+      "desc": "Farm Event: m 1000/t 600 930/d Mon Tue Thu Sat Sun/w sunny/h dog/H"
+    },
+    {
+      "id": "91",
+      "desc": "Farm Event: f Marnie 750/t 600 930"
+    },
+    {
+      "id": "93",
+      "desc": "Farm Event: f Jodi 1000/t 600 930/d Tue Wed Thu Fri Sat Sun"
+    },
+    {
+      "id": "102",
+      "desc": "Farm Event: z spring/z summer/z fall/d Mon Tue Wed Thu Fri Sat/y 1/H"
+    },
+    {
+      "id": "2118991",
+      "desc": "Farm Event: e 3910975/t 600 800"
+    },
+    {
+      "id": "2128292",
+      "desc": "Farm Event: e 3900074/t 600 630/f Shane 2500/D Shane"
+    },
+    {
+      "id": "3917587",
+      "desc": "Farm Event: f Alex 3500/O Alex/t 500 820/M 5000/d Sun/y 2"
+    },
+    {
+      "id": "3917600",
+      "desc": "Farm Event: f Emily 3500/O Emily/t 500 820"
+    },
+    {
+      "id": "3911124",
+      "desc": "Farm Event: f Leah 3500/O Leah/t 500 820/w sunny/z winter/d Sun"
+    },
+    {
+      "id": "3912125",
+      "desc": "Farm Event: f Elliott 3500/O Elliott/t 500 1500/p Elliott/U 8"
+    },
+    {
+      "id": "992559",
+      "desc": "Farm Event: t 600 1130/n clothFound/o Emily/w sunny"
+    },
+    {
+      "id": "992559",
+      "desc": "Farm Event: t 600 1130/n clothFound/O Emily/w sunny"
+    },
+    {
+      "id": "980558",
+      "desc": "Farm Event: t 600 1130/w sunny/f Gus 1250"
+    },
+    {
+      "id": "980559",
+      "desc": "Farm Event: t 600 1130/w sunny/e 739330/j 27/!Skill Fishing 1"
+    },
+    {
+      "id": "558291",
+      "desc": "FarmHouse Event: y 3/H"
+    },
+    {
+      "id": "558292",
+      "desc": "FarmHouse Event: e 321777/t 600 620/H"
+    },
+    {
+      "id": "3917601",
+      "desc": "FarmHouse Event: f Emily 3500/O Emily/n emilyFiber/A emilyFiber/t 2000 2400/p Emily"
+    },
+    {
+      "id": "3918600",
+      "desc": "FarmHouse Event: f Sam 3500/O Sam/t 610 1700/p Sam/L"
+    },
+    {
+      "id": "3918601",
+      "desc": "FarmHouse Event: e 3918600/O Sam/t 610 1700/A samJob1/p Sam/L"
+    },
+    {
+      "id": "3918602",
+      "desc": "FarmHouse Event: e 3918601/O Sam/t 610 1700/A samJob2/p Sam/L"
+    },
+    {
+      "id": "3918603",
+      "desc": "FarmHouse Event: e 3918602/O Sam/t 610 1700/A samJob3/p Sam/L"
+    },
+    {
+      "id": "3917666",
+      "desc": "FarmHouse Event: f Maru 3500/O Maru/t 610 1700/p Maru/d Sun/z winter"
+    },
+    {
+      "id": "3912132",
+      "desc": "FarmHouse Event: e 3912126/O Elliott/A elliottGone/B"
+    },
+    {
+      "id": "3917626",
+      "desc": "FarmHouse Event: f Harvey 3500/O Harvey/t 2000 2400/p Harvey/L"
+    },
+    {
+      "id": "4325434",
+      "desc": "FarmHouse Event: f Penny 3500/O Penny/t 1500 1900/p Penny"
+    },
+    {
+      "id": "4324303",
+      "desc": "FarmHouse Event: e 4325434/O Penny/A pennyRedecorating/l noQuilt/B"
+    },
+    {
+      "id": "8675611",
+      "desc": "FarmHouse Event: e 6184643/O Haley/A haleyCakewalk1/t 620 1700/p Haley"
+    },
+    {
+      "id": "9333220",
+      "desc": "FarmHouse Event: e 9333219/O Sebastian/A sebastianFrog/t 620 1900"
+    },
+    {
+      "id": "16253595",
+      "desc": "FishShop Event: j 29/X"
+    },
+    {
+      "id": "14",
+      "desc": "Forest Event: f Haley 2000/z winter/t 1000 1600/w sunny"
+    },
+    {
+      "id": "52",
+      "desc": "Forest Event: f Leah 1500/p Leah/z winter"
+    },
+    {
+      "id": "54",
+      "desc": "Forest Event: f Leah 2500/t 1100 1600/z winter/w sunny"
+    },
+    {
+      "id": "181928",
+      "desc": "Forest Event: f Penny 2000/t 900 1600/w sunny/G !IS_PASSIVE_FESTIVAL_TODAY TroutDerby, !SEASON_DAY summer 17 summer 18 summer 19"
+    },
+    {
+      "id": "318560",
+      "desc": "Forest Event: j 10/t 900 1600/d Tue Wed Fri Sat"
+    },
+    {
+      "id": "611944",
+      "desc": "Forest Event: f Shane 500/t 2000 2400"
+    },
+    {
+      "id": "3910975",
+      "desc": "Forest Event: f Shane 1500/e 3910674/t 900 2000/w rainy"
+    },
+    {
+      "id": "3910979",
+      "desc": "Forest Event: f Vincent 2000/f Jas 2000/t 600 1700/z summer/z fall/z winter/w sunny"
+    },
+    {
+      "id": "3091462",
+      "desc": "Forest Event: e 3911124/O Leah/w sunny/t 1130 1400/A leahPaint"
+    },
+    {
+      "id": "11",
+      "desc": "HaleyHouse Event: f Haley 500/p Haley/p Emily"
+    },
+    {
+      "id": "12",
+      "desc": "HaleyHouse Event: f Haley 1000/p Haley"
+    },
+    {
+      "id": "15",
+      "desc": "HaleyHouse Event: f Haley 2500/p Haley"
+    },
+    {
+      "id": "917409",
+      "desc": "HaleyHouse Event: e 463391/f Emily 1500/p Emily"
+    },
+    {
+      "id": "471942",
+      "desc": "HaleyHouse Event: f Emily 500/p Emily"
+    },
+    {
+      "id": "195019",
+      "desc": "HaleyHouse Event: f Haley 2500/f Emily 2500/f Penny 2500/f Abigail 2500/f Leah 2500/f Maru 2500/o Abigail/o Penny/o Leah/o Emily/o Maru/o Haley/o Shane/o Harvey/o Sebastian/o Sam/o Elliott/o Alex/e 38/e 2123343/e 10/e 901756/e 54/e 15/i 446/k 195012"
+    },
+    {
+      "id": "195012",
+      "desc": "HaleyHouse Event: f Haley 2500/f Emily 2500/f Penny 2500/f Abigail 2500/f Leah 2500/f Maru 2500/o Abigail/o Penny/o Leah/o Emily/o Maru/o Haley/o Shane/o Harvey/o Sebastian/o Sam/o Elliott/o Alex/e 38/e 2123343/e 10/e 901756/e 54/e 15/k 195019"
+    },
+    {
+      "id": "150938",
+      "desc": "HaleyHouse Event: n emilyStones"
+    },
+    {
+      "id": "7",
+      "desc": "Hospital Event: f Maru 1000/p Maru"
+    },
+    {
+      "id": "57",
+      "desc": "Hospital Event: f Harvey 1000/p Harvey"
+    },
+    {
+      "id": "571102",
+      "desc": "Hospital Event: f Harvey 2000"
+    },
+    {
+      "id": "1039573",
+      "desc": "IslandHut Event: N 10/Hl addedParrotBoy"
+    },
+    {
+      "id": "6497421",
+      "desc": "IslandNorth Event: e 6497423/f Leo 1000/w sunny/t 600 1800/Hl leoMoved"
+    },
+    {
+      "id": "6497428",
+      "desc": "IslandSouth Event: e 6497423/f Leo 1500/w sunny/t 600 1800/Hl leoMoved"
+    },
+    {
+      "id": "6497423",
+      "desc": "IslandWest Event: e 1039573/f Leo 500/w sunny/t 600 1800/Hl leoMoved"
+    },
+    {
+      "id": "18",
+      "desc": "JoshHouse Event: f George 1500/p George"
+    },
+    {
+      "id": "19",
+      "desc": "JoshHouse Event: f Evelyn 1000/p Evelyn"
+    },
+    {
+      "id": "21",
+      "desc": "JoshHouse Event: f Alex 1250/p Alex"
+    },
+    {
+      "id": "2119820",
+      "desc": "JoshHouse Event: f Alex 1500/p Alex"
+    },
+    {
+      "id": "56",
+      "desc": "JoshHouse Event: f Harvey 500/p George"
+    },
+    {
+      "id": "5837189",
+      "desc": "JoshHouse Event: n georgeGifts"
+    },
+    {
+      "id": "50",
+      "desc": "LeahHouse Event: f Leah 500/p Leah"
+    },
+    {
+      "id": "51",
+      "desc": "LeahHouse Event: f Leah 1000/p Leah"
+    },
+    {
+      "id": "584059",
+      "desc": "LeahHouse Event: f Leah 2000/p Leah/n LeahInternet"
+    },
+    {
+      "id": "2123243",
+      "desc": "ManorHouse Event: e 2111194"
+    },
+    {
+      "id": "901756",
+      "desc": "Mine Event: f Abigail 2500/t 1700 2400/o Abigail"
+    },
+    {
+      "id": "100162",
+      "desc": "Mine Event: t 600 2600"
+    },
+    {
+      "id": "2",
+      "desc": "Mountain Event: f Abigail 1000/w rainy/t 1200 1900/z winter"
+    },
+    {
+      "id": "8",
+      "desc": "Mountain Event: f Maru 1500/w sunny/t 2100 2340"
+    },
+    {
+      "id": "26",
+      "desc": "Mountain Event: f Linus 1000/w sunny/t 2000 2400"
+    },
+    {
+      "id": "384883",
+      "desc": "Mountain Event: f Sebastian 1000/t 1100 1700"
+    },
+    {
+      "id": "384882",
+      "desc": "Mountain Event: f Sebastian 2500/t 2000 2400"
+    },
+    {
+      "id": "404798",
+      "desc": "Mountain Event: Hn ccFishTank"
+    },
+    {
+      "id": "371652",
+      "desc": "Mountain Event: f Linus 2000/w sunny/t 600 1700/a 12 26"
+    },
+    {
+      "id": "5183338",
+      "desc": "Mountain Event: e 3917666/O Maru/w sunny/t 2200 2500"
+    },
+    {
+      "id": "9333219",
+      "desc": "Mountain Event: O Sebastian/f Sebastian 3500/w rainy/t 600 1900"
+    },
+    {
+      "id": "8357109",
+      "desc": "Mountain Event: w sunny/t 600 1900/n linusTrashCleanup"
+    },
+    {
+      "id": "8959199",
+      "desc": "Mountain Event: w sunny/t 600 1900/e 6497428/f Leo 2250/F"
+    },
+    {
+      "id": "10040609",
+      "desc": "QiNutRoom Event: "
+    },
+    {
+      "id": "528052",
+      "desc": "Railroad Event: f Harvey 2500/t 900 1700/n harveyBalloon"
+    },
+    {
+      "id": "529952",
+      "desc": "Railroad Event: C"
+    },
+    {
+      "id": "40",
+      "desc": "Saloon Event: f Elliott 1000/p Gus/t 1500 2200"
+    },
+    {
+      "id": "96",
+      "desc": "Saloon Event: f Gus 1000/f Pam 500/p Gus"
+    },
+    {
+      "id": "97",
+      "desc": "Saloon Event: f Clint 750/t 1900 2300/d Tue Wed Thu Fri Sat Sun"
+    },
+    {
+      "id": "911526",
+      "desc": "Saloon Event: f Alex 2500/t 1900 2200/n joshMessage"
+    },
+    {
+      "id": "195099",
+      "desc": "Saloon Event: f Shane 2500/f Sebastian 2500/f Sam 2500/f Harvey 2500/f Alex 2500/f Elliott 2500/o Abigail/o Penny/o Leah/o Emily/o Maru/o Haley/o Shane/o Harvey/o Sebastian/o Sam/o Elliott/o Alex/e 911526/e 528052/e 9581348/e 43/e 384882/e 233104/i 446/k 195013"
+    },
+    {
+      "id": "195013",
+      "desc": "Saloon Event: f Shane 2500/f Sebastian 2500/f Sam 2500/f Harvey 2500/f Alex 2500/f Elliott 2500/o Abigail/o Penny/o Leah/o Emily/o Maru/o Haley/o Shane/o Harvey/o Sebastian/o Sam/o Elliott/o Alex/e 911526/e 528052/e 9581348/e 43/e 384882/e 233104/k 195099"
+    },
+    {
+      "id": "3917590",
+      "desc": "Saloon Event: n saloonSportsRoom/O Alex"
+    },
+    {
+      "id": "3206194",
+      "desc": "Saloon Event: n gusGiantOmelet"
+    },
+    {
+      "id": "95",
+      "desc": "SamHouse Event: e 93/k 94/t 1800 1950/i 136/y 2"
+    },
+    {
+      "id": "94",
+      "desc": "SamHouse Event: e 93/k 95/t 1800 1950/i 136/y 1"
+    },
+    {
+      "id": "44",
+      "desc": "SamHouse Event: f Sam 500/p Sam"
+    },
+    {
+      "id": "46",
+      "desc": "SamHouse Event: f Sam 1000/p Sam"
+    },
+    {
+      "id": "100",
+      "desc": "SamHouse Event: f Kent 750/p Kent/p Jodi"
+    },
+    {
+      "id": "67",
+      "desc": "SandyHouse Event: m 10"
+    },
+    {
+      "id": "6",
+      "desc": "ScienceHouse Event: f Maru 500/p Maru"
+    },
+    {
+      "id": "9",
+      "desc": "ScienceHouse Event: f Maru 2000/p Maru"
+    },
+    {
+      "id": "25",
+      "desc": "ScienceHouse Event: f Demetrius 1500/p Demetrius/p Robin"
+    },
+    {
+      "id": "33",
+      "desc": "ScienceHouse Event: f Robin 1500/p Robin"
+    },
+    {
+      "id": "10",
+      "desc": "ScienceHouse Event: f Maru 2500/t 900 1600"
+    },
+    {
+      "id": "1053978",
+      "desc": "ScienceHouse Event: n robinDeluxeBed"
+    },
+    {
+      "id": "2794460",
+      "desc": "SebastianRoom Event: f Sebastian 500/p Sebastian"
+    },
+    {
+      "id": "27",
+      "desc": "SebastianRoom Event: f Sebastian 1500/p Sebastian"
+    },
+    {
+      "id": "1",
+      "desc": "SeedShop Event: f Abigail 500/p Abigail/d Sat"
+    },
+    {
+      "id": "3",
+      "desc": "SeedShop Event: f Abigail 2000/p Abigail/t 2000 2200/n abbySpiritBoard"
+    },
+    {
+      "id": "16",
+      "desc": "SeedShop Event: f Pierre 1500/p Pierre"
+    },
+    {
+      "id": "17",
+      "desc": "SeedShop Event: f Caroline 1500/p Caroline/p Abigail"
+    },
+    {
+      "id": "58",
+      "desc": "SeedShop Event: f Harvey 1500/t 1100 1500"
+    },
+    {
+      "id": "3102768",
+      "desc": "SeedShop Event: j 15/H"
+    },
+    {
+      "id": "963113",
+      "desc": "SeedShop Event: n pierreQualityCrops"
+    },
+    {
+      "id": "691039",
+      "desc": "Sewer Event: f Dwarf 50/n CF_Sewer/d Fri"
+    },
+    {
+      "id": "719926",
+      "desc": "Sunroom Event: t 900 1700/w sunny"
+    },
+    {
+      "id": "4",
+      "desc": "Town Event: f Abigail 1500/t 2100 2400/w sunny"
+    },
+    {
+      "id": "831125",
+      "desc": "Town Event: f Shane 1750/f Clint 500/f Emily 500/t 1000 1600/w sunny"
+    },
+    {
+      "id": "2481135",
+      "desc": "Town Event: f Alex 1000/t 900 1600"
+    },
+    {
+      "id": "34",
+      "desc": "Town Event: f Penny 500/t 900 1400/w sunny"
+    },
+    {
+      "id": "45",
+      "desc": "Town Event: f Sam 1500/t 1200 1600/w sunny"
+    },
+    {
+      "id": "53",
+      "desc": "Town Event: e 55/t 1500 1700"
+    },
+    {
+      "id": "639373",
+      "desc": "Town Event: f Lewis 1500/f Marnie 1500/t 1900 2300/w sunny"
+    },
+    {
+      "id": "101",
+      "desc": "Town Event: f Clint 1500/e 97/k 2123243/k 2123343/o Emily/t 900 1830/a 0 90/!D Emily"
+    },
+    {
+      "id": "233104",
+      "desc": "Town Event: f Sam 2500/t 2000 2400/w sunny/n samMessage"
+    },
+    {
+      "id": "611439",
+      "desc": "Town Event: j 4/t 800 1300/w sunny/a 0 54/H"
+    },
+    {
+      "id": "191393",
+      "desc": "Town Event: Hn ccFishTank/Hn ccBulletin/Hn ccPantry/Hn ccVault/Hn ccBoilerRoom/Hn ccCraftsRoom/Hl jojaFishTank/Hl jojaPantry/Hl jojaVault/Hl jojaBoilerRoom/Hl jojaCraftsRoom/Hl JojaMember/w sunny/H"
+    },
+    {
+      "id": "502261",
+      "desc": "Town Event: J/w sunny/H"
+    },
+    {
+      "id": "502969",
+      "desc": "Town Event: w sunny/f Linus 50/j 7/t 2000 2400"
+    },
+    {
+      "id": "463391",
+      "desc": "Town Event: f Emily 1000/e 471942/w sunny/z winter/t 600 1700"
+    },
+    {
+      "id": "611173",
+      "desc": "Town Event: Hn pamHouseUpgrade/o Penny"
+    },
+    {
+      "id": "611173",
+      "desc": "Town Event: Hn pamHouseUpgrade"
+    },
+    {
+      "id": "3917584",
+      "desc": "Town Event: f Shane 3500/O Shane/d Fri/t 800 1700"
+    },
+    {
+      "id": "3917585",
+      "desc": "Town Event: e 3917584/O Shane/A shaneSaloon1"
+    },
+    {
+      "id": "3917586",
+      "desc": "Town Event: e 3917585/O Shane/A shaneSaloon2"
+    },
+    {
+      "id": "3917589",
+      "desc": "Town Event: n gaveAlexMoney/O Alex/d Mon/d Tue/d Wed/d Thu/d Fri/d Sat"
+    },
+    {
+      "id": "6184643",
+      "desc": "Town Event: f Haley 3500/O Haley/t 800 1500/w sunny"
+    },
+    {
+      "id": "6184644",
+      "desc": "Town Event: e 8675611/O Haley/A haleyCakewalk2/t 600 1500/w sunny/i 220"
+    },
+    {
+      "id": "15389722",
+      "desc": "Town Event: j 57"
+    },
+    {
+      "id": "35",
+      "desc": "Trailer Event: f Penny 1000/p Penny"
+    },
+    {
+      "id": "36",
+      "desc": "Trailer Event: f Penny 1500/p Penny"
+    },
+    {
+      "id": "963313",
+      "desc": "Trailer Event: n pamPotatoJuice"
+    },
+    {
+      "id": "503180",
+      "desc": "Trailer_Big Event: f Pam 2250/A pamHouseUpgrade/A pamHouseUpgradeAnonymous/Hn pamHouseUpgrade"
+    },
+    {
+      "id": "112",
+      "desc": "WizardHouse Event: n seenJunimoNote"
+    },
+    {
+      "id": "418172",
+      "desc": "WizardHouse Event: n hasPickedUpMagicInk"
+    },
+    {
+      "id": "2123343",
+      "desc": "Woods Event: e 2111294/t 2200 2540/w sunny/F/D Emily"
+    },
+    {
+      "id": "2120303",
+      "desc": "Woods Event: S 23/i 724/t 600 1900"
+    }
+  ]
+}
