@@ -376,11 +376,13 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
         addToast('Extracting save data...', 'info');
 
         // Call the secure rust extractor
-        await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
-        
-        // Clean up the temporary zip file
-        await remove(tempZipPath);
-        addToast('Save extracted successfully!', 'success');
+        try {
+          await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
+          addToast('Save extracted successfully!', 'success');
+        } finally {
+          // Clean up the temporary zip file even if extraction fails
+          try { await remove(tempZipPath); } catch(e) {}
+        }
       } catch (e: any) {
         addToast(`Failed: ${e.message}`, 'error');
       }
@@ -482,8 +484,8 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
           const saveFile = saves().find(s => s.id === id);
           if (!saveFile?.file_url) continue;
 
-          // Use save title to create a distinct subfolder
-          const safeTitle = saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || `Save_${id}`;
+          // Use save title and ID to create a distinct subfolder to prevent collisions
+          const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${id.substring(0, 8)}`;
           const subDir = await join(folderPath as string, safeTitle);
           try { await mkdir(subDir, { recursive: true }); } catch(e) {}
           
@@ -491,9 +493,12 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
         
           const response = await tauriFetch(saveFile.file_url, { method: 'GET' });
           if (response.ok) {
-            await writeFile(tempZipPath, new Uint8Array(await response.arrayBuffer()));
-            await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
-            await remove(tempZipPath);
+            try {
+              await writeFile(tempZipPath, new Uint8Array(await response.arrayBuffer()));
+              await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
+            } finally {
+              try { await remove(tempZipPath); } catch(e) {}
+            }
           }
         }
         addToast(`Bulk download complete!`, 'success');

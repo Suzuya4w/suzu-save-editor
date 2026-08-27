@@ -200,6 +200,29 @@ async fn mcp_restore_backup(target_path: String, backup_path: String) -> Result<
 }
 
 #[tauri::command]
+async fn get_backup_dir_path(app: tauri::AppHandle) -> Result<String, String> {
+    let backup_dir = crate::backup::manager::get_backup_dir(&app).await?;
+    Ok(backup_dir.to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+async fn open_in_explorer(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer").arg(&path).spawn().map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open").arg(&path).spawn().map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open").arg(&path).spawn().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 async fn list_backups(app: tauri::AppHandle) -> Result<Vec<crate::backup::manager::BackupMetadata>, String> {
     crate::backup::manager::read_metadata_db(&app).await
 }
@@ -888,6 +911,8 @@ pub fn run() {
             mcp_notify_event,
             mcp_create_backup,
             mcp_restore_backup,
+            get_backup_dir_path,
+            open_in_explorer,
             list_backups,
             delete_backup,
             restore_backup_by_id,

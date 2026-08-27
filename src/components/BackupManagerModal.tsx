@@ -1,9 +1,9 @@
-import { createSignal, onMount, For, Show } from 'solid-js';
+import { createSignal, onMount, For, Show, createEffect } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { save } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { Modal } from './Modal';
-import { DatabaseBackup, Trash2, RotateCcw, Clock, HardDrive, FileText, CheckCircle2, Search, Filter, Download } from 'lucide-solid';
+import { DatabaseBackup, Trash2, RotateCcw, Clock, HardDrive, FileText, CheckCircle2, Search, Filter, Download, FolderOpen, Info } from 'lucide-solid';
 import { addToast } from '../store/toastStore';
 import { useEditorStore, loadSaveData } from '../store/editorStore';
 
@@ -25,6 +25,10 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
     // Search and Filter States
     const [searchQuery, setSearchQuery] = createSignal('');
     const [showMilestonesOnly, setShowMilestonesOnly] = createSignal(false);
+    
+    // Backup Dir Info
+    const [osType, setOsType] = createSignal<string>('unknown');
+    const [backupDirPath, setBackupDirPath] = createSignal<string | null>(null);
 
     const filteredBackups = () => {
         return backups().filter(b => {
@@ -55,9 +59,31 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
         }
     };
 
-    onMount(() => {
-        if (props.isOpen) fetchBackups();
+    createEffect(async () => {
+        if (props.isOpen) {
+            fetchBackups();
+            try {
+                const { type } = await import('@tauri-apps/plugin-os');
+                const currentOs = await type();
+                setOsType(currentOs);
+                const path = await invoke<string>('get_backup_dir_path');
+                setBackupDirPath(path);
+            } catch (e) {
+                console.error('Failed to get OS or backup dir path', e);
+            }
+        }
     });
+
+    const handleOpenBackupDir = async () => {
+        const path = backupDirPath();
+        if (!path) return;
+        try {
+            await invoke('open_in_explorer', { path });
+        } catch (e: any) {
+            console.error('Failed to open backup dir', e);
+            addToast(`Failed: ${e.message || String(e)}`, 'error');
+        }
+    };
 
     const formatSize = (bytes: number) => {
         if (bytes < 1024) return bytes + ' B';
@@ -195,6 +221,29 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
                         <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Milestones Only</span>
                     </label>
                 </div>
+
+                <Show when={backupDirPath()}>
+                    <div class="flex items-center justify-between p-2 bg-[#00F0FF]/5 border border-[#00F0FF]/20 text-[#00F0FF] text-xs">
+                        <div class="flex items-center gap-2 truncate">
+                            <Info size={14} class="shrink-0" />
+                            <span class="truncate" title={backupDirPath()!}>
+                                {osType() === 'android' || osType() === 'ios' ? 
+                                    "Backups are stored safely in internal app storage." : 
+                                    `Location: ${backupDirPath()}`
+                                }
+                            </span>
+                        </div>
+                        <Show when={osType() !== 'android' && osType() !== 'ios'}>
+                            <button 
+                                onClick={handleOpenBackupDir}
+                                class="shrink-0 ml-2 px-2 py-1 bg-[#00F0FF]/10 hover:bg-[#00F0FF] hover:text-black border border-[#00F0FF]/30 transition-colors uppercase font-bold tracking-wider text-[10px] flex items-center gap-1 cursor-pointer"
+                                title="Open in File Explorer"
+                            >
+                                <FolderOpen size={12} /> Open
+                            </button>
+                        </Show>
+                    </div>
+                </Show>
 
                 <Show when={isLoading()}>
                     <div class="text-center text-zinc-500 py-8 text-xs font-bold uppercase tracking-widest animate-pulse">Loading backups...</div>
