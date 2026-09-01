@@ -96,7 +96,7 @@ const fetchGameSuggestions = async (val: string) => {
   return results.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
 };
 
-export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', children: any }) {
+export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
   let alignmentClass = 'left-1/2 -translate-x-1/2';
   if (props.align === 'left') alignmentClass = 'left-0';
@@ -104,7 +104,7 @@ export function Tooltip(props: { text: string, position?: 'top' | 'bottom', alig
 
   return (
     <div
-      class="relative inline-flex items-center justify-center"
+      class={`relative inline-flex items-center justify-center shrink-0 ${props.class || ''}`}
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
@@ -728,9 +728,9 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
     {/* Toolbar */}
   <div class="px-6 py-4 flex flex-wrap gap-4 items-center justify-between border-b-4 border-zinc-200 bg-black">
-     <div class="flex flex-1 gap-4 items-center max-w-2xl">
-      <div class="flex-1 flex items-center gap-2">
-       <div class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 transition-colors duration-200 focus-within:border-[#FF7A00] px-3 group py-2">
+     <div class="flex flex-wrap flex-1 gap-4 items-center max-w-2xl">
+      <div class="flex-1 flex min-w-[200px] flex-wrap items-center gap-2">
+       <div class="flex-1 flex min-w-[150px] items-center bg-zinc-900 border-2 border-zinc-700 transition-colors duration-200 focus-within:border-[#FF7A00] px-3 group py-2">
         <div class="flex items-center pr-2 text-zinc-500 transition-colors duration-200 focus-within:text-[#FF7A00] group-focus-within:text-[#FF7A00]">
          <Search size={18} />
         </div>
@@ -749,7 +749,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        <select
         value={sortOrder()}
         onChange={(e) => { setSortOrder(e.currentTarget.value as any); fetchSaves(); }}
-        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors"
+        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors shrink-0"
        >
         <option value="newest">NEWEST FIRST</option>
         <option value="oldest">OLDEST FIRST</option>
@@ -757,7 +757,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        <select
         value={engineFilter()}
         onChange={(e) => { setEngineFilter(e.currentTarget.value); fetchSaves(); }}
-        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors"
+        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors shrink-0"
        >
         <option value="all">ALL ENGINES</option>
         <option value="RPG Maker MV/MZ">RPG MAKER MV/MZ</option>
@@ -771,14 +771,14 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        </select>
       </div>
       <Tooltip text="SHOW/HIDE ADULT CONTENT">
-      <button onClick={() => setShowNSFW(!showNSFW())} class={`shrink-0 px-4 py-3 mr-4 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${showNSFW() ? 'bg-red-500 text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-red-500 hover:text-red-500 shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_red]'}`}>
+      <button onClick={() => setShowNSFW(!showNSFW())} class={`px-4 py-3 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${showNSFW() ? 'bg-red-500 text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-red-500 hover:text-red-500 shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_red]'}`}>
        {showNSFW() ? <Eye size={16} /> : <EyeOff size={16} />}
        {showNSFW() ? 'NSFW: ON' : 'NSFW: OFF'}
       </button>
       </Tooltip>
       <Show when={authState.session}>
        <Tooltip text="SHOW ONLY MY UPLOADS">
-       <button onClick={() => { setFilterMode(filterMode() === 'my_uploads' ? 'all' : 'my_uploads'); fetchSaves(); }} class={`shrink-0 px-4 py-3 mr-4 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${filterMode() === 'my_uploads' ? 'bg-[#FF7A00] text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-[#FF7A00] hover:text-[#FF7A00] shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_#FF7A00]'}`}>
+       <button onClick={() => { setFilterMode(filterMode() === 'my_uploads' ? 'all' : 'my_uploads'); fetchSaves(); }} class={`px-4 py-3 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${filterMode() === 'my_uploads' ? 'bg-[#FF7A00] text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-[#FF7A00] hover:text-[#FF7A00] shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_#FF7A00]'}`}>
         <Cloud size={16} />
         {filterMode() === 'my_uploads' ? 'MY UPLOADS' : 'ALL UPLOADS'}
        </button>
@@ -786,28 +786,28 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       </Show>
      </div>
      <Show when={authState.session}>
-      <div class="flex items-center gap-8">
+      <div class="flex flex-wrap items-center gap-4 xl:gap-8 justify-end">
        <Show when={authState.isAdmin}>
-        <div class="flex items-center gap-2">
-         <button onClick={() => { setIsAdminMode(!isAdminMode()); fetchSaves(); }} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer ${isAdminMode() ? 'bg-red-500 text-black border-red-500 shadow-[4px_4px_0px_white]' : 'bg-zinc-900 text-red-500 border-red-900 hover:bg-red-950 shadow-[4px_4px_0px_rgba(239,68,68,0)] hover:shadow-[4px_4px_0px_rgba(239,68,68,0.5)]'}`}>
+        <div class="flex flex-wrap items-center gap-2">
+         <button onClick={() => { setIsAdminMode(!isAdminMode()); fetchSaves(); }} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isAdminMode() ? 'bg-red-500 text-black border-red-500 shadow-[4px_4px_0px_white]' : 'bg-zinc-900 text-red-500 border-red-900 hover:bg-red-950 shadow-[4px_4px_0px_rgba(239,68,68,0)] hover:shadow-[4px_4px_0px_rgba(239,68,68,0.5)]'}`}>
           <Shield size={14} /> ADMIN MODE
          </button>
-         <button onClick={handleToggleMaintenance} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer ${isMaintenance() ? 'bg-red-900 text-white border-red-500 animate-pulse shadow-[4px_4px_0px_red]' : 'bg-zinc-900 text-zinc-500 border-zinc-700 hover:text-red-500 hover:border-red-500 hover:shadow-[4px_4px_0px_rgba(239,68,68,0.5)]'}`}>
+         <button onClick={handleToggleMaintenance} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isMaintenance() ? 'bg-red-900 text-white border-red-500 animate-pulse shadow-[4px_4px_0px_red]' : 'bg-zinc-900 text-zinc-500 border-zinc-700 hover:text-red-500 hover:border-red-500 hover:shadow-[4px_4px_0px_rgba(239,68,68,0.5)]'}`}>
           <ShieldAlert size={14} /> {isMaintenance() ? 'SYS LOCKED' : 'LOCKDOWN'}
          </button>
         </div>
        </Show>
        <Tooltip text="SELECT MULTIPLE ITEMS">
-       <button onClick={() => { setIsBulkSelectMode(!isBulkSelectMode()); setSelectedSaves([]); }} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer ${isBulkSelectMode() ? 'bg-[#FF7A00] text-black border-[#FF7A00] shadow-[4px_4px_0px_white]' : 'bg-zinc-900 text-[#FF7A00] border-orange-900 hover:bg-orange-950 shadow-[4px_4px_0px_rgba(255,122,0,0)] hover:shadow-[4px_4px_0px_rgba(255,122,0,0.5)]'}`}>
+       <button onClick={() => { setIsBulkSelectMode(!isBulkSelectMode()); setSelectedSaves([]); }} class={`px-4 py-2 border-2 font-black tracking-widest text-[10px] uppercase transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isBulkSelectMode() ? 'bg-[#FF7A00] text-black border-[#FF7A00] shadow-[4px_4px_0px_white]' : 'bg-zinc-900 text-[#FF7A00] border-orange-900 hover:bg-orange-950 shadow-[4px_4px_0px_rgba(255,122,0,0)] hover:shadow-[4px_4px_0px_rgba(255,122,0,0.5)]'}`}>
         <LayoutList size={14} /> BULK SELECT
        </button>
        </Tooltip>
-       <div class="flex items-center gap-3 border-2 border-zinc-700 p-1.5 transition-colors hover:border-[#FF7A00]">
+       <div class="flex items-center gap-3 border-2 border-zinc-700 p-1.5 transition-colors hover:border-[#FF7A00] shrink-0">
         <Show when={authState.user?.user_metadata?.avatar_url}>
-          <img src={authState.user?.user_metadata?.avatar_url} class="w-20 h-20 rounded-full object-cover border-2 border-zinc-700" />
+          <img src={authState.user?.user_metadata?.avatar_url} class="w-10 h-10 rounded-full object-cover border-2 border-zinc-700" />
         </Show>
         <div class="flex items-center pr-4 py-1 border-r-2 border-zinc-800">
-         <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest max-w-[200px] truncate">
+         <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest max-w-[150px] truncate">
           USER: <span class="text-[#FF7A00] ml-1">{authState.user?.user_metadata?.full_name || authState.user?.email || 'ANONYMOUS'}</span>
          </span>
         </div>
@@ -817,7 +817,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
          </button>
         </Tooltip>
        </div>
-       <div class="flex items-center ml-2">
+       <div class="flex items-center shrink-0">
         <button onClick={() => setIsUploadModalOpen(true)} class="px-6 py-3 bg-[#FF7A00] hover:bg-white text-black font-black tracking-widest uppercase transition-colors flex items-center gap-2 cursor-pointer border-2 border-black hover:border-black shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_white]">
          <Upload size={18} strokeWidth={3} />
          UPLOAD SAVE
@@ -826,7 +826,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       </div>
      </Show>
      <Show when={!authState.session && !authState.loading}>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 shrink-0">
        <button onClick={() => setIsLoginModalOpen(true)} class="px-6 py-3 bg-zinc-900 border-2 border-zinc-700 hover:border-[#FF7A00] text-zinc-300 hover:text-[#FF7A00] font-black tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer shadow-[4px_4px_0px_rgba(255,122,0,0)] hover:shadow-[4px_4px_0px_#FF7A00] hover:-translate-y-0.5 hover:-translate-x-0.5">
         <span class="mr-2">{">>"}</span> <span>CONTRIBUTE SAVE</span>
        </button>
