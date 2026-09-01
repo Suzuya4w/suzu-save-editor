@@ -102,6 +102,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [isUploading, setIsUploading] = createSignal(false);
   const [downloadProgress, setDownloadProgress] = createSignal(0);
   const [downloadStatus, setDownloadStatus] = createSignal('');
+  const [bulkDownloadQueue, setBulkDownloadQueue] = createSignal<any[]>([]);
   
   const [reportTarget, setReportTarget] = createSignal<{id: string, title: string} | null>(null);
   const [reportForm, setReportForm] = createSignal({ reason: 'Outdated Version', description: '' });
@@ -136,7 +137,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       
       const q = overrideQuery !== undefined ? overrideQuery : searchQuery();
       if (q.trim()) {
-        query = query.ilike('title', `%${q.trim()}%`);
+        query = query.or(`title.ilike.%${q.trim()}%,uploader.ilike.%${q.trim()}%`);
       }
 
       if (engineFilter() !== 'all') {
@@ -185,6 +186,23 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       setIsFetchingMore(false);
     }
   };
+
+  let loadMoreRef: HTMLDivElement | undefined;
+
+  onMount(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore() && !isFetchingMore() && !loading()) {
+        fetchSaves(true);
+      }
+    }, { threshold: 0.1 });
+
+    createEffect(() => {
+      if (loadMoreRef) {
+        observer.observe(loadMoreRef);
+        onCleanup(() => observer.unobserve(loadMoreRef!));
+      }
+    });
+  });
 
   const fetchConfig = async () => {
     try {
@@ -508,15 +526,30 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       setIsUploading(true);
       let successCount = 0;
       let failedCount = 0;
+
+      const initialQueue = selectedSaves().map(id => ({
+        id,
+        title: saves().find(s => s.id === id)?.title || 'Unknown',
+        status: 'pending',
+        progress: 0
+      }));
+      setBulkDownloadQueue(initialQueue);
+
+      const updateItem = (id: string, status: string, progress: number) => {
+        setBulkDownloadQueue(prev => prev.map(item => item.id === id ? { ...item, status, progress } : item));
+      };
+
       try {
         for (let i = 0; i < selectedSaves().length; i++) {
           const id = selectedSaves()[i];
           const saveFile = saves().find(s => s.id === id);
           if (!saveFile?.file_url) {
+            updateItem(id, 'error', 0);
             failedCount++;
             continue;
           }
 
+          updateItem(id, 'downloading', 0);
           setDownloadStatus(`Downloading ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
           const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${id.substring(0, 8)}`;
           const subDir = await join(folderPath as string, safeTitle);
@@ -526,6 +559,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
         
           const response = await fetch(saveFile.file_url, { method: 'GET' });
           if (!response.ok) {
+            updateItem(id, 'error', 0);
             failedCount++;
             continue;
           }
@@ -542,7 +576,9 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
               chunks.push(value);
               receivedLength += value.length;
               if (contentLength > 0) {
-                setDownloadProgress((receivedLength / contentLength) * 100);
+                const prog = (receivedLength / contentLength) * 100;
+                setDownloadProgress(prog);
+                updateItem(id, 'downloading', prog);
               }
             }
             const buffer = new Uint8Array(receivedLength);
@@ -557,6 +593,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
             await writeFile(tempZipPath, new Uint8Array(buffer));
           }
 
+          updateItem(id, 'extracting', 100);
           setDownloadStatus(`Extracting ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
           const collisions = await invoke<string[]>('check_zip_collisions', { zipPath: tempZipPath, destDir: subDir });
           if (collisions.length > 0) {
@@ -566,8 +603,10 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
           try {
             await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
+            updateItem(id, 'done', 100);
             successCount++;
           } catch (e) {
+            updateItem(id, 'error', 0);
             failedCount++;
           } finally {
             try { await remove(tempZipPath); } catch(e) {}
@@ -585,6 +624,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       } finally { 
         setIsUploading(false); 
         setDownloadProgress(0);
+        setTimeout(() => setBulkDownloadQueue([]), 2000); // Clear after 2 seconds
       }
     });
   };
@@ -834,17 +874,13 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        </div>
        
        <Show when={hasMore() && saves().length > 0}>
-        <div class="flex justify-center mt-4 mb-20">
-         <button 
-           onClick={(e) => { e.preventDefault(); fetchSaves(true); }}
-           disabled={isFetchingMore()}
-           class="px-8 py-4 bg-zinc-950 text-[#FF7A00] border-2 border-[#FF7A00] hover:bg-[#FF7A00] hover:text-black font-black uppercase tracking-widest text-sm transition-all shadow-[4px_4px_0px_#FF7A00] hover:shadow-[0px_0px_0px_#FF7A00] hover:translate-x-1 hover:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
-         >
-          <Show when={isFetchingMore()} fallback={<Database size={20} />}>
-           <Loader2 size={20} class="animate-spin" />
-          </Show>
-          {isFetchingMore() ? 'FETCHING...' : '>> LOAD MORE'}
-         </button>
+        <div ref={loadMoreRef} class="flex justify-center mt-8 mb-20 w-full h-20">
+         <Show when={isFetchingMore()}>
+           <div class="flex items-center gap-3 text-[#FF7A00] font-black uppercase tracking-widest text-sm">
+             <Loader2 size={24} class="animate-spin" />
+             FETCHING MORE DATA...
+           </div>
+         </Show>
         </div>
        </Show>
        
@@ -897,7 +933,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
    
     {/* Download Progress Modal */}
     <Modal
-      isOpen={downloadProgress() > 0}
+      isOpen={downloadProgress() > 0 || isUploading()}
       onClose={() => {}}
       title="DOWNLOADING..."
       width="max-w-md"
@@ -905,6 +941,32 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       <div class="flex flex-col items-center">
         <Loader2 size={32} class="animate-spin text-[#FF7A00] mb-4" />
         <h3 class="text-sm font-black text-white tracking-widest uppercase mb-2">{downloadStatus()}</h3>
+        
+        <Show when={bulkDownloadQueue().length > 0}>
+          <div class="w-full max-h-48 overflow-y-auto mt-4 bg-black border-2 border-zinc-800 p-2 flex flex-col gap-2">
+            <For each={bulkDownloadQueue()}>
+              {(item) => (
+                <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 p-1 border-b border-zinc-900 last:border-0">
+                  <span class="truncate w-1/2 pr-2" title={item.title}>{item.title}</span>
+                  <div class="flex items-center gap-2 w-1/2 justify-end">
+                    <span class={{
+                      'text-zinc-400': item.status === 'pending',
+                      'text-[#FF7A00]': item.status === 'downloading' || item.status === 'extracting',
+                      'text-green-500': item.status === 'done',
+                      'text-red-500': item.status === 'error',
+                    }}>
+                      {item.status}
+                    </span>
+                    <Show when={item.status === 'downloading'}>
+                      <span class="text-[#FF7A00] min-w-[30px] text-right">{Math.round(item.progress)}%</span>
+                    </Show>
+                  </div>
+                </div>
+              )}
+            </For>
+          </div>
+        </Show>
+
         <div class="w-full bg-zinc-900 border-2 border-zinc-700 h-6 relative mt-4">
           <div 
             class="bg-[#FF7A00] h-full transition-all duration-300"
