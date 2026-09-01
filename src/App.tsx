@@ -12,7 +12,7 @@ import { Modal } from "./components/Modal";
 import { RawJsonViewer } from "./components/RawJsonViewer";
 import { Info, Settings, Database, Gamepad2, Monitor, MessageSquare, Heart, Loader2, Smartphone, Zap, Lock, RefreshCw } from 'lucide-solid';
 import "./App.css";
-import { CloudDatabaseBrowser } from './components/CloudDatabaseBrowser';
+import { CloudDatabaseBrowser } from './components/cloud/CloudDatabaseBrowser';
 import { AndroidBrowserModal } from './components/AndroidBrowserModal';
 import { SettingsModal } from './components/SettingsModal';
 import { HelpModal } from "./components/HelpModal";
