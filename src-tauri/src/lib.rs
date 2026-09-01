@@ -338,6 +338,29 @@ async fn extract_save_zip(zip_path: String, dest_dir: String) -> Result<(), Stri
 }
 
 #[tauri::command]
+async fn check_zip_collisions(zip_path: String, dest_dir: String) -> Result<Vec<String>, String> {
+    let zip_p = std::path::Path::new(&zip_path);
+    let dest_p = std::path::Path::new(&dest_dir);
+    crate::utils::check_zip_collisions(zip_p, dest_p)
+}
+
+#[tauri::command]
+async fn backup_colliding_files(app: tauri::AppHandle, dest_dir: String, files: Vec<String>) -> Result<(), String> {
+    let dest_p = std::path::Path::new(&dest_dir);
+    for file in files {
+        let file_path = dest_p.join(file);
+        if file_path.exists() {
+            crate::backup::manager::create_backup(
+                &file_path, 
+                Some("Auto-backup before cloud extraction overwrite".to_string()), 
+                &app
+            ).await?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
 fn check_device_rooted() -> Result<bool, String> {
     // Check Shizuku first
     if crate::shizuku::check_permission().unwrap_or(false) {
@@ -889,8 +912,9 @@ pub fn run() {
             crate::adb::adb_list_files,
             crate::adb::adb_pull_file,
             crate::adb::adb_push_file,
-            crate::adb::adb_backup_file,
             extract_save_zip,
+            check_zip_collisions,
+            backup_colliding_files,
             check_device_rooted,
             root_read_file,
             root_write_file,

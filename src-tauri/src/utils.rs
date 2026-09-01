@@ -3,6 +3,34 @@ use std::io;
 use std::path::Path;
 use zip::ZipArchive;
 
+pub fn check_zip_collisions(zip_path: &Path, dest_dir: &Path) -> Result<Vec<String>, String> {
+    let file = fs::File::open(zip_path).map_err(|e| e.to_string())?;
+    let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
+    
+    let canonical_dest = dest_dir.canonicalize().unwrap_or_else(|_| dest_dir.to_path_buf());
+    let mut collisions = Vec::new();
+
+    for i in 0..archive.len() {
+        let file = archive.by_index(i).map_err(|e| e.to_string())?;
+        
+        let safe_path = match file.enclosed_name() {
+            Some(path) => path,
+            None => continue,
+        };
+
+        if (*file.name()).ends_with('/') {
+            continue;
+        }
+
+        let outpath = canonical_dest.join(&safe_path);
+        if outpath.exists() {
+            collisions.push(safe_path.to_string_lossy().into_owned());
+        }
+    }
+    
+    Ok(collisions)
+}
+
 pub fn secure_extract_zip(zip_path: &Path, dest_dir: &Path) -> Result<(), String> {
     let file = fs::File::open(zip_path).map_err(|e| e.to_string())?;
     let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;

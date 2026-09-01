@@ -141,10 +141,16 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [isLoginModalOpen, setIsLoginModalOpen] = createSignal(false);
   const [isReportModalOpen, setIsReportModalOpen] = createSignal(false);
 
-  const [showNSFW, setShowNSFW] = createSignal(false);
+  const [showNSFW, setShowNSFW] = createSignal(localStorage.getItem('cloud_showNSFW') === 'true');
   const [showNSFWDisclaimer, setShowNSFWDisclaimer] = createSignal(localStorage.getItem('hide_nsfw_disclaimer') !== 'true');
   const [isAdminMode, setIsAdminMode] = createSignal(false);
-  const [filterMode, setFilterMode] = createSignal<'all' | 'my_uploads'>('all');
+  const [filterMode, setFilterMode] = createSignal<'all' | 'my_uploads'>((localStorage.getItem('cloud_filterMode') as any) || 'all');
+  const [sortOrder, setSortOrder] = createSignal<'newest' | 'oldest'>((localStorage.getItem('cloud_sortOrder') as any) || 'newest');
+  
+  createEffect(() => localStorage.setItem('cloud_showNSFW', showNSFW().toString()));
+  createEffect(() => localStorage.setItem('cloud_filterMode', filterMode()));
+  createEffect(() => localStorage.setItem('cloud_sortOrder', sortOrder()));
+
   const [isBulkSelectMode, setIsBulkSelectMode] = createSignal(false);
   const [selectedSaves, setSelectedSaves] = createSignal<string[]>([]);
   const [isNsfwLocked, setIsNsfwLocked] = createSignal(false);
@@ -152,11 +158,14 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [isMaintenance, setIsMaintenance] = createSignal(false);
   const [maintenanceMsg, setMaintenanceMsg] = createSignal('');
 
-  const [confirmModal, setConfirmModal] = createSignal<{ isOpen: boolean; title: string; message: string; onConfirm: () => void; kind: 'warning' | 'info' | 'danger'; }>({
+  const [confirmModal, setConfirmModal] = createSignal<{ isOpen: boolean; title: string; message: string; onConfirm: () => void; onCancel?: () => void; kind: 'warning' | 'info' | 'danger'; }>({
     isOpen: false, title: '', message: '', onConfirm: () => {}, kind: 'info'
   });
 
   const [isUploading, setIsUploading] = createSignal(false);
+  const [downloadProgress, setDownloadProgress] = createSignal(0);
+  const [downloadStatus, setDownloadStatus] = createSignal('');
+  
   const [reportTarget, setReportTarget] = createSignal<{id: string, title: string} | null>(null);
   const [reportForm, setReportForm] = createSignal({ reason: 'Outdated Version', description: '' });
   const [saveDetailsModal, setSaveDetailsModal] = createSignal<any | null>(null);
@@ -166,10 +175,15 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const toggleDisclaimer = () => setShowNSFWDisclaimer(!showNSFWDisclaimer());
   const handleCloseDisclaimer = () => { localStorage.setItem('hide_nsfw_disclaimer', 'true'); setShowNSFWDisclaimer(false); };
 
-  const requestConfirm = (title: string, message: string, kind: 'warning' | 'info' | 'danger', onConfirm: () => void) => {
-    setConfirmModal({ isOpen: true, title, message, onConfirm, kind });
+  const requestConfirm = (title: string, message: string, kind: 'warning' | 'info' | 'danger', onConfirm: () => void, onCancel?: () => void) => {
+    setConfirmModal({ isOpen: true, title, message, onConfirm, onCancel, kind });
   };
-  const closeConfirm = () => setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  const closeConfirm = (isCancel: boolean | Event = true) => {
+    if (isCancel === true || typeof isCancel !== 'boolean') {
+      if (confirmModal().onCancel) confirmModal().onCancel!();
+    }
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   const fetchSaves = async (loadMore = false, overrideQuery?: string) => {
     if (loadMore) {
@@ -188,11 +202,11 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       }
 
       if (filterMode() === 'my_uploads' && authState.user?.id) {
-        query = query.eq('uploader_id', authState.user.id).order('created_at', { ascending: false });
+        query = query.eq('uploader_id', authState.user.id).order('created_at', { ascending: sortOrder() === 'oldest' });
       } else if (isAdminMode()) {
-        query = query.order('report_count', { ascending: false }).order('created_at', { ascending: false });
+        query = query.order('report_count', { ascending: false }).order('created_at', { ascending: sortOrder() === 'oldest' });
       } else {
-        query = query.eq('is_visible', true).order('created_at', { ascending: false });
+        query = query.eq('is_visible', true).order('created_at', { ascending: sortOrder() === 'oldest' });
       }
       
       const currentPage = loadMore ? page() + 1 : 0;
@@ -357,34 +371,100 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
   const handleDownload = (url: string, saveTitle: string) => {
     requestConfirm('Download & Extract', `Download and extract "${saveTitle}" to your local folder?`, 'danger', async () => {
-      closeConfirm();
+      closeConfirm(false);
       try {
         const extractDir = await openDialog({ directory: true, title: 'Select folder to extract the save to' });
         if (!extractDir) return;
 
-        addToast('Downloading save data...', 'info');
-        const response = await tauriFetch(url, { method: 'GET' });
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        setDownloadStatus('Connecting...');
+        setDownloadProgress(1); // Show modal
+        setIsUploading(true);
 
-        const buffer = await response.arrayBuffer();
+        const response = await fetch(url, { method: 'GET' });
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        // Save to a temporary zip file inside the chosen directory
+        const contentLength = +(response.headers.get('Content-Length') || 0);
+        let receivedLength = 0;
+        
         const tempZipName = `temp_${Date.now()}.zip`;
         const tempZipPath = await join(extractDir as string, tempZipName);
         
-        await writeFile(tempZipPath, new Uint8Array(buffer));
-        addToast('Extracting save data...', 'info');
+        if (response.body) {
+          const reader = response.body.getReader();
+          const chunks = [];
+          
+          while(true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            chunks.push(value);
+            receivedLength += value.length;
+            if (contentLength > 0) {
+              setDownloadProgress((receivedLength / contentLength) * 100);
+              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)} / ${formatBytes(contentLength)}`);
+            } else {
+              setDownloadProgress(50);
+              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)}`);
+            }
+          }
+          
+          const buffer = new Uint8Array(receivedLength);
+          let position = 0;
+          for(let chunk of chunks) {
+            buffer.set(chunk, position);
+            position += chunk.length;
+          }
+          await writeFile(tempZipPath, buffer);
+        } else {
+          const buffer = await response.arrayBuffer();
+          await writeFile(tempZipPath, new Uint8Array(buffer));
+        }
 
-        // Call the secure rust extractor
+        setDownloadStatus('Checking for file collisions...');
+        const collisions = await invoke<string[]>('check_zip_collisions', { zipPath: tempZipPath, destDir: extractDir as string });
+        
+        if (collisions.length > 0) {
+          setDownloadProgress(0); // Hide progress bar for a moment
+          setIsUploading(false);
+          const proceed = await new Promise<boolean>(resolve => {
+            const collisionText = collisions.slice(0,5).join('\n') + (collisions.length > 5 ? `\n...and ${collisions.length - 5} more` : '');
+            requestConfirm(
+              'FILES WILL BE OVERWRITTEN', 
+              `The following files already exist in the destination:\n\n${collisionText}\n\nDo you want to BACKUP the existing files before overwriting?`, 
+              'warning', 
+              async () => {
+                closeConfirm(false);
+                setDownloadProgress(99);
+                setDownloadStatus('Backing up existing files...');
+                setIsUploading(true);
+                await invoke('backup_colliding_files', { destDir: extractDir as string, files: collisions });
+                resolve(true);
+              },
+              () => {
+                resolve(false);
+              }
+            );
+          });
+          
+          if (!proceed) {
+            await remove(tempZipPath);
+            return;
+          }
+        }
+
+        setDownloadProgress(100);
+        setDownloadStatus('Extracting save data...');
+        setIsUploading(true);
         try {
           await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
           addToast('Save extracted successfully!', 'success');
         } finally {
-          // Clean up the temporary zip file even if extraction fails
           try { await remove(tempZipPath); } catch(e) {}
         }
       } catch (e: any) {
         addToast(`Failed: ${e.message}`, 'error');
+      } finally {
+        setDownloadProgress(0);
+        setIsUploading(false);
       }
     });
   };
@@ -393,7 +473,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
   const handleAdminDelete = (saveId: string, fileUrl: string) => {
     requestConfirm('Delete Save', 'Permanently delete?', 'danger', async () => {
-      closeConfirm();
+      closeConfirm(false);
       try {
         const fileName = fileUrl.split('/').pop();
         if (fileName) await supabase.storage.from('saves').remove([fileName]);
@@ -430,7 +510,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       isMaintenance() ? 'Are you sure you want to reopen the database to the public?' : 'Are you sure you want to lockdown the database? Normal users will be completely blocked.',
       'warning',
       async () => {
-        closeConfirm();
+        closeConfirm(false);
         try {
           const newState = !isMaintenance();
           const { error } = await supabase.from('app_config').update({ is_maintenance: newState }).eq('id', 'global');
@@ -456,7 +536,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     };
     const config = actionsMap[action];
     requestConfirm(`Bulk ${config.text}`, `Apply to ${selectedSaves().length} items?`, 'warning', async () => {
-      closeConfirm();
+      closeConfirm(false);
       setLoading(true);
       try {
         const promises = selectedSaves().map(async (id) => {
@@ -473,44 +553,83 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const handleBulkDownload = async () => {
     if (selectedSaves().length === 0) return;
     requestConfirm('Bulk Download', `Download ${selectedSaves().length} files?`, 'danger', async () => {
-      closeConfirm();
+      closeConfirm(false);
       const folderPath = await openDialog({ directory: true });
       if (!folderPath) return;
 
-      addToast(`Downloading...`, 'info');
+      setDownloadProgress(1);
       setIsUploading(true);
       try {
-        for (const id of selectedSaves()) {
+        for (let i = 0; i < selectedSaves().length; i++) {
+          const id = selectedSaves()[i];
           const saveFile = saves().find(s => s.id === id);
           if (!saveFile?.file_url) continue;
 
-          // Use save title and ID to create a distinct subfolder to prevent collisions
+          setDownloadStatus(`Downloading ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
           const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${id.substring(0, 8)}`;
           const subDir = await join(folderPath as string, safeTitle);
           try { await mkdir(subDir, { recursive: true }); } catch(e) {}
           
           const tempZipPath = await join(folderPath as string, `temp_bulk_${id}.zip`);
         
-          const response = await tauriFetch(saveFile.file_url, { method: 'GET' });
-          if (response.ok) {
-            try {
-              await writeFile(tempZipPath, new Uint8Array(await response.arrayBuffer()));
-              await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
-            } finally {
-              try { await remove(tempZipPath); } catch(e) {}
+          const response = await fetch(saveFile.file_url, { method: 'GET' });
+          if (!response.ok) continue;
+
+          const contentLength = +(response.headers.get('Content-Length') || 0);
+          let receivedLength = 0;
+
+          if (response.body) {
+            const reader = response.body.getReader();
+            const chunks = [];
+            while(true) {
+              const {done, value} = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              receivedLength += value.length;
+              if (contentLength > 0) {
+                setDownloadProgress((receivedLength / contentLength) * 100);
+              }
             }
+            const buffer = new Uint8Array(receivedLength);
+            let position = 0;
+            for(let chunk of chunks) {
+              buffer.set(chunk, position);
+              position += chunk.length;
+            }
+            await writeFile(tempZipPath, buffer);
+          } else {
+            const buffer = await response.arrayBuffer();
+            await writeFile(tempZipPath, new Uint8Array(buffer));
+          }
+
+          setDownloadStatus(`Extracting ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
+          const collisions = await invoke<string[]>('check_zip_collisions', { zipPath: tempZipPath, destDir: subDir });
+          if (collisions.length > 0) {
+            setDownloadStatus(`Backing up ${collisions.length} existing files...`);
+            await invoke('backup_colliding_files', { destDir: subDir, files: collisions });
+          }
+
+          try {
+            await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
+          } finally {
+            try { await remove(tempZipPath); } catch(e) {}
           }
         }
         addToast(`Bulk download complete!`, 'success');
         setSelectedSaves([]); setIsBulkSelectMode(false);
-      } catch (e: any) { addToast(`Error: ${e.message}`, 'error'); } finally { setIsUploading(false); }
+      } catch (e: any) { 
+        addToast(`Error: ${e.message}`, 'error'); 
+      } finally { 
+        setIsUploading(false); 
+        setDownloadProgress(0);
+      }
     });
   };
 
   const handleBulkDelete = () => {
     if (selectedSaves().length === 0) return;
     requestConfirm('Bulk Delete', `Delete ${selectedSaves().length} saves?`, 'danger', async () => {
-      closeConfirm();
+      closeConfirm(false);
       for (const id of selectedSaves()) {
         const save = saves().find(s => s.id === id);
         if (save?.file_url) {
@@ -524,7 +643,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     });
   };
 
-  const handleLogout = () => requestConfirm('Confirm Logout', 'Are you sure?', 'warning', () => { closeConfirm(); signOut(); });
+  const handleLogout = () => requestConfirm('Confirm Logout', 'Are you sure?', 'warning', () => { closeConfirm(false); signOut(); });
 
   return (
 <Show when={shouldRender()}>
@@ -597,21 +716,31 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     {/* Toolbar */}
   <div class="px-6 py-4 flex flex-wrap gap-4 items-center justify-between border-b-4 border-zinc-200 bg-black">
      <div class="flex flex-1 gap-4 items-center max-w-2xl">
-      <div class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 transition-colors duration-200 focus-within:border-[#FF7A00] px-3 group">
-       <div class="flex items-center pr-2 text-zinc-500 transition-colors duration-200 focus-within:text-[#FF7A00] group-focus-within:text-[#FF7A00]">
-        <Search size={18} />
+      <div class="flex-1 flex items-center gap-2">
+       <div class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 transition-colors duration-200 focus-within:border-[#FF7A00] px-3 group py-2">
+        <div class="flex items-center pr-2 text-zinc-500 transition-colors duration-200 focus-within:text-[#FF7A00] group-focus-within:text-[#FF7A00]">
+         <Search size={18} />
+        </div>
+        <input 
+         type="text" 
+         placeholder="SEARCH QUERY..." 
+         class="bg-transparent border-none outline-none text-zinc-400 font-mono text-xs w-full uppercase tracking-widest placeholder:text-zinc-700"
+         value={searchQuery()}
+         onInput={(e) => {
+           setSearchQuery(e.currentTarget.value);
+           clearTimeout(searchTimeout);
+           searchTimeout = setTimeout(() => fetchSaves(false, e.currentTarget.value), 500);
+         }}
+        />
        </div>
-       <input 
-        type="text" 
-        placeholder="SEARCH QUERY..." 
-        class="bg-transparent border-none outline-none text-zinc-400 font-mono text-xs w-full uppercase tracking-widest placeholder:text-zinc-700"
-        value={searchQuery()}
-        onInput={(e) => {
-          setSearchQuery(e.currentTarget.value);
-          clearTimeout(searchTimeout);
-          searchTimeout = setTimeout(() => fetchSaves(false, e.currentTarget.value), 500);
-        }}
-       />
+       <select
+        value={sortOrder()}
+        onChange={(e) => { setSortOrder(e.currentTarget.value as any); fetchSaves(); }}
+        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors"
+       >
+        <option value="newest">NEWEST FIRST</option>
+        <option value="oldest">OLDEST FIRST</option>
+       </select>
       </div>
       <Tooltip text="SHOW/HIDE ADULT CONTENT">
       <button onClick={() => setShowNSFW(!showNSFW())} class={`shrink-0 px-4 py-3 mr-4 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${showNSFW() ? 'bg-red-500 text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-red-500 hover:text-red-500 shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_red]'}`}>
@@ -787,6 +916,28 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
      </Show>
     </div>
    
+    {/* Download Progress Modal */}
+    <Modal
+      isOpen={downloadProgress() > 0}
+      onClose={() => {}}
+      title="DOWNLOADING..."
+      width="max-w-md"
+    >
+      <div class="flex flex-col items-center">
+        <Loader2 size={32} class="animate-spin text-[#FF7A00] mb-4" />
+        <h3 class="text-sm font-black text-white tracking-widest uppercase mb-2">{downloadStatus()}</h3>
+        <div class="w-full bg-zinc-900 border-2 border-zinc-700 h-6 relative mt-4">
+          <div 
+            class="bg-[#FF7A00] h-full transition-all duration-300"
+            style={{ width: `${downloadProgress()}%` }}
+          ></div>
+          <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white mix-blend-difference">
+            {Math.round(downloadProgress())}%
+          </div>
+        </div>
+      </div>
+    </Modal>
+
     {/* Upload Modal */}
     <UploadSaveModal
       isOpen={isUploadModalOpen()}
