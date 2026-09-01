@@ -307,7 +307,16 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
        <div class="flex gap-4">
         <div class="flex flex-col gap-1 flex-1 relative">
          <label class="text-xs font-bold text-white tracking-widest uppercase">Game Engine / Format (Optional)</label>
-         <input type="text" maxLength={50} value={uploadForm().game_engine} onInput={(e) => setUploadForm({...uploadForm(), game_engine: e.currentTarget.value})} class="w-full bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold placeholder:text-zinc-700" placeholder="e.g. Ren'Py, RPG Maker, Unity" />
+         <input type="text" list="engine-options" maxLength={50} value={uploadForm().game_engine} onInput={(e) => setUploadForm({...uploadForm(), game_engine: e.currentTarget.value})} class="w-full bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold placeholder:text-zinc-700" placeholder="e.g. Ren'Py, RPG Maker, Unity" />
+         <datalist id="engine-options">
+           <option value="RPG Maker MV/MZ" />
+           <option value="RPG Maker VX Ace" />
+           <option value="Ren'Py" />
+           <option value="KiriKiri" />
+           <option value="WOLF RPG Editor" />
+           <option value="TyranoBuilder" />
+           <option value="Unity" />
+         </datalist>
          <Show when={detectedEngine() && uploadForm().game_engine === detectedEngine()}>
           <span class="text-[9px] text-[#FF7A00] font-black tracking-widest uppercase mt-1 absolute -bottom-4">System Detected</span>
          </Show>

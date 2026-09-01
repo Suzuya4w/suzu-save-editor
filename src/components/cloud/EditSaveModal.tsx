@@ -148,7 +148,16 @@ export function EditSaveModal(props: EditSaveModalProps) {
           <div class="flex gap-4">
             <div class="flex flex-col gap-1 flex-1">
               <label class="text-xs font-bold text-white tracking-widest uppercase">Game Engine / Format</label>
-              <input type="text" maxLength={50} value={infoForm().game_engine} onInput={(e) => setInfoForm({...infoForm(), game_engine: e.currentTarget.value})} class="w-full bg-zinc-900 border-2 border-zinc-700 p-3 text-white focus:border-[#FF7A00] outline-none uppercase font-bold" />
+              <input type="text" list="engine-options-edit" maxLength={50} value={infoForm().game_engine} onInput={(e) => setInfoForm({...infoForm(), game_engine: e.currentTarget.value})} class="w-full bg-zinc-900 border-2 border-zinc-700 p-3 text-white focus:border-[#FF7A00] outline-none uppercase font-bold" />
+              <datalist id="engine-options-edit">
+                <option value="RPG Maker MV/MZ" />
+                <option value="RPG Maker VX Ace" />
+                <option value="Ren'Py" />
+                <option value="KiriKiri" />
+                <option value="WOLF RPG Editor" />
+                <option value="TyranoBuilder" />
+                <option value="Unity" />
+              </datalist>
             </div>
             <div class="flex flex-col gap-1 flex-1">
               <label class="text-xs font-bold text-white tracking-widest uppercase">Version</label>
