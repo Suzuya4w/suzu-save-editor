@@ -14,13 +14,13 @@ import { join, tempDir } from '@tauri-apps/api/path';
 import { invoke } from '@tauri-apps/api/core';
 import { type as osType } from '@tauri-apps/plugin-os';
 import { Modal } from '../Modal';
-import { UploadSaveModal } from '../UploadSaveModal';
-import { SaveDetailsModal } from '../SaveDetailsModal';
-import { EditSaveModal } from '../EditSaveModal';
+import { UploadSaveModal } from './UploadSaveModal';
+import { SaveDetailsModal } from './SaveDetailsModal';
+import { EditSaveModal } from './EditSaveModal';
 import { CloudLoginModal } from './CloudLoginModal';
 import { CloudReportModal } from './CloudReportModal';
 import { AdminReportsModal } from './AdminReportsModal';
-import { SaveCard } from '../SaveCard';
+import { SaveCard } from './SaveCard';
 import { SaveFile } from '../../types/database';
 
 export const formatBytes = (bytes: number) => {

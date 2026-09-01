@@ -1,14 +1,14 @@
 import { createSignal, Show, For } from 'solid-js';
 import { Upload, Loader2 } from 'lucide-solid';
-import { addToast } from '../store/toastStore';
-import { useAuthStore } from '../store/authStore';
-import { supabase } from '../lib/supabase';
+import { addToast } from '../../store/toastStore';
+import { useAuthStore } from '../../store/authStore';
+import { supabase } from '../../lib/supabase';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
 import JSZip from 'jszip';
-import { Modal } from './Modal';
+import { Modal } from '../Modal';
 
 export const isSafeFile = (bytes: Uint8Array): boolean => {
   if (bytes.length < 4) return true;

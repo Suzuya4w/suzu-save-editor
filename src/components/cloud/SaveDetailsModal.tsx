@@ -1,7 +1,7 @@
 import { Show, createSignal, createEffect } from 'solid-js';
 import { BadgeCheck, FileCheck2, ShieldCheck, Loader2, ShieldAlert, Flag, Clock, HardDrive, Download, Gamepad2, Edit3 } from 'lucide-solid';
-import { Modal } from './Modal';
-import { Tooltip, formatBytes } from './cloud/CloudDatabaseBrowser';
+import { Modal } from '../Modal';
+import { Tooltip, formatBytes } from './CloudDatabaseBrowser';
 
 export function SaveDetailsModal(props: {
   save: any | null;

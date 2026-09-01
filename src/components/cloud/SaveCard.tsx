@@ -1,8 +1,8 @@
 import { Show } from 'solid-js';
 import { Gamepad2, BadgeCheck, Eye, EyeOff, Flag, Trash2, Download, ShieldCheck, Loader2, ShieldAlert, CheckSquare, Square, HardDrive, Clock, Edit3 } from 'lucide-solid';
-import { formatBytes, Tooltip } from './cloud/CloudDatabaseBrowser';
-import { SaveFile } from '../types/database';
-import { useAuthStore } from '../store/authStore';
+import { formatBytes, Tooltip } from './CloudDatabaseBrowser';
+import { SaveFile } from '../../types/database';
+import { useAuthStore } from '../../store/authStore';
 
 interface SaveCardProps {
   save: SaveFile;

@@ -1,12 +1,12 @@
 import { createSignal, Show, createEffect } from 'solid-js';
 import { Upload, Loader2, X, Info, FileArchive } from 'lucide-solid';
-import { addToast } from '../store/toastStore';
-import { supabase } from '../lib/supabase';
+import { addToast } from '../../store/toastStore';
+import { supabase } from '../../lib/supabase';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
-import { Modal } from './Modal';
-import { SaveFile } from '../types/database';
+import { Modal } from '../Modal';
+import { SaveFile } from '../../types/database';
 import { isSafeFile } from './UploadSaveModal';
 
 interface EditSaveModalProps {
