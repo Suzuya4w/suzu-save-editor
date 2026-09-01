@@ -3,6 +3,7 @@ import { createSignal, onMount, onCleanup, For, Show, createEffect } from 'solid
 import { Search, Download, Upload, X, Cloud, Clock, HardDrive, Gamepad2, FileCheck2, Loader2, LogOut, Flag, BadgeCheck, ShieldAlert, Eye, EyeOff, CheckSquare, Square, Trash2, Shield, LayoutList, ShieldCheck, Copy, Info, Database } from 'lucide-solid';
 import { useToastStore, addToast } from '../../store/toastStore';
 import { useAuthStore, signOut, setCustomSession } from '../../store/authStore';
+import { useSettingsStore } from '../../store/settingsStore';
 import { supabase } from '../../lib/supabase';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
@@ -114,6 +115,28 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [adminReportsModal, setAdminReportsModal] = createSignal<{saveId: string, title: string, reports: any[]} | null>(null);
   const [isLoadingReports, setIsLoadingReports] = createSignal(false);
 
+  const settingsState = useSettingsStore();
+  const [pinnedSavesData, setPinnedSavesData] = createSignal<SaveFile[]>([]);
+  const [isFetchingPinned, setIsFetchingPinned] = createSignal(false);
+
+  createEffect(() => {
+    if (props.isOpen && settingsState.pinnedCloudSaves.length > 0) {
+      setIsFetchingPinned(true);
+      // Fetch only the pinned saves from Supabase
+      supabase.from('save_files').select('*').in('id', settingsState.pinnedCloudSaves)
+        .then(({ data, error }) => {
+          if (!error && data) {
+            // Sort to match the order of pins
+            const sorted = data.sort((a, b) => settingsState.pinnedCloudSaves.indexOf(a.id) - settingsState.pinnedCloudSaves.indexOf(b.id));
+            setPinnedSavesData(sorted as any);
+          }
+          setIsFetchingPinned(false);
+        });
+    } else {
+      setPinnedSavesData([]);
+    }
+  });
+
   const toggleDisclaimer = () => setShowNSFWDisclaimer(!showNSFWDisclaimer());
   const handleCloseDisclaimer = () => { localStorage.setItem('hide_nsfw_disclaimer', 'true'); setShowNSFWDisclaimer(false); };
 
@@ -140,7 +163,10 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       
       const q = overrideQuery !== undefined ? overrideQuery : searchQuery();
       if (q.trim()) {
-        query = query.or(`title.ilike.%${q.trim()}%,uploader.ilike.%${q.trim()}%`);
+        const words = q.trim().split(/\s+/);
+        for (const word of words) {
+          query = query.or(`title.ilike.%${word}%,uploader.ilike.%${word}%`);
+        }
       }
 
       if (engineFilter() !== 'all') {
@@ -852,6 +878,45 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
          <Search size={48} class="mb-4 opacity-50" />
          <p>NO SAVE FILES FOUND MATCHING YOUR QUERY</p>
         </div>
+       </Show>
+       
+       <Show when={pinnedSavesData().length > 0 && !loading()}>
+        <div class="mb-8">
+         <div class="flex items-center gap-3 mb-4 text-[#FF7A00] border-b border-[#FF7A00]/20 pb-2">
+           <span class="font-black text-xs tracking-[0.3em] uppercase">📌 PINNED SAVES</span>
+           <Show when={isFetchingPinned()}>
+             <Loader2 size={14} class="animate-spin opacity-50" />
+           </Show>
+         </div>
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+           <For each={pinnedSavesData()}>
+            {(save) => (
+              <SaveCard 
+                save={save}
+                isAdminMode={isAdminMode()}
+                isBulkSelectMode={isBulkSelectMode()}
+                selectedSaves={selectedSaves()}
+                showNSFW={showNSFW()}
+                onToggleSelection={toggleSaveSelection}
+                onClick={setSaveDetailsModal}
+                onAdminVerify={handleAdminVerify}
+                onAdminToggleVisibility={handleAdminToggleVisibility}
+                onViewReports={handleViewReports}
+                onAdminDelete={handleAdminDelete}
+                onReport={handleReport}
+                onEdit={(s) => setEditSaveModal(s)}
+                onDownload={handleDownload}
+              />
+            )}
+           </For>
+         </div>
+        </div>
+        
+        <Show when={saves().length > 0}>
+          <div class="flex items-center gap-3 mb-4 text-zinc-500 border-b border-zinc-800 pb-2">
+            <span class="font-black text-xs tracking-[0.3em] uppercase">ALL SAVES</span>
+          </div>
+        </Show>
        </Show>
        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
        <For each={saves()}>

@@ -50,6 +50,7 @@ interface EditorState {
   hasUsedRawMode: boolean;
   stardewActiveTab: string;
   isBackupManagerOpen: boolean;
+  pinnedPaths: Set<string>;
 }
 
 const setNestedValue = (obj: any, path: string, value: any) => {
@@ -147,6 +148,7 @@ export const [editorState, setEditorState] = createStore<EditorState>({
   isAiDiffModalOpen: false,
   hasUsedRawMode: false,
   stardewActiveTab: 'identity',
+  pinnedPaths: new Set<string>(),
 });
 
 export const useEditorStore = () => editorState;
@@ -190,6 +192,7 @@ export const loadSaveData = (data: StandardJson, path: string, profileRules: any
     state.past = [];
     state.future = [];
     state.stardewActiveTab = 'identity';
+    state.pinnedPaths = new Set<string>();
     
     if (data.parsed_variables?._is_binary_format === true || data.parsed_variables?.is_encrypted_binary === true) {
       state.editorMode = 'hex';
@@ -200,7 +203,7 @@ export const loadSaveData = (data: StandardJson, path: string, profileRules: any
     }
 
     if (state.editorMode === 'advanced') {
-      state.flattenedNodes = flattenJson(data.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+      state.flattenedNodes = flattenJson(data.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
     }
   }));
 
@@ -267,7 +270,7 @@ export const updateValue = (path: string, value: any) => setEditorState(produce(
 
   setNestedValue(state.saveData.parsed_variables, path, value);
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -292,7 +295,7 @@ export const updateParsedVariables = (newVariables: any) => setEditorState(produ
   });
   state.saveData.parsed_variables = newVariables;
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -322,7 +325,7 @@ export const deleteValue = (path: string) => setEditorState(produce((state) => {
   }
 
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -364,7 +367,7 @@ export const duplicateValue = (path: string) => setEditorState(produce((state) =
   }
 
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -428,7 +431,7 @@ export const addValue = (
   }
 
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -475,7 +478,7 @@ export const renameKey = (path: string, newKey: string) => setEditorState(produc
   }
   
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -500,7 +503,18 @@ export const toggleExpand = (path: string) => setEditorState(produce((state) => 
     }
   }
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
+  }
+}));
+
+export const togglePinPath = (path: string) => setEditorState(produce((state) => {
+  if (state.pinnedPaths.has(path)) {
+    state.pinnedPaths.delete(path);
+  } else {
+    state.pinnedPaths.add(path);
+  }
+  if (state.saveData) {
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -510,7 +524,7 @@ export const expandAll = (maxDepth: number = 3) => setEditorState(produce((state
   collectPaths(state.saveData.parsed_variables, '', 0, maxDepth, newPaths);
   state.expandedPaths = newPaths;
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -518,7 +532,7 @@ export const collapseAll = () => setEditorState(produce((state) => {
   if (!state.saveData) return;
   state.expandedPaths.clear();
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -527,7 +541,7 @@ export const setSearchQuery = (query: string) => setEditorState(produce((state) 
   state.searchQuery = query;
   state.collapsedSearchPaths.clear();
   if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -542,7 +556,7 @@ export const setEditorMode = (mode: 'easy' | 'advanced' | 'hex' | 'diff' | 'raw'
   }
 
   if ((mode === 'advanced' || mode === 'diff') && state.saveData?.parsed_variables) {
-    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+    state.flattenedNodes = flattenJson(state.saveData.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
   }
 }));
 
@@ -640,7 +654,7 @@ export const undo = () => setEditorState(produce((state) => {
     state.future.push(command);
     executeInverseCommand(state, command);
     if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-      state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+      state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
     }
   }
 }));
@@ -656,7 +670,7 @@ export const redo = () => setEditorState(produce((state) => {
       executeForwardCommand(state, command);
     }
     if (state.editorMode === 'advanced' || state.editorMode === 'diff') {
-      state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+      state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
     }
   }
 }));
@@ -672,7 +686,7 @@ export const undoToId = (id: string) => setEditorState(produce((state) => {
     state.future.push(cmd);
     executeInverseCommand(state, cmd);
   }
-  state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+  state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
 }));
 
 export const redoToId = (id: string) => setEditorState(produce((state) => {
@@ -689,7 +703,7 @@ export const redoToId = (id: string) => setEditorState(produce((state) => {
       executeForwardCommand(state, cmd);
     }
   }
-  state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths);
+  state.flattenedNodes = flattenJson(state.saveData!.parsed_variables, state.expandedPaths, state.searchQuery, state.collapsedSearchPaths, state.pinnedPaths);
 }));
 
 export const setPendingAiMutation = (payload: any) => setEditorState(produce((state) => {

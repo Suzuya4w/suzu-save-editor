@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createSignal, createEffect, For, Index, Show } from 'solid-js';
-import { useEditorStore, toggleExpand, updateValue, setSearchQuery, expandAll, collapseAll, addValue, duplicateValue, deleteValue, renameKey } from '../store/editorStore';
-import { Search, FolderOpen, FolderClosed, Copy, Plus, CopyPlus, Trash2, Code, Edit2, Check, X } from 'lucide-solid';
+import { useEditorStore, toggleExpand, updateValue, setSearchQuery, expandAll, collapseAll, addValue, duplicateValue, deleteValue, renameKey, togglePinPath } from '../store/editorStore';
+import { Search, FolderOpen, FolderClosed, Copy, Plus, CopyPlus, Trash2, Code, Edit2, Check, X, Pin, PinOff } from 'lucide-solid';
 import { addToast } from '../store/toastStore';
 import { ViewJsonModal } from './ViewJsonModal';
 import { Modal } from './Modal';
@@ -196,83 +196,95 @@ export const TreeView = () => {
                         }}
                         class="flex items-start py-4 md:py-8 gap-4 md:gap-10 border-b border-zinc-800 hover:bg-[#FF7A00]/5 transition-colors pr-4 md:pr-16 group relative"
                       >
-                        {/* Expander Icon */}
-                        <div 
-                          class={`w-8 h-8 mt-6 flex items-center justify-center shrink-0 cursor-pointer text-zinc-400 hover:text-[#FF7A00] transition-transform ${node().isExpanded ? 'rotate-90' : ''}`}
-                          onClick={() => node().hasChildren && toggleExpand(node().path)}
-                        >
-                          {node().hasChildren ? '▶' : '•'}
-                        </div>
-
-                        {/* Key Name & Dictionary Badge */}
-                        <Show when={renamingPath() === node().path} fallback={
+                        <Show when={node().path === '__pinned_header__'} fallback={
                           <>
-                            {/* Key Name & Dictionary Badge */}
-                            <Tooltip text={node().key} position="bottom" align="left">
-                              <div class="font-brains text-sm text-[#FF7A00] shrink-0 font-bold flex flex-col items-start max-w-[250px]">
-                                <span class="truncate w-full"><HighlightText text={node().key} query={editorState.searchQuery} /></span>
-                                {/* Displays Item Name Badge from 'keys' Array */}
-                                <Show when={node().pairedLabel}>
-                                  <Tooltip text={node().pairedLabel} position="bottom" align="left">
-                                    <span class="text-[10px] mt-2 font-desc bg-[#FF7A00]/10 text-[#FF7A00] px-6 py-2 rounded-sm border border-[#FF7A00]/30 truncate w-full inline-block max-w-[250px]">
-                                      🔑 <HighlightText text={node().pairedLabel!} query={editorState.searchQuery} />
-                                    </span>
-                                  </Tooltip>
-                                </Show>
-                              </div>
-                            </Tooltip>
-
-                            {/* Value Area */}
-                            <div class="flex-1 flex items-center min-w-0">
-                              {node().hasChildren ? (
-                                <span class="text-zinc-400 italic text-xs mt-4 font-desc">{String(node().value)}</span>
-                              ) : node().type === 'boolean' ? (
-                                <button 
-                                  onClick={() => handleToggleBoolean(node().path, node().value)}
-                                  class={`px-8 py-2 mt-2 rounded-none text-[10px] uppercase font-bold tracking-widest transition-colors border ${node().value ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500 hover:bg-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500 hover:bg-red-500/30'}`}
-                                >
-                                  {node().value ? 'TRUE' : 'FALSE'}
-                                </button>
-                              ) : node().type === 'number' ? (
-                                <input 
-                                  type="number"
-                                  value={localValues()[node().path] !== undefined ? localValues()[node().path] : node().value}
-                                  onInput={(e) => handleInputChange(node().path, e.target.value)}
-                                  onBlur={() => handleInputBlur(node().path, node().type)}
-                                  class="w-full bg-zinc-950 border-2 border-zinc-800 focus:border-[#FF7A00] text-[#FF7A00] px-4 py-2 outline-none transition-all font-brains text-sm mt-2 shadow-inner"
-                                />
-                              ) : node().type === 'string' ? (
-                                (typeof node().value === 'string' && node().value.length > 200 && (node().key.toLowerCase().includes('base64') || node().value.startsWith('/9j/') || node().value.startsWith('iVBORw0'))) ? (
-                                  <div class="text-[12px] leading-[16px] text-zinc-500 font-desc italic bg-black/50 px-12 py-6 rounded-sm border border-zinc-800 mt-2 select-none flex items-center gap-8">
-                                    <span>🖼️</span> [Base64 Image Data - Editing Disabled for UI Performance]
-                                  </div>
-                                ) : (
-                                  <textarea 
-                                    value={localValues()[node().path] !== undefined ? localValues()[node().path] : node().value}
-                                    onInput={(e) => {
-                                      handleInputChange(node().path, e.target.value);
-                                      e.target.style.height = 'auto';
-                                      e.target.style.height = `${e.target.scrollHeight}px`;
-                                      virtualizer.measure();
-                                    }}
-                                    onBlur={() => handleInputBlur(node().path, node().type)}
-                                    class="w-full min-h-[40px] max-h-[200px] overflow-y-auto custom-scrollbar whitespace-pre-wrap break-all resize-y bg-zinc-950 border-2 border-zinc-800 focus:border-[#00F0FF] text-[#00F0FF] px-4 py-2 outline-none transition-all font-brains text-sm mt-2 shadow-inner"
-                                  />
-                                )
-                              ) : (
-                                <span class="text-zinc-500 font-brains text-sm mt-4"><HighlightText text={String(node().value)} query={editorState.searchQuery} /></span>
-                              )}
+                            {/* Expander Icon */}
+                            <div 
+                              class={`w-8 h-8 mt-6 flex items-center justify-center shrink-0 cursor-pointer text-zinc-400 hover:text-[#FF7A00] transition-transform ${node().isExpanded ? 'rotate-90' : ''}`}
+                              onClick={() => node().hasChildren && toggleExpand(node().path)}
+                            >
+                              {node().hasChildren ? '▶' : '•'}
                             </div>
-                            
-                            {/* Hover Actions */}
-                            <div class="static mt-4 md:mt-0 md:absolute right-4 top-1/2 md:-translate-y-1/2 flex flex-wrap items-center gap-3 md:gap-2 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity bg-black/90 px-4 md:px-3 py-3 md:py-2 border border-zinc-700 shadow-[4px_4px_0px_#FF7A00]">
-                              <Tooltip text="Copy Path" position="bottom">
-                                <button 
-                                  onClick={() => { navigator.clipboard.writeText(node().path); addToast("Path copied to clipboard", "success"); }} 
-                                  class="p-3 md:p-2 cursor-pointer hover:text-[#00F0FF] text-zinc-500 transition-colors"
-                                >
-                                  <Copy class="w-[24px] h-[24px] md:w-[16px] md:h-[16px]" />
-                                </button>
+
+                            {/* Key Name & Dictionary Badge */}
+                            <Show when={renamingPath() === node().path} fallback={
+                              <>
+                                {/* Key Name & Dictionary Badge */}
+                                <Tooltip text={node().key} position="bottom" align="left">
+                                  <div class="font-brains text-sm text-[#FF7A00] shrink-0 font-bold flex flex-col items-start max-w-[250px]">
+                                    <span class="truncate w-full"><HighlightText text={node().key} query={editorState.searchQuery} /></span>
+                                    {/* Displays Item Name Badge from 'keys' Array */}
+                                    <Show when={node().pairedLabel}>
+                                      <Tooltip text={node().pairedLabel} position="bottom" align="left">
+                                        <span class="text-[10px] mt-2 font-desc bg-[#FF7A00]/10 text-[#FF7A00] px-6 py-2 rounded-sm border border-[#FF7A00]/30 truncate w-full inline-block max-w-[250px]">
+                                          🔑 <HighlightText text={node().pairedLabel!} query={editorState.searchQuery} />
+                                        </span>
+                                      </Tooltip>
+                                    </Show>
+                                  </div>
+                                </Tooltip>
+
+                                {/* Value Area */}
+                                <div class="flex-1 flex items-center min-w-0">
+                                  {node().hasChildren ? (
+                                    <span class="text-zinc-400 italic text-xs mt-4 font-desc">{String(node().value)}</span>
+                                  ) : node().type === 'boolean' ? (
+                                    <button 
+                                      onClick={() => handleToggleBoolean(node().path, node().value)}
+                                      class={`px-8 py-2 mt-2 rounded-none text-[10px] uppercase font-bold tracking-widest transition-colors border ${node().value ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500 hover:bg-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500 hover:bg-red-500/30'}`}
+                                    >
+                                      {node().value ? 'TRUE' : 'FALSE'}
+                                    </button>
+                                  ) : node().type === 'number' ? (
+                                    <input 
+                                      type="number"
+                                      value={localValues()[node().path] !== undefined ? localValues()[node().path] : node().value}
+                                      onInput={(e) => handleInputChange(node().path, e.target.value)}
+                                      onBlur={() => handleInputBlur(node().path, node().type)}
+                                      class="w-full bg-zinc-950 border-2 border-zinc-800 focus:border-[#FF7A00] text-[#FF7A00] px-4 py-2 outline-none transition-all font-brains text-sm mt-2 shadow-inner"
+                                    />
+                                  ) : node().type === 'string' ? (
+                                    (typeof node().value === 'string' && node().value.length > 200 && (node().key.toLowerCase().includes('base64') || node().value.startsWith('/9j/') || node().value.startsWith('iVBORw0'))) ? (
+                                      <div class="text-[12px] leading-[16px] text-zinc-500 font-desc italic bg-black/50 px-12 py-6 rounded-sm border border-zinc-800 mt-2 select-none flex items-center gap-8">
+                                        <span>🖼️</span> [Base64 Image Data - Editing Disabled for UI Performance]
+                                      </div>
+                                    ) : (
+                                      <textarea 
+                                        value={localValues()[node().path] !== undefined ? localValues()[node().path] : node().value}
+                                        onInput={(e) => {
+                                          handleInputChange(node().path, e.target.value);
+                                          e.target.style.height = 'auto';
+                                          e.target.style.height = `${e.target.scrollHeight}px`;
+                                          virtualizer.measure();
+                                        }}
+                                        onBlur={() => handleInputBlur(node().path, node().type)}
+                                        class="w-full min-h-[40px] max-h-[200px] overflow-y-auto custom-scrollbar whitespace-pre-wrap break-all resize-y bg-zinc-950 border-2 border-zinc-800 focus:border-[#00F0FF] text-[#00F0FF] px-4 py-2 outline-none transition-all font-brains text-sm mt-2 shadow-inner"
+                                      />
+                                    )
+                                  ) : (
+                                    <span class="text-zinc-500 font-brains text-sm mt-4"><HighlightText text={String(node().value)} query={editorState.searchQuery} /></span>
+                                  )}
+                                </div>
+                                
+                                {/* Hover Actions */}
+                                <div class="static mt-4 md:mt-0 md:absolute right-4 top-1/2 md:-translate-y-1/2 flex flex-wrap items-center gap-3 md:gap-2 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity bg-black/90 px-4 md:px-3 py-3 md:py-2 border border-zinc-700 shadow-[4px_4px_0px_#FF7A00]">
+                                  <Tooltip text={editorState.pinnedPaths.has(node().path) ? "Unpin Variable" : "Pin Variable"} position="bottom">
+                                    <button 
+                                      onClick={() => togglePinPath(node().path)} 
+                                      class={`p-3 md:p-2 cursor-pointer transition-colors ${editorState.pinnedPaths.has(node().path) ? 'text-[#FF7A00] hover:text-red-500' : 'text-zinc-500 hover:text-[#FF7A00]'}`}
+                                    >
+                                      <Show when={editorState.pinnedPaths.has(node().path)} fallback={<Pin class="w-[24px] h-[24px] md:w-[16px] md:h-[16px]" />}>
+                                        <PinOff class="w-[24px] h-[24px] md:w-[16px] md:h-[16px]" />
+                                      </Show>
+                                    </button>
+                                  </Tooltip>
+                                  <Tooltip text="Copy Path" position="bottom">
+                                    <button 
+                                      onClick={() => { navigator.clipboard.writeText(node().path); addToast("Path copied to clipboard", "success"); }} 
+                                      class="p-3 md:p-2 cursor-pointer hover:text-[#00F0FF] text-zinc-500 transition-colors"
+                                    >
+                                      <Copy class="w-[24px] h-[24px] md:w-[16px] md:h-[16px]" />
+                                    </button>
                               </Tooltip>
                               <Tooltip text="Copy Value" position="bottom">
                                 <button 
@@ -361,7 +373,12 @@ export const TreeView = () => {
                             </div>
                           </div>
                         </Show>
-                        
+                          </>
+                        }>
+                          <div class="px-4 py-3 w-full bg-black border-y border-[#FF7A00]/50 flex items-center gap-2 text-[#FF7A00] font-black text-xs tracking-[0.3em] uppercase">
+                            <Pin class="w-4 h-4" /> {node().key}
+                          </div>
+                        </Show>
                       </div>
                     </div>
                   </Show>

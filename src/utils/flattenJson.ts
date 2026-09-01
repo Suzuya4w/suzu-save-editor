@@ -10,15 +10,31 @@ export interface FlattenedNode {
   isExpanded: boolean;
   isHidden: boolean;  // For search filtering
   pairedLabel?: string;
+  isPinned?: boolean;
+}
+
+function fuzzyMatch(text: string, query: string): boolean {
+  if (!query) return true;
+  let i = 0;
+  let j = 0;
+  while (i < text.length && j < query.length) {
+    if (text[i].toLowerCase() === query[j].toLowerCase()) {
+      j++;
+    }
+    i++;
+  }
+  return j === query.length;
 }
 
 export function flattenJson(
   json: any,
   expandedPaths: Set<string>,
   searchQuery: string = '',
-  collapsedSearchPaths: Set<string> = new Set()
+  collapsedSearchPaths: Set<string> = new Set(),
+  pinnedPaths: Set<string> = new Set()
 ): FlattenedNode[] {
   const result: FlattenedNode[] = [];
+  const pinnedResults: FlattenedNode[] = [];
   const lowerQuery = searchQuery.toLowerCase();
 
   // Helper to determine type
@@ -46,9 +62,9 @@ export function flattenJson(
     if (!searchQuery) {
       nodeMatches = true;
     } else {
-      if (currentKey.toLowerCase().includes(lowerQuery)) nodeMatches = true;
-      else if (pairedLabel && pairedLabel.toLowerCase().includes(lowerQuery)) nodeMatches = true;
-      else if (!hasChildren && String(currentVal).toLowerCase().includes(lowerQuery)) nodeMatches = true;
+      if (currentKey.toLowerCase().includes(lowerQuery) || fuzzyMatch(currentKey, lowerQuery)) nodeMatches = true;
+      else if (pairedLabel && (pairedLabel.toLowerCase().includes(lowerQuery) || fuzzyMatch(pairedLabel, lowerQuery))) nodeMatches = true;
+      else if (!hasChildren && (String(currentVal).toLowerCase().includes(lowerQuery) || fuzzyMatch(String(currentVal), lowerQuery))) nodeMatches = true;
     }
 
     const isExpanded = searchQuery !== '' 
@@ -60,7 +76,7 @@ export function flattenJson(
     const startIndex = result.length;
 
     if (shouldPushToResult) {
-      result.push({
+      const nodeObj = {
         path: currentPath,
         key: currentKey,
         value: hasChildren ? (type === 'array' ? `Array(${currentVal.length})` : 'Object') : currentVal,
@@ -69,8 +85,17 @@ export function flattenJson(
         hasChildren,
         isExpanded,
         isHidden: false,
-        pairedLabel, // Paired label injected here
-      });
+        pairedLabel,
+      };
+      result.push(nodeObj);
+      
+      if (pinnedPaths.has(currentPath)) {
+        pinnedResults.push({
+          ...nodeObj,
+          depth: 0,
+          isPinned: true
+        } as any);
+      }
     }
 
     let anyChildMatches = false;
@@ -121,6 +146,21 @@ export function flattenJson(
     for (const k of keys) {
       recurse(json[k], k, 0, k);
     }
+  }
+
+  if (pinnedResults.length > 0) {
+    const headerNode: FlattenedNode = {
+      path: '__pinned_header__',
+      key: '📌 PINNED VARIABLES',
+      value: '',
+      type: 'string',
+      depth: 0,
+      hasChildren: false,
+      isExpanded: false,
+      isHidden: false,
+      isPinned: true
+    };
+    return [headerNode, ...pinnedResults, ...result];
   }
 
   return result;

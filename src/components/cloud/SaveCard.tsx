@@ -1,8 +1,9 @@
 import { Show } from 'solid-js';
-import { Gamepad2, BadgeCheck, Eye, EyeOff, Flag, Trash2, Download, ShieldCheck, Loader2, ShieldAlert, CheckSquare, Square, HardDrive, Clock, Edit3 } from 'lucide-solid';
+import { Gamepad2, BadgeCheck, Eye, EyeOff, Flag, Trash2, Download, ShieldCheck, Loader2, ShieldAlert, CheckSquare, Square, HardDrive, Clock, Edit3, Pin, PinOff } from 'lucide-solid';
 import { formatBytes, Tooltip } from './CloudDatabaseBrowser';
 import { SaveFile } from '../../types/database';
 import { useAuthStore } from '../../store/authStore';
+import { useSettingsStore, togglePinnedCloudSave } from '../../store/settingsStore';
 
 interface SaveCardProps {
   save: SaveFile;
@@ -63,6 +64,13 @@ export function SaveCard(props: SaveCardProps) {
           </div>
         </div>
         <div class="flex gap-4">
+        <Tooltip text={useSettingsStore().pinnedCloudSaves.includes(save().id) ? "Unpin Save" : "Pin Save"}>
+          <button onClick={(e) => { e.stopPropagation(); togglePinnedCloudSave(save().id); }} class={`p-2 transition-colors border-2 cursor-pointer inline-flex ${useSettingsStore().pinnedCloudSaves.includes(save().id) ? 'bg-[#FF7A00] text-black border-[#FF7A00]' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:bg-[#FF7A00]/20 hover:text-[#FF7A00] hover:border-[#FF7A00]'}`}>
+            <Show when={useSettingsStore().pinnedCloudSaves.includes(save().id)} fallback={<Pin size={18} strokeWidth={2.5} />}>
+              <PinOff size={18} strokeWidth={2.5} />
+            </Show>
+          </button>
+        </Tooltip>
         <Show when={props.isAdminMode && !props.isBulkSelectMode}>
           <Tooltip text={save().is_verified ? "Unverify" : "Verify Save"}>
           <button onClick={(e) => { e.stopPropagation(); props.onAdminVerify(save().id, save().is_verified); }} class={`p-2 transition-colors border-2 cursor-pointer inline-flex ${save().is_verified ? 'bg-green-900 text-green-400 border-green-700' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:bg-green-500 hover:text-white hover:border-green-400'}`}>
