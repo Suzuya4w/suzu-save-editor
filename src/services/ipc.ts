@@ -110,8 +110,58 @@ export async function writeSaveFile(modifiedData: StandardJson, path: string, ac
  */
 export async function loadGameDatabase(folderPath: string): Promise<Record<string, Record<number, string>>> {
   try {
-    const result = await invoke<Record<string, Record<number, string>>>('load_game_database', { folderPath });
-    return result;
+    const { readTextFile } = await import('@tauri-apps/plugin-fs');
+    const { join } = await import('@tauri-apps/api/path');
+
+    const parseItemsArray = async (filename: string) => {
+      try {
+        const p = await join(folderPath, filename);
+        const txt = await readTextFile(p);
+        const arr = JSON.parse(txt);
+        const map: Record<number, string> = {};
+        if (Array.isArray(arr)) {
+          arr.forEach(i => {
+            if (i && i.id !== undefined && i.name) map[i.id] = i.name;
+          });
+        }
+        return map;
+      } catch { return {}; }
+    };
+
+    const parseSystem = async () => {
+      try {
+        const p = await join(folderPath, 'System.json');
+        const txt = await readTextFile(p);
+        const obj = JSON.parse(txt);
+        const sMap: Record<number, string> = {};
+        const vMap: Record<number, string> = {};
+        if (obj.switches && Array.isArray(obj.switches)) {
+          obj.switches.forEach((n: string, i: number) => { if (n) sMap[i] = n; });
+        }
+        if (obj.variables && Array.isArray(obj.variables)) {
+          obj.variables.forEach((n: string, i: number) => { if (n) vMap[i] = n; });
+        }
+        return { switches: sMap, variables: vMap };
+      } catch { return { switches: {}, variables: {} }; }
+    };
+
+    const finalDb: Record<string, Record<number, string>> = {};
+    const items = await parseItemsArray('Items.json');
+    const weapons = await parseItemsArray('Weapons.json');
+    const armors = await parseItemsArray('Armors.json');
+    const actors = await parseItemsArray('Actors.json');
+    const skills = await parseItemsArray('Skills.json');
+    const sys = await parseSystem();
+
+    if (Object.keys(items).length) finalDb.items = items;
+    if (Object.keys(weapons).length) finalDb.weapons = weapons;
+    if (Object.keys(armors).length) finalDb.armors = armors;
+    if (Object.keys(actors).length) finalDb.actors = actors;
+    if (Object.keys(skills).length) finalDb.skills = skills;
+    if (Object.keys(sys.switches).length) finalDb.switches = sys.switches;
+    if (Object.keys(sys.variables).length) finalDb.variables = sys.variables;
+
+    return finalDb;
   } catch (error) {
     console.error("Failed to load game database:", error);
     throw new Error(typeof error === 'string' ? error : JSON.stringify(error));

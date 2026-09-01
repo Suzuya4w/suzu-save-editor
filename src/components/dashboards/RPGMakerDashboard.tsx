@@ -10,6 +10,7 @@ import { VariablesView } from './VariablesView';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { fetch } from '@tauri-apps/plugin-http';
+import { loadGameDatabase } from '../../services/ipc';
 
 export const RPGMakerDashboard = () => {
   const store = useEditorStore();
@@ -134,7 +135,7 @@ const [translationProgress, setTranslationProgress] = createSignal("");
       if (selectedDir) {
         setIsLoadingDB(true);
 
-        const dbResult: any = await invoke('load_game_database', { folderPath: selectedDir });
+        const dbResult = await loadGameDatabase(selectedDir);
 
         if (dbResult.items) { setGameDatabase('items', dbResult.items); setOriginalGameDatabase('items', dbResult.items); }
         if (dbResult.weapons) { setGameDatabase('weapons', dbResult.weapons); setOriginalGameDatabase('weapons', dbResult.weapons); }
