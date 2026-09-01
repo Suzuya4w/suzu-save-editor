@@ -136,9 +136,12 @@ export function McpInfoModal(props: McpInfoModalProps) {
               <div class="bg-zinc-900/50 p-3 border border-zinc-800 rounded">
                 <strong class="text-[#FF7A00] block mb-1">Universal JSON Tools</strong>
                 <ul class="list-disc list-inside space-y-1 mt-2 text-zinc-400">
+                  <li><code class="text-xs text-zinc-300 font-desc">get_editor_state</code>: Returns loaded file path, engine type, and unsaved changes status.</li>
+                  <li><code class="text-xs text-zinc-300 font-desc">save_file_to_disk</code>: Saves the currently modified file to your local disk.</li>
                   <li><code class="text-xs text-zinc-300 font-desc">get_save_skeleton</code>: Maps the structure of the JSON save file.</li>
                   <li><code class="text-xs text-zinc-300 font-desc">search_json_path</code>: Recursively searches the save JSON for a specific keyword.</li>
                   <li><code class="text-xs text-zinc-300 font-desc">read_value_at_path</code> / <code class="text-xs text-zinc-300 font-desc">set_value_at_path</code>: Read or edit specific JSON values.</li>
+                  <li><code class="text-xs text-zinc-300 font-desc">apply_bulk_json_updates</code>: Modify multiple values simultaneously in a single request.</li>
                   <li><code class="text-xs text-zinc-300 font-desc">add_json_item</code> / <code class="text-xs text-zinc-300 font-desc">delete_json_key</code>: Safely push items to arrays or delete keys from objects.</li>
                   <li><code class="text-xs text-zinc-300 font-desc">create_save_backup</code> / <code class="text-xs text-zinc-300 font-desc">restore_save_backup</code>: Create a backup of the current save file and restore it if modifications fail.</li>
                 </ul>
@@ -149,7 +152,7 @@ export function McpInfoModal(props: McpInfoModalProps) {
                 <ul class="list-disc list-inside space-y-1 mt-2 text-zinc-400">
                   <li><code class="text-xs text-zinc-300 font-desc">search_hex_pattern</code>: Scans the hex file for a wildcard byte pattern (e.g. 'FF ?? A1 00') and returns matching offsets (Ultra-fast Rust implementation).</li>
                   <li><code class="text-xs text-zinc-300 font-desc">read_hex_segment</code> / <code class="text-xs text-zinc-300 font-desc">write_hex_segment</code>: Reads/writes raw bytes at specific offsets.</li>
-                  <li><code class="text-xs text-zinc-300 font-desc">convert_data_type</code>: Safely convert decimal to Little/Big Endian hex.</li>
+                  <li><code class="text-xs text-zinc-300 font-desc">convert_data_type</code>: Safely convert decimal to Little/Big Endian hex (Supports Integer and Float 32/64-bit).</li>
                   <li><code class="text-xs text-zinc-300 font-desc">get_active_diff_results</code>: Fetches byte differences if you are comparing two save files.</li>
                 </ul>
               </div>

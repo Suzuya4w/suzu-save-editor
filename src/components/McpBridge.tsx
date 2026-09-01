@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, Event } from '@tauri-apps/api/event';
 import { useHexStore, setRawPayload } from '../store/hexStore';
 import { updateValue, editorState } from '../store/editorStore';
+import { writeSaveFile } from '../services/ipc';
 
 interface McpRequest {
   uuid: string;
@@ -76,6 +77,16 @@ export const McpBridge = (props: { activeTab: string }) => {
 
   const getUniversalTools = (): ToolDefinition[] => [
     {
+      name: "get_editor_state",
+      description: "Gets the current state of the editor, including loaded file path, engine type, and whether there are unsaved changes.",
+      inputSchema: { type: "object", properties: {} }
+    },
+    {
+      name: "save_file_to_disk",
+      description: "Saves the currently loaded file and all its modifications to disk.",
+      inputSchema: { type: "object", properties: {} }
+    },
+    {
       name: "get_save_skeleton",
       description: "Gets the top-level keys and their types of the parsed JSON save data. Optionally drill down into nested objects by providing a path.",
       inputSchema: {
@@ -114,6 +125,27 @@ export const McpBridge = (props: { activeTab: string }) => {
           value: { description: "The new value to set." }
         },
         required: ["path", "value"]
+      }
+    },
+    {
+      name: "apply_bulk_json_updates",
+      description: "Applies multiple value updates to the JSON save file in a single operation. Useful for modifying many variables at once.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          updates: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                path: { type: "string" },
+                value: { description: "The new value" }
+              },
+              required: ["path", "value"]
+            }
+          }
+        },
+        required: ["updates"]
       }
     },
     {
@@ -258,7 +290,7 @@ export const McpBridge = (props: { activeTab: string }) => {
         type: "object",
         properties: {
           value: { type: "number", description: "The decimal value to convert" },
-          target_endianness: { type: "string", enum: ["i32_le", "i16_le", "u32_le"], description: "The target type" }
+          target_endianness: { type: "string", enum: ["i32_le", "i16_le", "u32_le", "f32_le", "f64_le"], description: "The target type" }
         },
         required: ["value", "target_endianness"]
       }
@@ -315,6 +347,22 @@ export const McpBridge = (props: { activeTab: string }) => {
       try {
         if (action === "get_tools_list") {
           responseData = getDynamicToolsList();
+        }
+        else if (action === "get_editor_state") {
+          responseData = {
+            filePath: editorState.filePath || null,
+            activeEngine: activeEngine(),
+            hasUnsavedChanges: editorState.past.length > 0
+          };
+        }
+        else if (action === "save_file_to_disk") {
+          if (!editorState.filePath || !editorState.saveData) {
+            responseData = { error: "No file is currently loaded to save" };
+          } else {
+            await writeSaveFile(editorState.filePath, editorState.saveData);
+            // It will rely on a generic reload or toast on the frontend maybe, or just return success
+            responseData = { success: true, message: "File successfully saved to disk" };
+          }
         } 
         else if (action === "get_save_skeleton") {
           const rootObj = editorState.saveData?.parsed_variables;
@@ -426,11 +474,25 @@ export const McpBridge = (props: { activeTab: string }) => {
         }
         else if (action === "convert_data_type") {
           let hex = "";
+          const buf = new ArrayBuffer(8);
+          const view = new DataView(buf);
+          let bytesCount = 4;
+          
           if (args.target_endianness === "i32_le") {
-            const buf = new ArrayBuffer(4);
-            new DataView(buf).setInt32(0, args.value, true);
-            hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            view.setInt32(0, args.value, true);
+          } else if (args.target_endianness === "i16_le") {
+            view.setInt16(0, args.value, true);
+            bytesCount = 2;
+          } else if (args.target_endianness === "u32_le") {
+            view.setUint32(0, args.value, true);
+          } else if (args.target_endianness === "f32_le") {
+            view.setFloat32(0, args.value, true);
+          } else if (args.target_endianness === "f64_le") {
+            view.setFloat64(0, args.value, true);
+            bytesCount = 8;
           }
+          
+          hex = Array.from(new Uint8Array(buf).slice(0, bytesCount)).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
           responseData = { hex };
         }
         else if (action === "get_active_diff_results") {
@@ -452,6 +514,23 @@ export const McpBridge = (props: { activeTab: string }) => {
               hint_for_ai: startOffset + limit < allDiffs.length ? "Terlalu banyak diff. Minta user mempersempit aksi di dalam game, atau gunakan parameter 'start_offset' untuk bergeser ke halaman berikutnya." : "",
               diffs: diffsSlice
             };
+          }
+        }
+        else if (action === "apply_bulk_json_updates") {
+          const rootObj = editorState.saveData?.parsed_variables;
+          if (!rootObj) {
+            responseData = { error: "No JSON save file loaded" };
+          } else {
+            const results: any[] = [];
+            for (const update of args.updates) {
+              try {
+                updateValue(normalizePath(update.path), update.value);
+                results.push({ path: update.path, success: true });
+              } catch (e: any) {
+                results.push({ path: update.path, error: e.message || String(e) });
+              }
+            }
+            responseData = { success: true, results };
           }
         }
         else if (action === "add_json_item") {
