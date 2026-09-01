@@ -28,73 +28,7 @@ export const formatBytes = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const fetchGameSuggestions = async (val: string) => {
-  const results: any[] = [];
 
-  try {
-    const vndbRes = await tauriFetch('https://api.vndb.org/kana/vn', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filters: ["search", "=", val],
-        fields: "title, titles.title, titles.lang, image.url, image.sexual, image.violence",
-        results: 4
-      })
-    });
-    if (vndbRes.ok) {
-      const vndbData = await vndbRes.json();
-      vndbData.results?.forEach((r: any) => {
-        let displayTitle = r.title;
-        const enTitle = r.titles?.find((t: any) => t.lang === 'en');
-        if (enTitle && enTitle.title.toLowerCase() !== r.title.toLowerCase()) {
-          displayTitle = `${r.title} / ${enTitle.title}`;
-        }
-        results.push({
-          title: displayTitle,
-          source: 'VNDB',
-          cover_url: r.image?.url || '',
-          is_nsfw: r.image && (r.image.sexual >= 1 || r.image.violence >= 1)
-        });
-      });
-    }
-  } catch (err) {}
-
-  try {
-    const bgmRes = await tauriFetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(val)}?type=4&responseGroup=small`);
-    if (bgmRes.ok) {
-      const bgmData = await bgmRes.json();
-      bgmData.list?.slice(0, 4).forEach((r: any) => {
-        let displayTitle = r.name;
-        if (r.name_cn && r.name_cn.toLowerCase() !== r.name.toLowerCase()) {
-          displayTitle = `${r.name} / ${r.name_cn}`;
-        }
-        results.push({
-          title: displayTitle,
-          source: 'Bangumi',
-          cover_url: r.images?.common || '',
-          is_nsfw: false
-        });
-      });
-    }
-  } catch (err) {}
-
-  try {
-    const steamRes = await tauriFetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(val)}&l=english&cc=US`);
-    if (steamRes.ok) {
-      const steamData = await steamRes.json();
-      steamData.items?.slice(0, 4).forEach((r: any) => {
-        results.push({
-          title: r.name,
-          source: 'Steam',
-          cover_url: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${r.id}/header.jpg`,
-          is_nsfw: false
-        });
-      });
-    }
-  } catch (err) {}
-
-  return results.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
-};
 
 export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
@@ -572,11 +506,16 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
       setDownloadProgress(1);
       setIsUploading(true);
+      let successCount = 0;
+      let failedCount = 0;
       try {
         for (let i = 0; i < selectedSaves().length; i++) {
           const id = selectedSaves()[i];
           const saveFile = saves().find(s => s.id === id);
-          if (!saveFile?.file_url) continue;
+          if (!saveFile?.file_url) {
+            failedCount++;
+            continue;
+          }
 
           setDownloadStatus(`Downloading ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
           const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${id.substring(0, 8)}`;
@@ -586,7 +525,10 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
           const tempZipPath = await join(folderPath as string, `temp_bulk_${id}.zip`);
         
           const response = await fetch(saveFile.file_url, { method: 'GET' });
-          if (!response.ok) continue;
+          if (!response.ok) {
+            failedCount++;
+            continue;
+          }
 
           const contentLength = +(response.headers.get('Content-Length') || 0);
           let receivedLength = 0;
@@ -624,11 +566,19 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
           try {
             await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
+            successCount++;
+          } catch (e) {
+            failedCount++;
           } finally {
             try { await remove(tempZipPath); } catch(e) {}
           }
         }
-        addToast(`Bulk download complete!`, 'success');
+        
+        if (failedCount > 0) {
+          addToast(`Downloaded ${successCount}/${selectedSaves().length} files (${failedCount} failed)`, 'warning');
+        } else {
+          addToast(`Successfully downloaded all ${successCount} files!`, 'success');
+        }
         setSelectedSaves([]); setIsBulkSelectMode(false);
       } catch (e: any) { 
         addToast(`Error: ${e.message}`, 'error'); 
