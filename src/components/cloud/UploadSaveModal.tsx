@@ -99,6 +99,7 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
   const [showSuggestions, setShowSuggestions] = createSignal(false);
   const [isSearchingGames, setIsSearchingGames] = createSignal(false);
   const [isNsfwLocked, setIsNsfwLocked] = createSignal(false);
+  const [isCustomEngine, setIsCustomEngine] = createSignal(false);
   let searchTimeout: any;
 
   const handleTitleInput = (e: any) => {
@@ -137,6 +138,8 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
           const detected = await invoke<string>('detect_engine_from_zip', { zipPath: paths[0] });
           if (detected && detected !== 'Unknown') {
             setDetectedEngine(detected);
+            const stdEngines = ["RPG Maker MV/MZ", "RPG Maker VX Ace", "Ren'Py", "KiriKiri", "WOLF RPG Editor", "TyranoBuilder", "Unity"];
+            setIsCustomEngine(!stdEngines.includes(detected));
             setUploadForm(prev => ({ ...prev, game_engine: detected }));
             addToast(`Engine auto-detected: ${detected}`, 'info');
           }
@@ -153,6 +156,8 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
         }
         if (detected !== 'Unknown') {
           setDetectedEngine(detected);
+          const stdEngines = ["RPG Maker MV/MZ", "RPG Maker VX Ace", "Ren'Py", "KiriKiri", "WOLF RPG Editor", "TyranoBuilder", "Unity"];
+          setIsCustomEngine(!stdEngines.includes(detected));
           setUploadForm(prev => ({ ...prev, game_engine: detected }));
           addToast(`Engine auto-detected: ${detected}`, 'info');
         }
@@ -307,16 +312,33 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
        <div class="flex gap-4">
         <div class="flex flex-col gap-1 flex-1 relative">
          <label class="text-xs font-bold text-white tracking-widest uppercase">Game Engine / Format (Optional)</label>
-         <input type="text" list="engine-options" maxLength={50} value={uploadForm().game_engine} onInput={(e) => setUploadForm({...uploadForm(), game_engine: e.currentTarget.value})} class="w-full bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold placeholder:text-zinc-700" placeholder="e.g. Ren'Py, RPG Maker, Unity" />
-         <datalist id="engine-options">
-           <option value="RPG Maker MV/MZ" />
-           <option value="RPG Maker VX Ace" />
-           <option value="Ren'Py" />
-           <option value="KiriKiri" />
-           <option value="WOLF RPG Editor" />
-           <option value="TyranoBuilder" />
-           <option value="Unity" />
-         </datalist>
+         <select
+          value={isCustomEngine() ? 'Other' : uploadForm().game_engine}
+          onChange={(e) => {
+           const val = e.currentTarget.value;
+           if (val === 'Other') {
+            setIsCustomEngine(true);
+            setUploadForm({...uploadForm(), game_engine: ''});
+           } else {
+            setIsCustomEngine(false);
+            setUploadForm({...uploadForm(), game_engine: val});
+           }
+          }}
+          class="w-full bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold cursor-pointer"
+         >
+           <option value="">Select Engine...</option>
+           <option value="RPG Maker MV/MZ">RPG Maker MV/MZ</option>
+           <option value="RPG Maker VX Ace">RPG Maker VX Ace</option>
+           <option value="Ren'Py">Ren'Py</option>
+           <option value="KiriKiri">KiriKiri</option>
+           <option value="WOLF RPG Editor">WOLF RPG Editor</option>
+           <option value="TyranoBuilder">TyranoBuilder</option>
+           <option value="Unity">Unity</option>
+           <option value="Other">Unknown / Other</option>
+         </select>
+         <Show when={isCustomEngine()}>
+          <input type="text" maxLength={50} value={uploadForm().game_engine} onInput={(e) => setUploadForm({...uploadForm(), game_engine: e.currentTarget.value})} class="w-full mt-2 bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold placeholder:text-zinc-700" placeholder="Type custom engine name..." />
+         </Show>
          <Show when={detectedEngine() && uploadForm().game_engine === detectedEngine()}>
           <span class="text-[9px] text-[#FF7A00] font-black tracking-widest uppercase mt-1 absolute -bottom-4">System Detected</span>
          </Show>

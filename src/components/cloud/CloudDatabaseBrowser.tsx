@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { createSignal, onMount, onCleanup, For, Show, createEffect } from 'solid-js';
+import { debounce } from '@solid-primitives/scheduled';
+import { createVirtualizer } from '@tanstack/solid-virtual';
 import { Search, Download, Upload, X, Cloud, Clock, HardDrive, Gamepad2, FileCheck2, Loader2, LogOut, Flag, BadgeCheck, ShieldAlert, Eye, EyeOff, CheckSquare, Square, Trash2, Shield, LayoutList, ShieldCheck, Copy, Info, Database } from 'lucide-solid';
 import { useToastStore, addToast } from '../../store/toastStore';
 import { useAuthStore, signOut, setCustomSession } from '../../store/authStore';
@@ -23,6 +25,8 @@ import { CloudReportModal } from './CloudReportModal';
 import { AdminReportsModal } from './AdminReportsModal';
 import { SaveCard } from './SaveCard';
 import { SaveFile } from '../../types/database';
+import { useCloudDownloader } from './useCloudDownloader';
+
 
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return '0 Bytes';
@@ -33,6 +37,15 @@ export const formatBytes = (bytes: number) => {
 };
 
 
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), ms);
+    promise
+      .then(value => { clearTimeout(timer); resolve(value); })
+      .catch(reason => { clearTimeout(timer); reject(reason); });
+  });
+};
 
 export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
@@ -56,6 +69,27 @@ export function Tooltip(props: { text: string, position?: 'top' | 'bottom', alig
   );
 }
 
+function VirtualSaveCard(props: any) {
+  const [isVisible, setIsVisible] = createSignal(false);
+  let ref: HTMLDivElement | undefined;
+  
+  onMount(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { rootMargin: '600px' }); // Render a bit ahead of scrolling
+    if (ref) observer.observe(ref);
+    onCleanup(() => { if (ref) observer.unobserve(ref); });
+  });
+
+  return (
+    <div ref={ref} class="min-h-[350px]">
+      <Show when={isVisible()}>
+        <SaveCard {...props} />
+      </Show>
+    </div>
+  );
+}
+
 export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => void }) {
   const [shouldRender, setShouldRender] = createSignal(props.isOpen);
   const [isVisible, setIsVisible] = createSignal(props.isOpen);
@@ -66,13 +100,15 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
   const [saves, setSaves] = createSignal<SaveFile[]>([]);
   const [loading, setLoading] = createSignal(true);
+  const [hasError, setHasError] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal('');
   
   const [page, setPage] = createSignal(0);
   const [hasMore, setHasMore] = createSignal(true);
   const [isFetchingMore, setIsFetchingMore] = createSignal(false);
-  let searchTimeout: any;
   const ITEMS_PER_PAGE = 30;
+
+  const debouncedFetch = debounce((query: string) => fetchSaves(false, query), 500);
 
   const authState = useAuthStore();
 
@@ -103,10 +139,6 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     isOpen: false, title: '', message: '', onConfirm: () => {}, kind: 'info'
   });
 
-  const [isUploading, setIsUploading] = createSignal(false);
-  const [downloadProgress, setDownloadProgress] = createSignal(0);
-  const [downloadStatus, setDownloadStatus] = createSignal('');
-  const [bulkDownloadQueue, setBulkDownloadQueue] = createSignal<any[]>([]);
   
   const [reportTarget, setReportTarget] = createSignal<{id: string, title: string} | null>(null);
   const [reportForm, setReportForm] = createSignal({ reason: 'Outdated Version', description: '' });
@@ -150,11 +182,28 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     setConfirmModal(prev => ({ ...prev, isOpen: false }));
   };
 
+  const {
+    isUploading,
+    downloadProgress,
+    downloadStatus,
+    bulkDownloadQueue,
+    handleDownload,
+    handleBulkDownload
+  } = useCloudDownloader({
+    requestConfirm,
+    closeConfirm,
+    saves,
+    selectedSaves,
+    setSelectedSaves,
+    setIsBulkSelectMode
+  });
+
   const fetchSaves = async (loadMore = false, overrideQuery?: string) => {
     if (loadMore) {
       setIsFetchingMore(true);
     } else {
       setLoading(true);
+      setHasError(false);
       setPage(0);
       setHasMore(true);
     }
@@ -165,13 +214,14 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       if (q.trim()) {
         const words = q.trim().split(/\s+/);
         for (const word of words) {
-          query = query.or(`title.ilike.%${word}%,uploader.ilike.%${word}%`);
+          query = query.or(`title.ilike.%${word}%,uploader.ilike.%${word}%,game_engine.ilike.%${word}%`);
         }
       }
 
       if (engineFilter() !== 'all') {
         if (engineFilter() === 'unknown') {
-          query = query.is('game_engine', null).is('detected_engine', null);
+          const std = '("RPG Maker MV/MZ","RPG Maker VX Ace","Ren\'Py","KiriKiri","WOLF RPG Editor","TyranoBuilder","Unity")';
+          query = query.not('game_engine', 'in', std);
         } else {
           // Check if either user string matches or system string matches
           query = query.or(`game_engine.ilike.%${engineFilter()}%,detected_engine.ilike.%${engineFilter()}%`);
@@ -190,7 +240,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       const from = currentPage * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
       
-      const { data, error } = await query.range(from, to);
+      const { data, error } = await withTimeout(query.range(from, to), 10000);
       if (error) throw error;
       
       if (data) {
@@ -209,6 +259,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       }
     } catch (e: any) {
       addToast('Network error or connection failed', 'error');
+      setHasError(true);
       if (!loadMore) setSaves([]);
     } finally {
       setLoading(false);
@@ -235,7 +286,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
 
   const fetchConfig = async () => {
     try {
-      const { data, error } = await supabase.from('app_config').select('*').eq('id', 'global').single();
+      const { data, error } = await withTimeout(supabase.from('app_config').select('*').eq('id', 'global').single(), 3000);
       if (data) {
         setIsMaintenance(data.is_maintenance);
         setMaintenanceMsg(data.maintenance_message || 'Server is currently undergoing maintenance.');
@@ -363,105 +414,6 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     }
   };
 
-  const handleDownload = (url: string, saveTitle: string) => {
-    requestConfirm('Download & Extract', `Download and extract "${saveTitle}" to your local folder?`, 'danger', async () => {
-      closeConfirm(false);
-      try {
-        const extractDir = await openDialog({ directory: true, title: 'Select folder to extract the save to' });
-        if (!extractDir) return;
-
-        setDownloadStatus('Connecting...');
-        setDownloadProgress(1); // Show modal
-        setIsUploading(true);
-
-        const response = await fetch(url, { method: 'GET' });
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        
-        const contentLength = +(response.headers.get('Content-Length') || 0);
-        let receivedLength = 0;
-        
-        const tempZipName = `temp_${Date.now()}.zip`;
-        const tempZipPath = await join(extractDir as string, tempZipName);
-        
-        if (response.body) {
-          const reader = response.body.getReader();
-          const chunks = [];
-          
-          while(true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            receivedLength += value.length;
-            if (contentLength > 0) {
-              setDownloadProgress((receivedLength / contentLength) * 100);
-              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)} / ${formatBytes(contentLength)}`);
-            } else {
-              setDownloadProgress(50);
-              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)}`);
-            }
-          }
-          
-          const buffer = new Uint8Array(receivedLength);
-          let position = 0;
-          for(let chunk of chunks) {
-            buffer.set(chunk, position);
-            position += chunk.length;
-          }
-          await writeFile(tempZipPath, buffer);
-        } else {
-          const buffer = await response.arrayBuffer();
-          await writeFile(tempZipPath, new Uint8Array(buffer));
-        }
-
-        setDownloadStatus('Checking for file collisions...');
-        const collisions = await invoke<string[]>('check_zip_collisions', { zipPath: tempZipPath, destDir: extractDir as string });
-        
-        if (collisions.length > 0) {
-          setDownloadProgress(0); // Hide progress bar for a moment
-          setIsUploading(false);
-          const proceed = await new Promise<boolean>(resolve => {
-            const collisionText = collisions.slice(0,5).join('\n') + (collisions.length > 5 ? `\n...and ${collisions.length - 5} more` : '');
-            requestConfirm(
-              'FILES WILL BE OVERWRITTEN', 
-              `The following files already exist in the destination:\n\n${collisionText}\n\nDo you want to BACKUP the existing files before overwriting?`, 
-              'warning', 
-              async () => {
-                closeConfirm(false);
-                setDownloadProgress(99);
-                setDownloadStatus('Backing up existing files...');
-                setIsUploading(true);
-                await invoke('backup_colliding_files', { destDir: extractDir as string, files: collisions });
-                resolve(true);
-              },
-              () => {
-                resolve(false);
-              }
-            );
-          });
-          
-          if (!proceed) {
-            await remove(tempZipPath);
-            return;
-          }
-        }
-
-        setDownloadProgress(100);
-        setDownloadStatus('Extracting save data...');
-        setIsUploading(true);
-        try {
-          await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
-          addToast('Save extracted successfully!', 'success');
-        } finally {
-          try { await remove(tempZipPath); } catch(e) {}
-        }
-      } catch (e: any) {
-        addToast(`Failed: ${e.message}`, 'error');
-      } finally {
-        setDownloadProgress(0);
-        setIsUploading(false);
-      }
-    });
-  };
 
   const toggleSaveSelection = (saveId: string) => setSelectedSaves(prev => prev.includes(saveId) ? prev.filter(id => id !== saveId) : [...prev, saveId]);
 
@@ -544,119 +496,6 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     });
   };
 
-  const handleBulkDownload = async () => {
-    if (selectedSaves().length === 0) return;
-    requestConfirm('Bulk Download', `Download ${selectedSaves().length} files?`, 'danger', async () => {
-      closeConfirm(false);
-      const folderPath = await openDialog({ directory: true });
-      if (!folderPath) return;
-
-      setDownloadProgress(1);
-      setIsUploading(true);
-      let successCount = 0;
-      let failedCount = 0;
-
-      const initialQueue = selectedSaves().map(id => ({
-        id,
-        title: saves().find(s => s.id === id)?.title || 'Unknown',
-        status: 'pending',
-        progress: 0
-      }));
-      setBulkDownloadQueue(initialQueue);
-
-      const updateItem = (id: string, status: string, progress: number) => {
-        setBulkDownloadQueue(prev => prev.map(item => item.id === id ? { ...item, status, progress } : item));
-      };
-
-      try {
-        for (let i = 0; i < selectedSaves().length; i++) {
-          const id = selectedSaves()[i];
-          const saveFile = saves().find(s => s.id === id);
-          if (!saveFile?.file_url) {
-            updateItem(id, 'error', 0);
-            failedCount++;
-            continue;
-          }
-
-          updateItem(id, 'downloading', 0);
-          setDownloadStatus(`Downloading ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
-          const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${id.substring(0, 8)}`;
-          const subDir = await join(folderPath as string, safeTitle);
-          try { await mkdir(subDir, { recursive: true }); } catch(e) {}
-          
-          const tempZipPath = await join(folderPath as string, `temp_bulk_${id}.zip`);
-        
-          const response = await fetch(saveFile.file_url, { method: 'GET' });
-          if (!response.ok) {
-            updateItem(id, 'error', 0);
-            failedCount++;
-            continue;
-          }
-
-          const contentLength = +(response.headers.get('Content-Length') || 0);
-          let receivedLength = 0;
-
-          if (response.body) {
-            const reader = response.body.getReader();
-            const chunks = [];
-            while(true) {
-              const {done, value} = await reader.read();
-              if (done) break;
-              chunks.push(value);
-              receivedLength += value.length;
-              if (contentLength > 0) {
-                const prog = (receivedLength / contentLength) * 100;
-                setDownloadProgress(prog);
-                updateItem(id, 'downloading', prog);
-              }
-            }
-            const buffer = new Uint8Array(receivedLength);
-            let position = 0;
-            for(let chunk of chunks) {
-              buffer.set(chunk, position);
-              position += chunk.length;
-            }
-            await writeFile(tempZipPath, buffer);
-          } else {
-            const buffer = await response.arrayBuffer();
-            await writeFile(tempZipPath, new Uint8Array(buffer));
-          }
-
-          updateItem(id, 'extracting', 100);
-          setDownloadStatus(`Extracting ${i + 1}/${selectedSaves().length}: ${saveFile.title}`);
-          const collisions = await invoke<string[]>('check_zip_collisions', { zipPath: tempZipPath, destDir: subDir });
-          if (collisions.length > 0) {
-            setDownloadStatus(`Backing up ${collisions.length} existing files...`);
-            await invoke('backup_colliding_files', { destDir: subDir, files: collisions });
-          }
-
-          try {
-            await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: subDir });
-            updateItem(id, 'done', 100);
-            successCount++;
-          } catch (e) {
-            updateItem(id, 'error', 0);
-            failedCount++;
-          } finally {
-            try { await remove(tempZipPath); } catch(e) {}
-          }
-        }
-        
-        if (failedCount > 0) {
-          addToast(`Downloaded ${successCount}/${selectedSaves().length} files (${failedCount} failed)`, 'warning');
-        } else {
-          addToast(`Successfully downloaded all ${successCount} files!`, 'success');
-        }
-        setSelectedSaves([]); setIsBulkSelectMode(false);
-      } catch (e: any) { 
-        addToast(`Error: ${e.message}`, 'error'); 
-      } finally { 
-        setIsUploading(false); 
-        setDownloadProgress(0);
-        setTimeout(() => setBulkDownloadQueue([]), 2000); // Clear after 2 seconds
-      }
-    });
-  };
 
   const handleBulkDelete = () => {
     if (selectedSaves().length === 0) return;
@@ -760,8 +599,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
          value={searchQuery()}
          onInput={(e) => {
            setSearchQuery(e.currentTarget.value);
-           clearTimeout(searchTimeout);
-           searchTimeout = setTimeout(() => fetchSaves(false, e.currentTarget.value), 500);
+           debouncedFetch(e.currentTarget.value);
          }}
         />
        </div>
@@ -872,13 +710,22 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
      </Show>
     
      <Show when={!loading()}>
-      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
-       <Show when={saves().length === 0 && !loading()}>
-        <div class="col-span-full min-h-[400px] flex flex-col items-center justify-center text-zinc-600 font-bold uppercase tracking-widest self-center">
-         <Search size={48} class="mb-4 opacity-50" />
-         <p>NO SAVE FILES FOUND MATCHING YOUR QUERY</p>
-        </div>
-       </Show>
+       <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <Show when={hasError()}>
+         <div class="col-span-full min-h-[400px] flex flex-col items-center justify-center text-red-500 font-bold uppercase tracking-widest self-center">
+          <ShieldAlert size={48} class="mb-4" />
+          <p class="mb-6">Failed to load data from the server.</p>
+          <button onClick={() => fetchSaves()} class="px-6 py-3 bg-red-500 hover:bg-red-600 text-black font-black tracking-widest uppercase transition-colors cursor-pointer border-2 border-red-900">
+           TRY AGAIN
+          </button>
+         </div>
+        </Show>
+        <Show when={!hasError() && saves().length === 0 && !loading()}>
+         <div class="col-span-full min-h-[400px] flex flex-col items-center justify-center text-zinc-600 font-bold uppercase tracking-widest self-center">
+          <Search size={48} class="mb-4 opacity-50" />
+          <p>NO SAVE FILES FOUND MATCHING YOUR QUERY</p>
+         </div>
+        </Show>
        
        <Show when={pinnedSavesData().length > 0 && !loading()}>
         <div class="mb-8">
@@ -891,7 +738,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
            <For each={pinnedSavesData()}>
             {(save) => (
-              <SaveCard 
+              <VirtualSaveCard 
                 save={save}
                 isAdminMode={isAdminMode()}
                 isBulkSelectMode={isBulkSelectMode()}
@@ -904,7 +751,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
                 onViewReports={handleViewReports}
                 onAdminDelete={handleAdminDelete}
                 onReport={handleReport}
-                onEdit={(s) => setEditSaveModal(s)}
+                onEdit={(s: any) => setEditSaveModal(s)}
                 onDownload={handleDownload}
               />
             )}
@@ -921,7 +768,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
        <For each={saves()}>
         {(save) => (
-          <SaveCard 
+          <VirtualSaveCard 
             save={save}
             isAdminMode={isAdminMode()}
             isBulkSelectMode={isBulkSelectMode()}
@@ -934,7 +781,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
             onViewReports={handleViewReports}
             onAdminDelete={handleAdminDelete}
             onReport={handleReport}
-            onEdit={(s) => setEditSaveModal(s)}
+            onEdit={(s: any) => setEditSaveModal(s)}
             onDownload={handleDownload}
           />
         )}

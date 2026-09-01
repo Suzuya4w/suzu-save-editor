@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useEditorStore, closeFile, setIsHelpModalOpen, undo, redo, setIsHistoryModalOpen, setEditorMode } from '../store/editorStore';
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show, For } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { Save, X, Unlock, HelpCircle, Image as ImageIcon, AlertTriangle, Eye, EyeOff, Undo2, Redo2, History, Layout, Terminal, Bot, Settings, DatabaseBackup } from 'lucide-solid';
 import { CoverMetadataModal } from './CoverMetadataModal';
@@ -13,6 +13,37 @@ import { Modal } from './Modal';
 import { CyberHoldButton } from './CyberHoldButton';
 import { McpInfoModal } from './McpInfoModal';
 import { setEditorState } from '../store/editorStore';
+import { SplitSquareHorizontal } from 'lucide-solid';
+
+interface DiffResult {
+    path: string;
+    oldVal: any;
+    newVal: any;
+}
+
+function getJsonDiff(obj1: any, obj2: any, path = ""): DiffResult[] {
+    let diffs: DiffResult[] = [];
+    if (obj1 === obj2) return diffs;
+
+    if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
+        diffs.push({ path, oldVal: obj1, newVal: obj2 });
+        return diffs;
+    }
+
+    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+    for (const key of keys) {
+        const val1 = obj1[key];
+        const val2 = obj2[key];
+        const newPath = path ? `${path}.${key}` : key;
+        
+        if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
+            diffs = diffs.concat(getJsonDiff(val1, val2, newPath));
+        } else if (val1 !== val2) {
+            diffs.push({ path: newPath, oldVal: val1, newVal: val2 });
+        }
+    }
+    return diffs;
+}
 
 export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
@@ -87,6 +118,60 @@ export function Header() {
  const [isSaving, setIsSaving] = createSignal(false);
  const [holdProgress, setHoldProgress] = createSignal<number | undefined>(undefined);
  const [isMcpModalOpen, setIsMcpModalOpen] = createSignal(false);
+
+ const [diffModalOpen, setDiffModalOpen] = createSignal(false);
+ const [diffResults, setDiffResults] = createSignal<DiffResult[]>([]);
+ const [diffTargetName, setDiffTargetName] = createSignal('');
+ const [isDiffing, setIsDiffing] = createSignal(false);
+
+ const handleHeaderCompare = async () => {
+    if (!editorState.saveData || !editorState.filePath) {
+        addToast("No active save file to compare.", "warning");
+        return;
+    }
+
+    const isBinary = Object.keys(editorState.saveData.parsed_variables || {}).length === 0 && editorState.saveData.raw_payload;
+    if (isBinary) {
+        addToast("This is a binary/raw file. Please use the Hex Diff tool inside the Hex Viewer instead.", "warning");
+        return;
+    }
+
+    try {
+        const { open } = await import('@tauri-apps/plugin-dialog');
+        const selected = await open({
+            multiple: false,
+            title: "Select File to Compare With"
+        });
+        
+        if (selected && typeof selected === 'string') {
+            setIsDiffing(true);
+            addToast("Analyzing differences...", "info");
+            
+            const targetData = await invoke<any>('open_save_file', { 
+                path: selected,
+                activeProfileRules: null
+            });
+
+            const targetVars = targetData?.parsed_variables || {};
+            const currentVars = editorState.saveData.parsed_variables || {};
+
+            const diffs = getJsonDiff(targetVars, currentVars);
+            
+            setDiffResults(diffs);
+            setDiffTargetName(selected.split(/[/\\]/).pop() || 'Selected File');
+            setDiffModalOpen(true);
+            
+            if (diffs.length === 0) {
+                addToast("No differences found between the selected file and current file.", "info");
+            }
+        }
+    } catch (err: any) {
+        console.error(err);
+        addToast(`Failed to compare file: ${err.message || String(err)}`, "error");
+    } finally {
+        setIsDiffing(false);
+    }
+ };
 
  const toggleMcp = async () => {
    try {
@@ -295,6 +380,18 @@ export function Header() {
        class="p-3 md:p-2 bg-transparent border border-purple-500/50 text-purple-400 hover:text-purple-500 hover:border-purple-500 transition-colors cursor-pointer"
       >
        <History class="w-[18px] h-[18px] md:w-[14px] md:h-[14px]" />
+      </button>
+    </Tooltip>
+    
+    <div class="w-[1px] h-6 bg-zinc-800 mx-2"></div>
+    
+    <Tooltip text="Compare With Other File (Semantic Diff)">
+      <button
+       onClick={handleHeaderCompare}
+       disabled={isDiffing()}
+       class={`p-3 md:p-2 bg-transparent border border-cyan-500/50 text-cyan-400 hover:text-cyan-500 hover:border-cyan-500 transition-colors cursor-pointer ${isDiffing() ? 'opacity-50' : ''}`}
+      >
+       <SplitSquareHorizontal class="w-[18px] h-[18px] md:w-[14px] md:h-[14px]" />
       </button>
     </Tooltip>
     
@@ -572,6 +669,51 @@ export function Header() {
      </div>
     </div>
   </Modal>
+   {/* Diff Modal */}
+   <Modal isOpen={diffModalOpen()} onClose={() => setDiffModalOpen(false)} title="SEMANTIC VISUAL DIFF" icon={<SplitSquareHorizontal size={18} />}>
+        <div class="flex flex-col gap-4 font-mono max-h-[70vh] overflow-hidden">
+            <div class="p-3 bg-zinc-900/50 border border-zinc-800 text-xs text-zinc-300">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="flex-1">
+                        <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Target File (Before)</div>
+                        <div class="font-bold text-red-400">{diffTargetName()}</div>
+                    </div>
+                    <div class="text-zinc-600"><SplitSquareHorizontal size={16} /></div>
+                    <div class="flex-1 text-right">
+                        <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Current (After)</div>
+                        <div class="font-bold text-green-400">Active Editor</div>
+                    </div>
+                </div>
+                <div class="text-center pt-2 border-t border-zinc-800/50 text-[10px] uppercase font-bold tracking-widest">
+                    Found {diffResults().length} difference(s)
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar border border-zinc-800 bg-black">
+                <For each={diffResults()}>
+                    {(diff) => (
+                        <div class="flex flex-col font-brains p-2 border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
+                            <div class="text-[10px] text-zinc-500 mb-1 truncate" title={diff.path}>{diff.path}</div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <div class="flex-1 bg-red-500/10 text-red-400 p-1 rounded-sm border border-red-500/20 truncate" title={String(diff.oldVal)}>
+                                    <del>{String(diff.oldVal)}</del>
+                                </div>
+                                <div class="text-zinc-600">➔</div>
+                                <div class="flex-1 bg-green-500/10 text-green-400 p-1 rounded-sm border border-green-500/20 truncate" title={String(diff.newVal)}>
+                                    {String(diff.newVal)}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </For>
+                <Show when={diffResults().length === 0}>
+                    <div class="p-8 text-center text-zinc-500 font-desc text-sm">
+                        No semantic differences found.
+                    </div>
+                </Show>
+            </div>
+        </div>
+    </Modal>
   </>
  );
 }

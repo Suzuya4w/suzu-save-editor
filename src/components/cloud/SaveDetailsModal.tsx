@@ -31,8 +31,13 @@ export function SaveDetailsModal(props: {
     >
      <div class="-m-6 flex flex-col h-full bg-[#0a0a0a]">
       <div class="flex items-center gap-4 p-4 border-b-4 border-zinc-800 bg-black">
-       <span class="text-xs text-[#FF7A00] font-bold tracking-widest uppercase bg-[#FF7A00]/10 px-2 py-1 border border-[#FF7A00]/30 rounded-sm">
+       <span class="flex items-center gap-2 text-xs text-[#FF7A00] font-bold tracking-widest uppercase bg-[#FF7A00]/10 px-2 py-1 border border-[#FF7A00]/30 rounded-sm">
         {(localSave()?.game_engine === 'Unknown' && localSave()?.detected_engine) ? `Unknown (System Guess: ${localSave()?.detected_engine})` : (localSave()?.game_engine || 'UNKNOWN ENGINE')}
+        <Show when={localSave()?.game_engine && localSave()?.game_engine !== 'Unknown' && localSave()?.detected_engine && localSave()?.game_engine !== localSave()?.detected_engine}>
+         <Tooltip text={`User typed ${localSave()?.game_engine}, but system detected ${localSave()?.detected_engine}`} position="bottom">
+          <ShieldAlert size={14} class="text-yellow-500" />
+         </Tooltip>
+        </Show>
        </span>
        <Show when={localSave()?.game_version}>
         <span class="text-xs text-zinc-400 font-bold tracking-widest uppercase border-l border-zinc-700 pl-4">

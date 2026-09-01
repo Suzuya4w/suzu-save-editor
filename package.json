@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@monaco-editor/loader": "^1.7.0",
+    "@solid-primitives/scheduled": "^1.5.3",
     "@supabase/supabase-js": "^2.106.1",
     "@tanstack/solid-virtual": "^3.13.28",
     "@tauri-apps/api": "^2",

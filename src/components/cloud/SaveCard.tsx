@@ -55,6 +55,11 @@ export function SaveCard(props: SaveCardProps) {
             {(save().game_engine === 'Unknown' && save().detected_engine) 
               ? `Unknown (System Guess: ${save().detected_engine})` 
               : (save().game_engine || 'UNKNOWN ENGINE')}
+            <Show when={save().game_engine && save().game_engine !== 'Unknown' && save().detected_engine && save().game_engine !== save().detected_engine}>
+              <Tooltip text={`User typed ${save().game_engine}, but system detected ${save().detected_engine}`}>
+                <ShieldAlert size={12} class="text-yellow-500 ml-1" />
+              </Tooltip>
+            </Show>
           </p>
           <Show when={save().game_version}>
             <p class="text-xs text-zinc-400 font-bold tracking-widest flex items-center gap-1 border-l-2 border-zinc-700 pl-3">

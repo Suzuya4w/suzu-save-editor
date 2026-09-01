@@ -2,10 +2,41 @@ import { createSignal, Show, For, createEffect } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { save } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
+import { join } from '@tauri-apps/api/path';
 import { Modal } from './Modal';
-import { DatabaseBackup, Trash2, RotateCcw, Clock, HardDrive, FileText, CheckCircle2, Search, Filter, Download, FolderOpen, Info } from 'lucide-solid';
+import { DatabaseBackup, Trash2, RotateCcw, Clock, HardDrive, FileText, CheckCircle2, Search, Filter, Download, FolderOpen, Info, SplitSquareHorizontal } from 'lucide-solid';
 import { addToast } from '../store/toastStore';
 import { useEditorStore, loadSaveData } from '../store/editorStore';
+
+interface DiffResult {
+    path: string;
+    oldVal: any;
+    newVal: any;
+}
+
+function getJsonDiff(obj1: any, obj2: any, path = ""): DiffResult[] {
+    let diffs: DiffResult[] = [];
+    if (obj1 === obj2) return diffs;
+
+    if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
+        diffs.push({ path, oldVal: obj1, newVal: obj2 });
+        return diffs;
+    }
+
+    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+    for (const key of keys) {
+        const val1 = obj1[key];
+        const val2 = obj2[key];
+        const newPath = path ? `${path}.${key}` : key;
+        
+        if (typeof val1 === "object" && val1 !== null && typeof val2 === "object" && val2 !== null) {
+            diffs = diffs.concat(getJsonDiff(val1, val2, newPath));
+        } else if (val1 !== val2) {
+            diffs.push({ path: newPath, oldVal: val1, newVal: val2 });
+        }
+    }
+    return diffs;
+}
 
 interface BackupMetadata {
     id: string;
@@ -29,6 +60,12 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
     // Backup Dir Info
     const [osType, setOsType] = createSignal<string>('unknown');
     const [backupDirPath, setBackupDirPath] = createSignal<string | null>(null);
+
+    // Diff States
+    const [diffModalOpen, setDiffModalOpen] = createSignal(false);
+    const [diffResults, setDiffResults] = createSignal<DiffResult[]>([]);
+    const [diffBackupName, setDiffBackupName] = createSignal('');
+    const [isDiffing, setIsDiffing] = createSignal(false);
 
     const filteredBackups = () => {
         return backups().filter(b => {
@@ -89,6 +126,46 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    };
+
+    const handleCompare = async (backup: BackupMetadata) => {
+        if (!store.saveData || !store.filePath) {
+            addToast("No active save file to compare.", "warning");
+            return;
+        }
+
+        const isBinary = Object.keys(store.saveData.parsed_variables || {}).length === 0 && store.saveData.raw_payload;
+        if (isBinary) {
+            addToast("This is a binary/raw file. Please use the Hex Diff tool inside the Hex Viewer instead.", "warning");
+            return;
+        }
+
+        setIsDiffing(true);
+        try {
+            const backupPath = await join(backupDirPath()!, backup.backup_filename);
+            const backupSaveData = await invoke<any>('open_save_file', { 
+                path: backupPath,
+                activeProfileRules: null
+            });
+
+            const backupVars = backupSaveData?.parsed_variables || {};
+            const currentVars = store.saveData.parsed_variables || {};
+
+            const diffs = getJsonDiff(backupVars, currentVars);
+            
+            setDiffResults(diffs);
+            setDiffBackupName(backup.timestamp);
+            setDiffModalOpen(true);
+            
+            if (diffs.length === 0) {
+                addToast("No differences found between the backup and current file.", "info");
+            }
+        } catch (err: any) {
+            console.error(err);
+            addToast(`Failed to compare backup: ${err.message || String(err)}`, "error");
+        } finally {
+            setIsDiffing(false);
+        }
     };
 
     const handleRestore = async (backup: BackupMetadata) => {
@@ -175,6 +252,7 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
     };
 
     return (
+        <>
         <Modal isOpen={props.isOpen} onClose={props.onClose} title="BACKUP MANAGER" icon={<DatabaseBackup size={18} />}>
             <div class="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2 font-mono pb-4">
                 <div class="flex justify-between items-center bg-zinc-900/50 p-2 border border-zinc-800">
@@ -283,6 +361,14 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
                                     </div>
                                     <div class="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                                             <button 
+                                                onClick={() => handleCompare(b)}
+                                                disabled={isDiffing()}
+                                                class={`p-2.5 md:p-2 flex cursor-pointer items-center justify-center bg-zinc-900 ${isDiffing() ? 'text-zinc-600' : 'text-zinc-400 hover:bg-[#00F0FF] hover:text-black'} transition-colors`}
+                                                title="Compare with Current"
+                                            >
+                                                <SplitSquareHorizontal size={18} />
+                                            </button>
+                                            <button 
                                                 onClick={() => handleRestore(b)}
                                                 class="p-2.5 md:p-2 flex cursor-pointer items-center justify-center bg-zinc-900 text-zinc-400 hover:bg-[#FF7A00] hover:text-black transition-colors"
                                                 title="Restore Backup"
@@ -318,5 +404,51 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
                 </div>
             </div>
         </Modal>
+        
+        <Modal isOpen={diffModalOpen()} onClose={() => setDiffModalOpen(false)} title="SEMANTIC VISUAL DIFF" icon={<SplitSquareHorizontal size={18} />}>
+            <div class="flex flex-col gap-4 font-mono max-h-[70vh] overflow-hidden">
+                <div class="p-3 bg-zinc-900/50 border border-zinc-800 text-xs text-zinc-300">
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="flex-1">
+                            <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Backup (Before)</div>
+                            <div class="font-bold text-red-400">{diffBackupName()}</div>
+                        </div>
+                        <div class="text-zinc-600"><SplitSquareHorizontal size={16} /></div>
+                        <div class="flex-1 text-right">
+                            <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">Current (After)</div>
+                            <div class="font-bold text-green-400">Active Editor</div>
+                        </div>
+                    </div>
+                    <div class="text-center pt-2 border-t border-zinc-800/50 text-[10px] uppercase font-bold tracking-widest">
+                        Found {diffResults().length} difference(s)
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto custom-scrollbar border border-zinc-800 bg-black">
+                    <For each={diffResults()}>
+                        {(diff) => (
+                            <div class="flex flex-col p-2 border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
+                                <div class="text-[10px] text-zinc-500 mb-1 truncate" title={diff.path}>{diff.path}</div>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <div class="flex-1 bg-red-500/10 text-red-400 p-1 rounded-sm border border-red-500/20 truncate" title={String(diff.oldVal)}>
+                                        <del>{String(diff.oldVal)}</del>
+                                    </div>
+                                    <div class="text-zinc-600">➔</div>
+                                    <div class="flex-1 bg-green-500/10 text-green-400 p-1 rounded-sm border border-green-500/20 truncate" title={String(diff.newVal)}>
+                                        {String(diff.newVal)}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </For>
+                    <Show when={diffResults().length === 0}>
+                        <div class="p-8 text-center text-zinc-500 font-desc text-sm">
+                            No semantic differences found.
+                        </div>
+                    </Show>
+                </div>
+            </div>
+        </Modal>
+        </>
     );
 }
