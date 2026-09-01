@@ -21,7 +21,7 @@
     "process:default",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://**" }, { "url": "http://**" }, { "url": "http://localhost:1420/*" }]
+      "allow": [{ "url": "https://**" }, { "url": "http://**" }, { "url": "http://*/**" }, { "url": "https://*/**" }, { "url": "http://*:*/**" }, { "url": "https://*:*/**" }, { "url": "http://localhost:1420/*" }]
     }
   ]
 }
