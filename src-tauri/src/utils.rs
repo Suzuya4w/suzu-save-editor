@@ -3,6 +3,42 @@ use std::io;
 use std::path::Path;
 use zip::ZipArchive;
 
+pub fn detect_engine_from_zip(zip_path: &Path) -> Result<String, String> {
+    let file = fs::File::open(zip_path).map_err(|e| e.to_string())?;
+    let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
+    
+    let mut has_rpgsave = false;
+    let mut has_rvdata2 = false;
+    let mut has_renpy_save = false;
+    let mut has_xp3 = false;
+    let mut has_wolf = false;
+    let mut has_tyrano = false;
+
+    for i in 0..archive.len() {
+        let file = match archive.by_index(i) {
+            Ok(f) => f,
+            Err(_) => continue,
+        };
+        let name = file.name().to_lowercase();
+        
+        if name.ends_with(".rpgsave") { has_rpgsave = true; }
+        if name.ends_with(".rvdata2") { has_rvdata2 = true; }
+        if name.ends_with(".save") || name.ends_with(".rpyc") { has_renpy_save = true; }
+        if name.ends_with(".xp3") || name.ends_with(".tjs") { has_xp3 = true; }
+        if name.ends_with(".wolf") || name.contains("data.wolf") { has_wolf = true; }
+        if name.contains("tyrano") { has_tyrano = true; }
+    }
+    
+    if has_rpgsave { return Ok("RPG Maker MV/MZ".to_string()); }
+    if has_rvdata2 { return Ok("RPG Maker VX Ace".to_string()); }
+    if has_renpy_save { return Ok("Ren'Py".to_string()); }
+    if has_xp3 { return Ok("KiriKiri".to_string()); }
+    if has_wolf { return Ok("WOLF RPG Editor".to_string()); }
+    if has_tyrano { return Ok("TyranoBuilder".to_string()); }
+    
+    Ok("Unknown".to_string())
+}
+
 pub fn check_zip_collisions(zip_path: &Path, dest_dir: &Path) -> Result<Vec<String>, String> {
     let file = fs::File::open(zip_path).map_err(|e| e.to_string())?;
     let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;

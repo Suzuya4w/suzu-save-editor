@@ -338,6 +338,11 @@ async fn extract_save_zip(zip_path: String, dest_dir: String) -> Result<(), Stri
 }
 
 #[tauri::command]
+async fn detect_engine_from_zip(zip_path: String) -> Result<String, String> {
+    crate::utils::detect_engine_from_zip(std::path::Path::new(&zip_path))
+}
+
+#[tauri::command]
 async fn check_zip_collisions(zip_path: String, dest_dir: String) -> Result<Vec<String>, String> {
     let zip_p = std::path::Path::new(&zip_path);
     let dest_p = std::path::Path::new(&dest_dir);
@@ -913,6 +918,7 @@ pub fn run() {
             crate::adb::adb_pull_file,
             crate::adb::adb_push_file,
             extract_save_zip,
+            detect_engine_from_zip,
             check_zip_collisions,
             backup_colliding_files,
             check_device_rooted,

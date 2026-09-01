@@ -1,4 +1,4 @@
-import { createSignal, onMount, For, Show, createEffect } from 'solid-js';
+import { createSignal, Show, For, createEffect } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { save } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';

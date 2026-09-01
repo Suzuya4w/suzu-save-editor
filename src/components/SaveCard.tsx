@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { Gamepad2, BadgeCheck, Eye, EyeOff, Flag, Trash2, Download, ShieldCheck, Loader2, ShieldAlert, CheckSquare, Square, HardDrive, Clock } from 'lucide-solid';
+import { Gamepad2, BadgeCheck, Eye, EyeOff, Flag, Trash2, Download, ShieldCheck, Loader2, ShieldAlert, CheckSquare, Square, HardDrive, Clock, Edit3 } from 'lucide-solid';
 import { formatBytes, Tooltip } from './CloudDatabaseBrowser';
 import { SaveFile } from '../types/database';
 import { useAuthStore } from '../store/authStore';
@@ -18,6 +18,7 @@ interface SaveCardProps {
   onViewReports: (id: string, title: string) => void;
   onAdminDelete: (id: string, fileUrl: string) => void;
   onReport: (id: string, title: string) => void;
+  onEdit: (save: SaveFile) => void;
   onDownload: (fileUrl: string, title: string) => void;
 }
 
@@ -49,7 +50,10 @@ export function SaveCard(props: SaveCardProps) {
           <h3 class="text-lg font-black text-white group-hover:text-[#FF7A00] transition-colors line-clamp-1 uppercase tracking-wider">{save().title}</h3>
           <div class="flex items-center gap-3 mt-2">
           <p class="text-xs text-[#FF7A00] font-bold tracking-widest flex items-center gap-1">
-            <Gamepad2 size={14} /> {save().game_engine || 'UNKNOWN ENGINE'}
+            <Gamepad2 size={14} /> 
+            {(save().game_engine === 'Unknown' && save().detected_engine) 
+              ? `Unknown (System Guess: ${save().detected_engine})` 
+              : (save().game_engine || 'UNKNOWN ENGINE')}
           </p>
           <Show when={save().game_version}>
             <p class="text-xs text-zinc-400 font-bold tracking-widest flex items-center gap-1 border-l-2 border-zinc-700 pl-3">
@@ -90,6 +94,13 @@ export function SaveCard(props: SaveCardProps) {
           <Tooltip text="Report">
           <button onClick={(e) => { e.stopPropagation(); props.onReport(save().id, save().title); }} class="opacity-0 group-hover:opacity-100 p-2 bg-zinc-900 text-zinc-500 hover:bg-red-500 hover:text-white transition-all duration-200 border-2 border-zinc-800 hover:border-red-600 cursor-pointer">
             <Flag size={18} strokeWidth={2.5} />
+          </button>
+          </Tooltip>
+        </Show>
+        <Show when={isOwner() && !props.isAdminMode && !props.isBulkSelectMode}>
+          <Tooltip text="Edit Save">
+          <button onClick={(e) => { e.stopPropagation(); props.onEdit(save()); }} class="p-2 bg-zinc-900 text-zinc-500 border-2 border-zinc-800 hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-colors cursor-pointer inline-flex">
+            <Edit3 size={18} strokeWidth={2.5} />
           </button>
           </Tooltip>
         </Show>

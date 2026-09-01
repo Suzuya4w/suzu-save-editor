@@ -16,6 +16,7 @@ import { type as osType } from '@tauri-apps/plugin-os';
 import { Modal } from './Modal';
 import { UploadSaveModal } from './UploadSaveModal';
 import { SaveDetailsModal } from './SaveDetailsModal';
+import { EditSaveModal } from './EditSaveModal';
 import { SaveCard } from './SaveCard';
 import { SaveFile } from '../types/database';
 
@@ -146,10 +147,12 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [isAdminMode, setIsAdminMode] = createSignal(false);
   const [filterMode, setFilterMode] = createSignal<'all' | 'my_uploads'>((localStorage.getItem('cloud_filterMode') as any) || 'all');
   const [sortOrder, setSortOrder] = createSignal<'newest' | 'oldest'>((localStorage.getItem('cloud_sortOrder') as any) || 'newest');
+  const [engineFilter, setEngineFilter] = createSignal<string>((localStorage.getItem('cloud_engineFilter') as any) || 'all');
   
   createEffect(() => localStorage.setItem('cloud_showNSFW', showNSFW().toString()));
   createEffect(() => localStorage.setItem('cloud_filterMode', filterMode()));
   createEffect(() => localStorage.setItem('cloud_sortOrder', sortOrder()));
+  createEffect(() => localStorage.setItem('cloud_engineFilter', engineFilter()));
 
   const [isBulkSelectMode, setIsBulkSelectMode] = createSignal(false);
   const [selectedSaves, setSelectedSaves] = createSignal<string[]>([]);
@@ -169,6 +172,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [reportTarget, setReportTarget] = createSignal<{id: string, title: string} | null>(null);
   const [reportForm, setReportForm] = createSignal({ reason: 'Outdated Version', description: '' });
   const [saveDetailsModal, setSaveDetailsModal] = createSignal<any | null>(null);
+  const [editSaveModal, setEditSaveModal] = createSignal<any | null>(null);
   const [adminReportsModal, setAdminReportsModal] = createSignal<{saveId: string, title: string, reports: any[]} | null>(null);
   const [isLoadingReports, setIsLoadingReports] = createSignal(false);
 
@@ -199,6 +203,15 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       const q = overrideQuery !== undefined ? overrideQuery : searchQuery();
       if (q.trim()) {
         query = query.ilike('title', `%${q.trim()}%`);
+      }
+
+      if (engineFilter() !== 'all') {
+        if (engineFilter() === 'unknown') {
+          query = query.is('game_engine', null).is('detected_engine', null);
+        } else {
+          // Check if either user string matches or system string matches
+          query = query.or(`game_engine.ilike.%${engineFilter()}%,detected_engine.ilike.%${engineFilter()}%`);
+        }
       }
 
       if (filterMode() === 'my_uploads' && authState.user?.id) {
@@ -741,6 +754,21 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
         <option value="newest">NEWEST FIRST</option>
         <option value="oldest">OLDEST FIRST</option>
        </select>
+       <select
+        value={engineFilter()}
+        onChange={(e) => { setEngineFilter(e.currentTarget.value); fetchSaves(); }}
+        class="bg-zinc-900 border-2 border-zinc-700 text-zinc-300 font-black uppercase tracking-widest text-[10px] p-2 outline-none cursor-pointer focus:border-[#FF7A00] hover:border-zinc-500 transition-colors"
+       >
+        <option value="all">ALL ENGINES</option>
+        <option value="RPG Maker MV/MZ">RPG MAKER MV/MZ</option>
+        <option value="RPG Maker VX Ace">RPG MAKER VX ACE</option>
+        <option value="Ren'Py">REN'PY</option>
+        <option value="KiriKiri">KIRIKIRI</option>
+        <option value="WOLF RPG Editor">WOLF RPG</option>
+        <option value="TyranoBuilder">TYRANOBUILDER</option>
+        <option value="Unity">UNITY</option>
+        <option value="unknown">UNKNOWN ENGINES</option>
+       </select>
       </div>
       <Tooltip text="SHOW/HIDE ADULT CONTENT">
       <button onClick={() => setShowNSFW(!showNSFW())} class={`shrink-0 px-4 py-3 mr-4 cursor-pointer transition-colors flex items-center justify-center border-2 font-black uppercase tracking-widest text-xs gap-2 ${showNSFW() ? 'bg-red-500 text-black border-black shadow-[4px_4px_0px_#ffffff]' : 'bg-zinc-950 text-white border-white hover:border-red-500 hover:text-red-500 shadow-[4px_4px_0px_#FF7A00] hover:shadow-[4px_4px_0px_red]'}`}>
@@ -848,6 +876,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
             onViewReports={handleViewReports}
             onAdminDelete={handleAdminDelete}
             onReport={handleReport}
+            onEdit={(s) => setEditSaveModal(s)}
             onDownload={handleDownload}
           />
         )}
@@ -1103,8 +1132,18 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       onClose={() => setSaveDetailsModal(null)}
       showNSFW={showNSFW()}
       isAdminMode={isAdminMode()}
+      isOwner={authState.user?.id === saveDetailsModal()?.uploader_id}
       onReport={handleReport}
+      onEdit={(s) => setEditSaveModal(s)}
       onDownload={handleDownload}
+    />
+
+    <EditSaveModal
+      isOpen={!!editSaveModal()}
+      onClose={() => setEditSaveModal(null)}
+      saveData={editSaveModal()}
+      onUpdateComplete={() => fetchSaves(false)}
+      requestConfirm={requestConfirm}
     />
 
    </div>

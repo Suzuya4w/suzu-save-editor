@@ -3,6 +3,7 @@ export interface SaveFile {
   title: string;
   description: string;
   game_engine: string;
+  detected_engine?: string;
   game_version?: string;
   game_cover_url?: string;
   is_nsfw: boolean;

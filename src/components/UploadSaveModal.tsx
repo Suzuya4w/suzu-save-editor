@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
+import { invoke } from '@tauri-apps/api/core';
 import JSZip from 'jszip';
 import { Modal } from './Modal';
 
@@ -122,11 +123,40 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
     }, 600);
   };
 
+  const [detectedEngine, setDetectedEngine] = createSignal('');
+
   const handleFileSelect = async () => {
     const selected = await openDialog({ multiple: true });
     if (selected) {
       let paths = Array.isArray(selected) ? selected.map(p => typeof p === 'string' ? p : (p as any).path) : [typeof selected === 'string' ? selected : (selected as any).path];
       setUploadForm({ ...uploadForm(), file_paths: paths });
+      
+      setDetectedEngine('');
+      if (paths.length === 1 && paths[0].toLowerCase().endsWith('.zip')) {
+        try {
+          const detected = await invoke<string>('detect_engine_from_zip', { zipPath: paths[0] });
+          if (detected && detected !== 'Unknown') {
+            setDetectedEngine(detected);
+            setUploadForm(prev => ({ ...prev, game_engine: detected }));
+            addToast(`Engine auto-detected: ${detected}`, 'info');
+          }
+        } catch(e) {}
+      } else {
+        let detected = 'Unknown';
+        for (const p of paths) {
+          const lower = p.toLowerCase();
+          if (lower.endsWith('.rpgsave')) detected = 'RPG Maker MV/MZ';
+          else if (lower.endsWith('.rvdata2')) detected = 'RPG Maker VX Ace';
+          else if (lower.endsWith('.save') || lower.endsWith('.rpyc')) detected = "Ren'Py";
+          else if (lower.endsWith('.xp3') || lower.endsWith('.tjs')) detected = 'KiriKiri';
+          else if (lower.endsWith('.wolf')) detected = 'WOLF RPG Editor';
+        }
+        if (detected !== 'Unknown') {
+          setDetectedEngine(detected);
+          setUploadForm(prev => ({ ...prev, game_engine: detected }));
+          addToast(`Engine auto-detected: ${detected}`, 'info');
+        }
+      }
     }
   };
 
@@ -166,8 +196,9 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
       const { error: dbError } = await supabase.from('save_files').insert({
         title: uploadForm().title,
         description: uploadForm().description,
-        game_engine: uploadForm().game_engine,
-        game_version: uploadForm().game_version,
+        game_engine: uploadForm().game_engine || 'Unknown',
+        detected_engine: detectedEngine() || null,
+        game_version: uploadForm().game_version || null,
         file_size_bytes: finalFileBytes.length,
         file_url: publicUrl,
         uploader: authState.user?.user_metadata?.full_name || authState.user?.email || 'Anonymous',
@@ -274,9 +305,12 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
        </div>
 
        <div class="flex gap-4">
-        <div class="flex flex-col gap-1 flex-1">
+        <div class="flex flex-col gap-1 flex-1 relative">
          <label class="text-xs font-bold text-white tracking-widest uppercase">Game Engine / Format (Optional)</label>
          <input type="text" maxLength={50} value={uploadForm().game_engine} onInput={(e) => setUploadForm({...uploadForm(), game_engine: e.currentTarget.value})} class="w-full bg-black border-2 border-zinc-700 p-2 text-white focus:border-[#FF7A00] outline-none uppercase font-bold placeholder:text-zinc-700" placeholder="e.g. Ren'Py, RPG Maker, Unity" />
+         <Show when={detectedEngine() && uploadForm().game_engine === detectedEngine()}>
+          <span class="text-[9px] text-[#FF7A00] font-black tracking-widest uppercase mt-1 absolute -bottom-4">System Detected</span>
+         </Show>
         </div>
         <div class="flex flex-col gap-1 flex-1">
          <label class="text-xs font-bold text-white tracking-widest uppercase">Version (Optional)</label>

@@ -453,6 +453,8 @@ export const SUPPORTED_ENGINES = [
         <span class="text-zinc-800">|</span>
         <button onClick={() => setIsHelpModalOpen(true, 'data')} class="hover:text-[#FF7A00] hover:underline decoration-2 underline-offset-4 p-1 cursor-pointer uppercase">HELP & INFO</button>
         <span class="text-zinc-800">|</span>
+        <a href="https://github.com/Suzuya4w/suzu-save-editor/issues/new" target="_blank" rel="noopener noreferrer" class="hover:text-[#00F0FF] hover:underline decoration-2 underline-offset-4 p-1 cursor-pointer uppercase text-zinc-400">REQUEST FEATURE</a>
+        <span class="text-zinc-800">|</span>
         <button onClick={() => setIsSettingsOpen(true)} class="hover:text-[#FF7A00] hover:underline decoration-2 underline-offset-4 p-1 cursor-pointer uppercase">SETTINGS</button>
        </div>
        
