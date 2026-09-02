@@ -34,3 +34,6 @@ public/*.glb
 # Build / Cache
 .vite
 
+
+# Bundle Analyzer
+bundle-stats.html
