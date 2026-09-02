@@ -9,18 +9,19 @@ import { DedSecBackground } from "./components/DedSecBackground";
 import { ToastContainer } from "./components/Toast";
 import { HexViewer } from "./components/HexViewer";
 import { Modal } from "./components/Modal";
-import { RawJsonViewer } from "./components/RawJsonViewer";
+const RawJsonViewer = lazy(() => import('./components/RawJsonViewer').then(m => ({ default: m.RawJsonViewer })));
 import { Info, Settings, Database, Gamepad2, Monitor, MessageSquare, Heart, Loader2, Smartphone, Zap, Lock, RefreshCw, Wifi } from 'lucide-solid';
 import "./App.css";
-import { CloudDatabaseBrowser } from './components/cloud/CloudDatabaseBrowser';
-import { AndroidBrowserModal } from './components/AndroidBrowserModal';
-import { SettingsModal } from './components/SettingsModal';
-import { HelpModal } from "./components/HelpModal";
-import { AiDiffModal } from "./components/AiDiffModal";
-import { PlatformConverterModal } from "./components/PlatformConverterModal";
-import { SupportModal } from "./components/SupportModal";
-import { BackupManagerModal } from "./components/BackupManagerModal";
-import { LocalShareModal } from "./components/LocalShareModal";
+import { lazy, Suspense } from "solid-js";
+const CloudDatabaseBrowser = lazy(() => import('./components/cloud/CloudDatabaseBrowser').then(m => ({ default: m.CloudDatabaseBrowser })));
+const AndroidBrowserModal = lazy(() => import('./components/AndroidBrowserModal').then(m => ({ default: m.AndroidBrowserModal })));
+const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
+const HelpModal = lazy(() => import('./components/HelpModal').then(m => ({ default: m.HelpModal })));
+const AiDiffModal = lazy(() => import('./components/AiDiffModal').then(m => ({ default: m.AiDiffModal })));
+const PlatformConverterModal = lazy(() => import('./components/PlatformConverterModal').then(m => ({ default: m.PlatformConverterModal })));
+const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
+const BackupManagerModal = lazy(() => import('./components/BackupManagerModal').then(m => ({ default: m.BackupManagerModal })));
+const LocalShareModal = lazy(() => import('./components/LocalShareModal').then(m => ({ default: m.LocalShareModal })));
 import { useEditorStore, loadSaveData, setIsHelpModalOpen, setIsShareModalOpen } from "./store/editorStore";
 import { setIsSettingsOpen } from "./store/settingsStore";
 import { McpBridge } from "./components/McpBridge";
@@ -502,15 +503,19 @@ export const SUPPORTED_ENGINES = [
         style={{ display: store.editorMode === 'raw' ? 'block' : 'none' }} 
         class="absolute inset-0 z-10"
        >
-        <RawJsonViewer />
+        <Suspense fallback={<div class="flex items-center justify-center h-full text-zinc-500 font-bold"><Loader2 class="animate-spin mr-2" /> LOADING EDITOR...</div>}>
+         <RawJsonViewer />
+        </Suspense>
        </div>
      </div>
     </div>
    </Show>
 
-   <CloudDatabaseBrowser isOpen={isCloudBrowserOpen()} onClose={() => setIsCloudBrowserOpen(false)} />
-   <AndroidBrowserModal isOpen={isAndroidBrowserOpen()} onClose={() => setIsAndroidBrowserOpen(false)} />
-   <SettingsModal />
+   <Suspense fallback={<></>}>
+    <CloudDatabaseBrowser isOpen={isCloudBrowserOpen()} onClose={() => setIsCloudBrowserOpen(false)} />
+    <AndroidBrowserModal isOpen={isAndroidBrowserOpen()} onClose={() => setIsAndroidBrowserOpen(false)} />
+    <SettingsModal />
+   </Suspense>
 
     <Modal
      isOpen={showInstalledGames()}
@@ -578,13 +583,15 @@ export const SUPPORTED_ENGINES = [
      </div>
     </Modal>
    
-   <HelpModal isOpen={store.isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
-   <AiDiffModal />
-   <PlatformConverterModal isOpen={isConverterOpen()} onClose={() => setIsConverterOpen(false)} />
-   <SupportModal isOpen={isSupportModalOpen()} onClose={() => setIsSupportModalOpen(false)} />
-   <BackupManagerModal isOpen={store.isBackupManagerOpen} onClose={() => {
-     import('./store/editorStore').then(m => m.setIsBackupManagerOpen(false));
-   }} />
+   <Suspense fallback={<></>}>
+    <HelpModal isOpen={store.isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+    <AiDiffModal />
+    <PlatformConverterModal isOpen={isConverterOpen()} onClose={() => setIsConverterOpen(false)} />
+    <SupportModal isOpen={isSupportModalOpen()} onClose={() => setIsSupportModalOpen(false)} />
+    <BackupManagerModal isOpen={store.isBackupManagerOpen} onClose={() => {
+      import('./store/editorStore').then(m => m.setIsBackupManagerOpen(false));
+    }} />
+   </Suspense>
    
    <ToastContainer />
 
@@ -623,7 +630,9 @@ export const SUPPORTED_ENGINES = [
        </Tooltip>
      </div>
     </Show>
-    <LocalShareModal isOpen={store.isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
+    <Suspense fallback={<></>}>
+     <LocalShareModal isOpen={store.isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
+    </Suspense>
   </main>
  );
 }
