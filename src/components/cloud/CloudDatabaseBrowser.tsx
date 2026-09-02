@@ -661,7 +661,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
        </Tooltip>
        <div class="flex items-center gap-3 border-2 border-zinc-700 p-1.5 transition-colors hover:border-[#FF7A00] shrink-0">
         <Show when={authState.user?.user_metadata?.avatar_url}>
-          <img src={authState.user?.user_metadata?.avatar_url} class="w-10 h-10 rounded-full object-cover border-2 border-zinc-700" />
+          <img src={authState.user?.user_metadata?.avatar_url} class="w-10 h-10 rounded-full object-cover border-2 border-zinc-700" referrerpolicy="no-referrer" />
         </Show>
         <div class="flex items-center pr-4 py-1 border-r-2 border-zinc-800">
          <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest max-w-[150px] truncate">

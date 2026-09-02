@@ -317,6 +317,18 @@ export async function xorDecrypt(base64Data: string, hexKey: string): Promise<st
   return await invoke<string>('xor_decrypt', { base64Data, hexKey });
 }
 
+export async function autoGuessXorKey(base64Data: string): Promise<string> {
+  return await invoke<string>('auto_guess_xor_key', { base64Data });
+}
+
+export async function autoHealHeader(base64Data: string): Promise<string> {
+  return await invoke<string>('auto_heal_header', { base64Data });
+}
+
+export async function extractUnityEs3Password(dllPath: string): Promise<string> {
+  return await invoke<string>('extract_unity_es3_password', { dllPath });
+}
+
 export async function decompressPayload(base64Data: string, method: string): Promise<string> {
   return await invoke<string>('decompress_payload', { base64Data, method });
 }

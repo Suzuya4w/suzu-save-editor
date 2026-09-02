@@ -286,7 +286,7 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
                             placeholder="Search by filename or notes..." 
                             value={searchQuery()}
                             onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                            class="w-full bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs pl-[20px] pr-3 py-[5px] focus:outline-none focus:border-[#FF7A00] transition-colors"
+                            class="w-full font-brains bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs pl-[20px] pr-3 py-[5px] focus:outline-none focus:border-[#FF7A00] transition-colors"
                         />
                     </div>
                     <label class="flex items-center gap-2 cursor-pointer border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 px-3 py-[5px] transition-colors select-none">
@@ -301,7 +301,7 @@ export function BackupManagerModal(props: { isOpen: boolean, onClose: () => void
                 </div>
 
                 <Show when={backupDirPath()}>
-                    <div class="flex items-center justify-between p-2 bg-[#00F0FF]/5 border border-[#00F0FF]/20 text-[#00F0FF] text-xs">
+                    <div class="flex items-center justify-between p-2 bg-[#00F0FF]/5 border border-[#00F0FF]/20 text-[#00F0FF] text-xs font-brains">
                         <div class="flex items-center gap-2 truncate">
                             <Info size={14} class="shrink-0" />
                             <span class="truncate" title={backupDirPath()!}>

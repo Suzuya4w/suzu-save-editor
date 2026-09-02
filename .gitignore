@@ -23,3 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 public/*.glb
+# Environment Variables
+.env
+.env.*
+
+# Android Keystore (Mencegah Kebocoran Kunci Signing)
+*.jks
+*.keystore
+
+# Build / Cache
+.vite
+

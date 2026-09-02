@@ -8,8 +8,8 @@ Suzu Save Editor does not use complex folder structures or separate JSON profile
 
 You can write your plugins in **Lua** (great for simple scripts and beginners) or **Wasm/Extism** (great for heavy-duty parsing in Rust, Go, JS, etc.).
 - For Lua, keep reading below.
-- For Wasm/Extism, see the [WASM Extism Guide](file:///c:/saveEditor/suzu-save-editor/docs/modding/WASM_EXTISM_GUIDE.md).
-- Want to use **Kaitai Struct**? See the [Kaitai Struct Guide](file:///c:/saveEditor/suzu-save-editor/docs/modding/KAITAI_STRUCT_GUIDE.md).
+- For Wasm/Extism, see the [WASM Extism Guide](WASM_EXTISM_GUIDE.md).
+- Want to use **Kaitai Struct**? See the [Kaitai Struct Guide](KAITAI_STRUCT_GUIDE.md).
 
 ### Lua Plugin Architecture
 

@@ -69,7 +69,7 @@ export function SaveDetailsModal(props: {
          <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
            <div class="flex items-center gap-3 bg-zinc-900 p-2 pr-4 border border-zinc-700 rounded-sm w-fit">
             <Show when={localSave()?.uploader_avatar_url}>
-             <img src={localSave()?.uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-600 rounded-full" />
+             <img src={localSave()?.uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-600 rounded-full" referrerpolicy="no-referrer"/>
             </Show>
             <div class="flex flex-col">
              <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-widest leading-none">Uploader</span>

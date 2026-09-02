@@ -6,7 +6,7 @@ import { AlertTriangle, Binary, Search as SearchIcon, Replace, Cpu, ShieldAlert,
 import { Modal } from './Modal';
 import { useEditorStore, updateRawPayload, loadSaveData, setIsHelpModalOpen, setHelpModalSection } from '../store/editorStore';
 import { useToastStore, addToast } from '../store/toastStore';
-import { openSaveFile, loadLocalProfiles, deleteLocalProfile, calculateEntropy, extractStrings, xorDecrypt, decompressPayload, compareFiles, DiffResult, saveLocalProfile } from '../services/ipc';
+import { openSaveFile, loadLocalProfiles, deleteLocalProfile, calculateEntropy, extractStrings, xorDecrypt, autoGuessXorKey, autoHealHeader, extractUnityEs3Password, decompressPayload, compareFiles, DiffResult, saveLocalProfile } from '../services/ipc';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readFile, writeTextFile } from '@tauri-apps/plugin-fs';
 
@@ -981,6 +981,52 @@ export const HexViewer = () => {
   }
  };
 
+ const handleAutoGuessXor = async () => {
+  const b64 = editorState.saveData?.raw_payload;
+  if (!b64 || typeof b64 !== 'string') return;
+  try {
+   const guessedKey = await autoGuessXorKey(b64);
+   setXorKeyInput(guessedKey);
+   addToast(`Auto-guessed XOR Key: ${guessedKey}`, "success");
+  } catch (e) {
+   addToast(`Failed to guess XOR key: ${e}`, "error");
+  }
+ };
+
+ const handleAutoHealHeader = async () => {
+  const b64 = editorState.saveData?.raw_payload;
+  if (!b64 || typeof b64 !== 'string') return;
+  try {
+   const newB64 = await autoHealHeader(b64);
+   updateRawPayload(newB64);
+   const binaryString = atob(newB64);
+   const newPayload = new Uint8Array(binaryString.length);
+   for (let i = 0; i < binaryString.length; i++) newPayload[i] = binaryString.charCodeAt(i);
+   setRawPayload(newPayload);
+   addToast("Successfully healed header! Found magic signature and stripped garbage data.", "success");
+  } catch (e) {
+   addToast(`Header Healing failed: ${e}`, "error");
+  }
+ };
+
+ const handleExtractEs3Password = async () => {
+  try {
+   const selected = await open({
+    multiple: false,
+    filters: [{ name: 'DLL Files', extensions: ['dll', 'assets'] }]
+   });
+   if (selected && typeof selected === 'string') {
+    addToast("Scanning DLL for ES3 Password...", "info");
+    const passwords = await extractUnityEs3Password(selected);
+    addToast(`Found Potential Passwords:\n${passwords}`, "success");
+    // Optionally alert them since toast might truncate
+    alert(`Potential ES3 Passwords found:\n${passwords}\n\nTry using these in your decryption tool or game config.`);
+   }
+  } catch (err) {
+   addToast(`Failed to extract ES3 Password: ${err}`, "error");
+  }
+ };
+
  return (
   <div class="w-full h-full flex flex-col lg:flex-row gap-6 p-6 overflow-hidden">
    {/* DATA SCAVENGER LEFT PANEL */}
@@ -1187,20 +1233,29 @@ export const HexViewer = () => {
       </Tooltip>
      </div>
       <div class="flex flex-wrap gap-3">
-       <button onClick={handleEntropy} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-cyan-500/60 hover:bg-cyan-500/10 text-cyan-500 hover:border-cyan-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest">
+       <button onClick={handleEntropy} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-cyan-500/60 hover:bg-cyan-500/10 text-cyan-500 hover:border-cyan-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest" title="Calculate Shannon entropy to detect if data is encrypted or compressed">
         <Activity size={14} /> Entropy Graph
        </button>
-       <button onClick={handleStrings} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'strings' ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400' : 'border-emerald-500/60 hover:bg-emerald-500/10 text-emerald-500 hover:border-emerald-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`}>
+       <button onClick={handleStrings} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'strings' ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400' : 'border-emerald-500/60 hover:bg-emerald-500/10 text-emerald-500 hover:border-emerald-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`} title="Extract readable ASCII/UTF-8 strings from binary data">
         <AlignLeft size={14} /> Extract Strings
        </button>
-       <button onClick={() => handleDecompress('zlib')} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-amber-500/60 hover:bg-amber-500/10 text-amber-500 hover:border-amber-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest">
+       <button onClick={() => handleDecompress('zlib')} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-amber-500/60 hover:bg-amber-500/10 text-amber-500 hover:border-amber-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest" title="Decompress a standard ZLIB payload">
         <ArchiveRestore size={14} /> Unpack Zlib
        </button>
-       <button onClick={() => setActiveTool(activeTool() === 'xor' ? 'none' : 'xor')} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'xor' ? 'border-purple-500 bg-purple-500/20 text-purple-400' : 'border-purple-500/60 hover:bg-purple-500/10 text-purple-500 hover:border-purple-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`}>
+       <button onClick={() => handleDecompress('zlib_utf8')} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-red-500/60 hover:bg-red-500/10 text-red-500 hover:border-red-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest" title="Fixes ZLIB corrupted by string encoding (e.g. C3 AD)">
+        <ArchiveRestore size={14} /> Zlib (UTF-8 Fix)
+       </button>
+       <button onClick={handleAutoHealHeader} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-blue-500/60 hover:bg-blue-500/10 text-blue-500 hover:border-blue-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest" title="Auto-removes garbage data before known magic headers (Zlib, Zip, JSON, etc)">
+        <ShieldAlert size={14} /> Auto-Heal Header
+       </button>
+       <button onClick={() => setActiveTool(activeTool() === 'xor' ? 'none' : 'xor')} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'xor' ? 'border-purple-500 bg-purple-500/20 text-purple-400' : 'border-purple-500/60 hover:bg-purple-500/10 text-purple-500 hover:border-purple-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`} title="Decrypt payload using a repeating XOR key">
         <Unlock size={14} /> XOR Decrypt
        </button>
-       <button onClick={() => setActiveTool(activeTool() === 'diff' ? 'none' : 'diff')} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'diff' ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-pink-500/60 hover:bg-pink-500/10 text-pink-500 hover:border-pink-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`}>
+       <button onClick={() => setActiveTool(activeTool() === 'diff' ? 'none' : 'diff')} class={`flex items-center gap-2 px-5 py-2.5 bg-black border ${activeTool() === 'diff' ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-pink-500/60 hover:bg-pink-500/10 text-pink-500 hover:border-pink-500'} text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest`} title="Compare changes between two save files byte-by-byte">
         <GitMerge size={14} /> Diff Analyzer
+       </button>
+       <button onClick={handleExtractEs3Password} class="flex items-center gap-2 px-5 py-2.5 bg-black border border-indigo-500/60 hover:bg-indigo-500/10 text-indigo-500 hover:border-indigo-500 text-xs font-bold cursor-pointer transition-colors uppercase tracking-widest" title="Extract Easy Save 3 Password from Assembly-CSharp.dll">
+        <Code size={14} /> ES3 Extractor
        </button>
       </div>
      </div>
@@ -1483,7 +1538,10 @@ export const HexViewer = () => {
          <div class={activeTool() === 'xor' ? 'flex flex-col gap-6 max-w-xl' : 'hidden'}>
           <p class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">Enter the Hexadecimal key used to encrypt this file.</p>
           <input type="text" value={xorKeyInput()} onInput={(e) => setXorKeyInput(e.currentTarget.value)} class="w-full bg-[#0a0a0a] border border-zinc-800 px-6 py-4 text-cyan-400 font-mono uppercase tracking-widest outline-none focus:border-zinc-500 transition-colors" placeholder="e.g. A3 B2" />
-          <button onClick={handleXor} class="px-8 py-3 bg-zinc-800 text-zinc-200 hover:bg-zinc-200 hover:text-black font-bold tracking-widest uppercase transition-colors cursor-pointer border border-zinc-700">DECRYPT</button>
+          <div class="flex gap-4">
+           <button onClick={handleXor} class="flex-1 px-8 py-3 bg-zinc-800 text-zinc-200 hover:bg-zinc-200 hover:text-black font-bold tracking-widest uppercase transition-colors cursor-pointer border border-zinc-700">DECRYPT</button>
+           <button onClick={handleAutoGuessXor} class="px-8 py-3 bg-purple-500/10 border border-purple-500/50 text-purple-400 hover:bg-purple-500 hover:text-white font-bold tracking-widest uppercase transition-colors cursor-pointer" title="Auto-guess based on frequency analysis">AUTO-GUESS KEY</button>
+          </div>
          </div>
 
          {/* PROFILES TOOL */}

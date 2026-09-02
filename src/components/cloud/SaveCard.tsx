@@ -130,7 +130,7 @@ export function SaveCard(props: SaveCardProps) {
         <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3 bg-black/40 p-1.5 pr-4 border-l-2 border-[#FF7A00] rounded-r-sm w-fit">
           <Show when={save().uploader_avatar_url}>
-          <img src={save().uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-700 rounded-full" />
+          <img src={save().uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-700 rounded-full" referrerpolicy="no-referrer"/>
           </Show>
           <span class="text-[10px] font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
           BY {save().uploader}

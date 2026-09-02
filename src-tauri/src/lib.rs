@@ -323,6 +323,50 @@ async fn xor_decrypt(base64_data: String, hex_key: String) -> Result<String, Str
 }
 
 #[tauri::command]
+async fn auto_guess_xor_key(base64_data: String) -> Result<String, String> {
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let decoded = STANDARD.decode(&base64_data).map_err(|e| e.to_string())?;
+    let result = crate::parsers::reverse_engineering::RevEngUtils::auto_guess_xor_key(&decoded);
+    Ok(hex::encode(&result))
+}
+
+#[tauri::command]
+async fn auto_heal_header(base64_data: String) -> Result<String, String> {
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let decoded = STANDARD.decode(&base64_data).map_err(|e| e.to_string())?;
+    let result = crate::parsers::reverse_engineering::RevEngUtils::auto_heal_header(&decoded)?;
+    Ok(STANDARD.encode(&result))
+}
+
+#[tauri::command]
+async fn extract_unity_es3_password(dll_path: String) -> Result<String, String> {
+    let bytes = tokio::fs::read(&dll_path).await.map_err(|e| e.to_string())?;
+    let strings = crate::parsers::reverse_engineering::RevEngUtils::extract_strings(&bytes, 4, true, true, true);
+    
+    let mut candidates = Vec::new();
+    for i in 0..strings.len() {
+        let s = strings[i].to_lowercase();
+        // C# usually stores strings nearby, if we see EasySave or ES3 or password
+        if s.contains("easysave") || s == "es3" || s.contains("password") || s.contains("encryptionkey") {
+            for j in 1..=5 {
+                if i + j < strings.len() {
+                    let cand = &strings[i+j];
+                    if cand.len() > 3 && cand.len() < 50 && !candidates.contains(cand) {
+                        candidates.push(cand.clone());
+                    }
+                }
+            }
+        }
+    }
+    
+    if candidates.is_empty() {
+        return Err("No obvious ES3 passwords found. Try using 'Extract Strings' manually.".to_string());
+    }
+    
+    Ok(candidates.join(" | "))
+}
+
+#[tauri::command]
 async fn decompress_payload(base64_data: String, method: String) -> Result<String, String> {
     use base64::{Engine as _, engine::general_purpose::STANDARD};
     let decoded = STANDARD.decode(&base64_data).map_err(|e| e.to_string())?;
@@ -894,6 +938,9 @@ pub fn run() {
             calculate_entropy,
             extract_strings,
             xor_decrypt,
+            auto_guess_xor_key,
+            auto_heal_header,
+            extract_unity_es3_password,
             decompress_payload,
             open_save_file,
             open_save_file_bytes,

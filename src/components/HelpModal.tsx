@@ -175,10 +175,19 @@ export const HelpModal = (props: { isOpen: boolean; onClose: () => void }) => {
                 <strong class="text-cyan-400">Strings:</strong> Extracts all readable human text (ASCII) from the binary file. Useful for finding hidden developer messages, item IDs, or variable names inside unknown save formats.
               </li>
               <li>
-                <strong class="text-cyan-400">Unpack (Zlib):</strong> Attempts to decompress the save file payload using Zlib. If a save file looks like garbage hex but starts with <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">78 9C</code> or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">78 DA</code>, it is likely Zlib compressed.
+                <strong class="text-cyan-400">Unpack Zlib:</strong> Attempts to decompress the save file payload using Zlib. If a save file looks like garbage hex but starts with <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">78 9C</code> or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">78 DA</code>, it is likely Zlib compressed.
               </li>
               <li>
-                <strong class="text-cyan-400">XOR Decrypt:</strong> A simple decryption tool. Some games hide their save data by XOR-ing every byte with a specific key. Enter the key here to decrypt (and re-encrypt) the payload.
+                <strong class="text-red-400">Zlib (UTF-8 Fix):</strong> Some buggy games accidentally save ZLIB binary data as a UTF-8 string, causing byte corruption (e.g. <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">C3 AD</code>). This button reverses the UTF-8 corruption and recovers the original ZLIB stream.
+              </li>
+              <li>
+                <strong class="text-blue-400">Auto-Heal Header:</strong> Automatically scans the first 1024 bytes of a file to find known magic signatures (Zlib, Zip, JSON). If a game obfuscates its save by prepending garbage text at the top, this tool will safely slice off the garbage and reveal the true payload.
+              </li>
+              <li>
+                <strong class="text-purple-400">XOR Decrypt / Auto-Guess:</strong> A decryption tool for games that hide data by XOR-ing bytes (e.g. Wolf RPG). You can manually enter a Hex key, or use <strong class="text-purple-300">AUTO-GUESS KEY</strong>, which performs a Frequency Analysis to magically guess the correct XOR key based on the most frequent bytes!
+              </li>
+              <li>
+                <strong class="text-indigo-400">ES3 Extractor:</strong> For Unity games utilizing Easy Save 3 (AES Encrypted saves). This tool scans the game's <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">Assembly-CSharp.dll</code> and extracts potential hardcoded ES3 passwords.
               </li>
             </ul>
           </AccordionItem>
