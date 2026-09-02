@@ -22,6 +22,7 @@ const PlatformConverterModal = lazy(() => import('./components/PlatformConverter
 const SupportModal = lazy(() => import('./components/SupportModal').then(m => ({ default: m.SupportModal })));
 const BackupManagerModal = lazy(() => import('./components/BackupManagerModal').then(m => ({ default: m.BackupManagerModal })));
 const LocalShareModal = lazy(() => import('./components/LocalShareModal').then(m => ({ default: m.LocalShareModal })));
+import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
 import { useEditorStore, loadSaveData, setIsHelpModalOpen, setIsShareModalOpen } from "./store/editorStore";
 import { setIsSettingsOpen } from "./store/settingsStore";
 import { McpBridge } from "./components/McpBridge";
@@ -493,20 +494,22 @@ export const SUPPORTED_ENGINES = [
     <div class="flex-1 flex flex-col w-full min-h-0 overflow-hidden gap-4 p-4 z-10 animate-[itemFadeInUp_1.2s_cubic-bezier(0.22,1,0.36,1)_forwards]">
      <Header />
      <div class="flex-1 flex overflow-hidden min-h-0 bg-zinc-950 border border-white/5 rounded-none relative">
-      <Switch fallback={<TreeView />}>
-       <Match when={store.editorMode === 'diff'}><DiffViewer /></Match>
-       <Match when={store.editorMode === 'hex'}><HexViewer /></Match>
-       <Match when={store.editorMode === 'easy'}><EasyMode /></Match>
-       <Match when={store.editorMode === 'raw'}><div></div></Match>
-      </Switch>
-      <div 
-        style={{ display: store.editorMode === 'raw' ? 'block' : 'none' }} 
-        class="absolute inset-0 z-10"
-       >
-        <Suspense fallback={<div class="flex items-center justify-center h-full text-zinc-500 font-bold"><Loader2 class="animate-spin mr-2" /> LOADING EDITOR...</div>}>
-         <RawJsonViewer />
-        </Suspense>
-       </div>
+      <GlobalErrorBoundary fallbackTitle="EDITOR CRASH DETECTED" fallbackMessage="The save editor failed to render this view. The file might be corrupted, or the structure is too complex.">
+       <Switch fallback={<TreeView />}>
+        <Match when={store.editorMode === 'diff'}><DiffViewer /></Match>
+        <Match when={store.editorMode === 'hex'}><HexViewer /></Match>
+        <Match when={store.editorMode === 'easy'}><EasyMode /></Match>
+        <Match when={store.editorMode === 'raw'}><div></div></Match>
+       </Switch>
+       <div 
+         style={{ display: store.editorMode === 'raw' ? 'block' : 'none' }} 
+         class="absolute inset-0 z-10"
+        >
+         <Suspense fallback={<div class="flex items-center justify-center h-full text-zinc-500 font-bold"><Loader2 class="animate-spin mr-2" /> LOADING EDITOR...</div>}>
+          <RawJsonViewer />
+         </Suspense>
+        </div>
+      </GlobalErrorBoundary>
      </div>
     </div>
    </Show>
