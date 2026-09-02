@@ -8,7 +8,6 @@ import { ArmorsView } from './ArmorsView';
 import { SwitchesView } from './SwitchesView';
 import { VariablesView } from './VariablesView';
 import { open } from '@tauri-apps/plugin-dialog';
-import { invoke } from '@tauri-apps/api/core';
 import { fetch } from '@tauri-apps/plugin-http';
 import { loadGameDatabase } from '../../services/ipc';
 

@@ -359,7 +359,7 @@ export const McpBridge = (props: { activeTab: string }) => {
           if (!editorState.filePath || !editorState.saveData) {
             responseData = { error: "No file is currently loaded to save" };
           } else {
-            await writeSaveFile(editorState.filePath, editorState.saveData);
+            await writeSaveFile(editorState.saveData, editorState.filePath);
             // It will rely on a generic reload or toast on the frontend maybe, or just return success
             responseData = { success: true, message: "File successfully saved to disk" };
           }
