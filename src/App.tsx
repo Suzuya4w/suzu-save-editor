@@ -222,12 +222,12 @@ export const SUPPORTED_ENGINES = [
       const setupCloseConfirm = async () => {
         try {
           const osTypeStr = await type();
-          if (osTypeStr === 'windows') {
+          if (osTypeStr === 'windows' || osTypeStr === 'android') {
             unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
               event.preventDefault();
-              if (store.saveData !== null) {
-                const confirmed = await ask('Are you sure you want to exit? Any unsaved changes will be lost.', {
-                  title: 'Confirm Exit',
+              if (store.isModified) {
+                const confirmed = await ask('You have unsaved changes. Are you sure you want to exit?', {
+                  title: 'Unsaved Changes Warning',
                   kind: 'warning',
                 });
                 

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { useEditorStore, closeFile, setIsHelpModalOpen, undo, redo, setIsHistoryModalOpen, setEditorMode } from '../store/editorStore';
+import { useEditorStore, closeFile, setIsHelpModalOpen, undo, redo, setIsHistoryModalOpen, setEditorMode, setIsModified } from '../store/editorStore';
 import { createSignal, onMount, Show, For } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { Save, X, Unlock, HelpCircle, Image as ImageIcon, AlertTriangle, Eye, EyeOff, Undo2, Redo2, History, Layout, Terminal, Bot, Settings, DatabaseBackup } from 'lucide-solid';
@@ -583,6 +583,7 @@ export function Header() {
                editorState.activeProfileRules || undefined, 
                editorState.activeProfileChecksums || undefined
              );
+             setIsModified(false);
              addToast(`Saved as ${newPath.split(/[/\\]/).pop()}`, "success");
            } finally {
              setIsSaving(false);
@@ -667,6 +668,7 @@ export function Header() {
             } else {
               addToast("File saved successfully! Backend backup created.", "success");
             }
+            setIsModified(false);
             
             setIsConfirmOverwriteModalOpen(false);
           } catch (err: any) {

@@ -52,6 +52,7 @@ interface EditorState {
   isBackupManagerOpen: boolean;
   isShareModalOpen: boolean;
   pinnedPaths: Set<string>;
+  isModified: boolean;
 }
 
 const setNestedValue = (obj: any, path: string, value: any) => {
@@ -151,6 +152,7 @@ export const [editorState, setEditorState] = createStore<EditorState>({
   stardewActiveTab: 'identity',
   isShareModalOpen: false,
   pinnedPaths: new Set<string>(),
+  isModified: false,
 });
 
 export const useEditorStore = () => editorState;
@@ -173,6 +175,7 @@ export const setIsHelpModalOpen = (isOpen: boolean) => setEditorState('isHelpMod
 export const setHelpModalSection = (section: string) => setEditorState('helpModalSection', section);
 export const setIsHistoryModalOpen = (isOpen: boolean) => setEditorState('isHistoryModalOpen', isOpen);
 export const setStardewActiveTab = (tab: string) => setEditorState('stardewActiveTab', tab);
+export const setIsModified = (val: boolean) => setEditorState('isModified', val);
 
 const pushCommand = (state: any, cmd: Omit<Command, 'id' | 'timestamp'>) => {
   state.past.push({
@@ -182,6 +185,7 @@ const pushCommand = (state: any, cmd: Omit<Command, 'id' | 'timestamp'>) => {
   });
   if (state.past.length > 100) state.past.shift();
   state.future = [];
+  state.isModified = true;
 };
 
 export const loadSaveData = (data: StandardJson, path: string, profileRules: any[] | null = null) => {
@@ -199,6 +203,7 @@ export const loadSaveData = (data: StandardJson, path: string, profileRules: any
     state.future = [];
     state.stardewActiveTab = 'identity';
     state.pinnedPaths = new Set<string>();
+    state.isModified = false;
     
     if (data.parsed_variables?._is_binary_format === true || data.parsed_variables?.is_encrypted_binary === true) {
       state.editorMode = 'hex';
@@ -242,6 +247,7 @@ export const closeFile = async () => {
     adbDeviceId: null,
     adbRemotePath: null,
     hasUsedRawMode: false,
+    isModified: false,
   });
 
   try {
