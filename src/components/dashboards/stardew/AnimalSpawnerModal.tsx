@@ -1,7 +1,7 @@
 import { createSignal, createMemo, createEffect, onCleanup, For, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { X } from 'lucide-solid';
-import farmAnimalsData from '../../../data/stardew/FarmAnimals.json';
+import farmAnimalsData from '../../../data/stardew/farmanimals.json';
 
 interface AnimalSpawnerModalProps {
   isOpen: boolean;
