@@ -13,7 +13,7 @@ import { Modal } from './Modal';
 import { CyberHoldButton } from './CyberHoldButton';
 import { McpInfoModal } from './McpInfoModal';
 import { setEditorState } from '../store/editorStore';
-import { SplitSquareHorizontal } from 'lucide-solid';
+import { SplitSquareHorizontal, Wifi } from 'lucide-solid';
 
 interface DiffResult {
     path: string;
@@ -410,6 +410,20 @@ export function Header() {
     </Tooltip>
 
     <div class="w-[1px] h-6 bg-zinc-800 mx-2"></div>
+    
+    <Tooltip text="Suzu Quick Share (WiFi Transfer)">
+      <button
+       onClick={async () => {
+         const { setIsShareModalOpen } = await import('../store/editorStore');
+         setIsShareModalOpen(true);
+       }}
+       class="p-3 md:p-2 bg-transparent border border-[#00F0FF]/50 text-[#00F0FF] hover:text-[#00F0FF] hover:border-[#00F0FF] transition-colors cursor-pointer"
+      >
+       <Wifi class="w-[18px] h-[18px] md:w-[14px] md:h-[14px]" />
+      </button>
+    </Tooltip>
+
+    <div class="w-[1px] h-6 bg-zinc-800 mx-2"></div>
 
     <div class="flex items-center gap-1">
       <Tooltip text={editorState.isMcpEnabled ? "MCP Bridge is ON. Click to disable." : "MCP Bridge is OFF. Click to enable."}>
@@ -512,10 +526,10 @@ export function Header() {
      Are you sure you want to close this file? Any unsaved changes will be lost permanently.
     </div>
         <Show when={editorState.hasUsedRawMode}>
-        <div class="bg-purple-500/10 border border-[#FF00FF]/40 p-3 rounded text-xs text-purple-200 font-mono leading-relaxed flex items-start gap-2.5 shadow-[inset_0_0_12px_rgba(255,0,255,0.15)]">
+        <div class="bg-black-500/10 border border-[#FF7A00]/80 p-3 rounded text-xs text-purple-200 font-mono leading-relaxed flex items-start gap-2.5 shadow-[inset_0_0_12px_rgba(255,0,255,0.15)]">
           <span class="text-[#FF00FF] font-bold mt-0.5">⚡</span>
           <div class="font-desc">
-            <span class="font-bold text-[#FF00FF] tracking-wider">RAM CLEANUP:</span> Since you used the Raw JSON tab, the screen will blink for a split second when closing this file. This instantly frees up your PC's memory (it takes about 5-8 seconds to drop back to normal ram usage).
+            <span class="font-bold text-[#FF7A00] tracking-wider">RAM CLEANUP:</span> Since you used the Raw JSON tab, the screen will blink for a split second when closing this file. This for frees up your PC's memory because of Monaco Editor (it takes about 5-8 seconds to drop back to normal ram usage).
           </div>
         </div>
       </Show>

@@ -50,6 +50,7 @@ interface EditorState {
   hasUsedRawMode: boolean;
   stardewActiveTab: string;
   isBackupManagerOpen: boolean;
+  isShareModalOpen: boolean;
   pinnedPaths: Set<string>;
 }
 
@@ -148,6 +149,7 @@ export const [editorState, setEditorState] = createStore<EditorState>({
   isAiDiffModalOpen: false,
   hasUsedRawMode: false,
   stardewActiveTab: 'identity',
+  isShareModalOpen: false,
   pinnedPaths: new Set<string>(),
 });
 
@@ -160,6 +162,10 @@ export const setIsAiDiffModalOpen = (isOpen: boolean) => {
 
 export const setIsBackupManagerOpen = (isOpen: boolean) => {
   setEditorState('isBackupManagerOpen', isOpen);
+};
+
+export const setIsShareModalOpen = (isOpen: boolean) => {
+  setEditorState('isShareModalOpen', isOpen);
 };
 
 export const setHasUsedRawMode = (hasUsed: boolean) => setEditorState('hasUsedRawMode', hasUsed);

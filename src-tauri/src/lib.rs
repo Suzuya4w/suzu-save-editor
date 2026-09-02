@@ -6,6 +6,7 @@ pub mod utils;
 pub mod converter;
 pub mod shizuku;
 pub mod saf;
+pub mod share;
 
 use crate::backup::manager::create_backup;
 use crate::models::ipc::{EngineType, StandardJson};
@@ -952,7 +953,10 @@ pub fn run() {
             mcp_scan_pattern,
             crate::converter::strip_save_header,
             crate::converter::inject_save_header,
-            crate::converter::swap_endianness
+            crate::converter::swap_endianness,
+            crate::share::start_share_server,
+            crate::share::stop_share_server,
+            crate::share::get_local_ip
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

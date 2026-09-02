@@ -10,7 +10,7 @@ import { ToastContainer } from "./components/Toast";
 import { HexViewer } from "./components/HexViewer";
 import { Modal } from "./components/Modal";
 import { RawJsonViewer } from "./components/RawJsonViewer";
-import { Info, Settings, Database, Gamepad2, Monitor, MessageSquare, Heart, Loader2, Smartphone, Zap, Lock, RefreshCw } from 'lucide-solid';
+import { Info, Settings, Database, Gamepad2, Monitor, MessageSquare, Heart, Loader2, Smartphone, Zap, Lock, RefreshCw, Wifi } from 'lucide-solid';
 import "./App.css";
 import { CloudDatabaseBrowser } from './components/cloud/CloudDatabaseBrowser';
 import { AndroidBrowserModal } from './components/AndroidBrowserModal';
@@ -20,7 +20,8 @@ import { AiDiffModal } from "./components/AiDiffModal";
 import { PlatformConverterModal } from "./components/PlatformConverterModal";
 import { SupportModal } from "./components/SupportModal";
 import { BackupManagerModal } from "./components/BackupManagerModal";
-import { useEditorStore, loadSaveData, setIsHelpModalOpen } from "./store/editorStore";
+import { LocalShareModal } from "./components/LocalShareModal";
+import { useEditorStore, loadSaveData, setIsHelpModalOpen, setIsShareModalOpen } from "./store/editorStore";
 import { setIsSettingsOpen } from "./store/settingsStore";
 import { McpBridge } from "./components/McpBridge";
 import { addToast } from "./store/toastStore";
@@ -428,6 +429,16 @@ export const SUPPORTED_ENGINES = [
         </div>
         <p class=" text-[9px] md:text-xs text-zinc-500 mt-1 md:mt-2">Restore saved files and milestones</p>
        </button>
+
+       <button 
+        onClick={() => setIsShareModalOpen(true)}
+        class="w-full flex flex-col items-center py-3 md:py-4 bg-transparent border-4 border-zinc-800 text-[#00F0FF] font-bold uppercase tracking-widest hover:border-white hover:bg-[#00F0FF]/5 transition-all cursor-pointer shadow-[4px_4px_0px_rgba(0,240,255,0)] md:shadow-[8px_8px_0px_rgba(0,240,255,0)] hover:shadow-[4px_4px_0px_#00F0FF] md:hover:shadow-[8px_8px_0px_#00F0FF] hover:-translate-y-1 hover:-translate-x-1"
+       >
+        <div class="flex items-center gap-2 md:gap-4 text-[10px] md:text-base text-center">
+         <span class="hidden md:inline">{">>"}</span><Wifi size={16} class="md:size-[18px]" />SUZU QUICK SHARE_
+        </div>
+        <p class=" text-[9px] md:text-xs text-zinc-500 mt-1 md:mt-2">Receive files instantly via WiFi</p>
+       </button>
       </div>
      </div>
 
@@ -612,6 +623,7 @@ export const SUPPORTED_ENGINES = [
        </Tooltip>
      </div>
     </Show>
+    <LocalShareModal isOpen={store.isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
   </main>
  );
 }

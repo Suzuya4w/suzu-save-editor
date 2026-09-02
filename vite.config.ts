@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import tailwindcss from "@tailwindcss/vite";
 import { internalIpV4 } from "internal-ip";
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vite.dev/config/
 export default defineConfig(async () => {
@@ -9,8 +10,15 @@ export default defineConfig(async () => {
   const host = process.env.TAURI_DEV_HOST || await internalIpV4();
 
   return {
-    plugins: [solid(), tailwindcss()],
-    assetsInclude: ['**/*.glb'],
+    plugins: [
+      solid(), 
+      tailwindcss(),
+      visualizer({
+        open: true,
+        filename: 'bundle-stats.html',
+        gzipSize: true,
+      }),
+    ],
 
     clearScreen: false,
     build: {
@@ -28,7 +36,7 @@ export default defineConfig(async () => {
           }
         : undefined,
       watch: {
-        // 3. tell Vite to ignore watching `src-tauri` and large binary files
+        // tell Vite to ignore watching `src-tauri` and large binary files
         ignored: ["**/src-tauri/**", "**/*.glb"],
       },
     },
