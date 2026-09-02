@@ -32,7 +32,7 @@ base64 = "0.22.1"
 serde-pickle = "1.2.0"
 flate2 = "1.1.9"
 tauri-plugin-dialog = "2.7.1"
-marshal-rs = { path = "../../marshal-rs-patched" }
+marshal-rs = { path = "./marshal-rs-patched" }
 regex = "1.12.3"
 tauri-plugin-fs = "2"
 hexf-parse = "0.2.1"

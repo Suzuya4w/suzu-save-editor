@@ -1,0 +1,24 @@
+[package]
+name = "marshal-rs"
+version = "2.0.1"
+authors = ["savannstm <savannstm@gmail.com>"]
+edition = "2021"
+rust-version = "1.82.0"
+description = "Blazingly fast Ruby-lang's Marshal implementation in Rust."
+readme = "README.md"
+repository = "https://github.com/savannstm/marshal-rs"
+documentation = "https://docs.rs/marshal-rs/"
+license-file = "LICENSE.md"
+keywords = ["marshal", "ruby", "serialize", "deserialize"]
+
+[dependencies]
+ahash = "0.8.12"
+bitflags = "2.11.0"
+encoding_rs = "0.8.35"
+
+indexmap = { version = "2.13.1", features = ["serde"] }
+num-bigint = "0.4.6"
+serde = { version = "1.0.228", features = ["serde_derive"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
+strum_macros = "0.28.0"
+thiserror = "2.0.18"
