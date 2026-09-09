@@ -30,11 +30,15 @@ pub extern "C" fn Java_com_suzu_saveeditor_MainActivity_initShizukuJni<'local>(
         if let Ok(global_class) = env.new_global_ref(class) {
             let _ = SHIZUKU_API_CLASS.set(global_class);
         }
+    } else {
+        let _ = env.exception_clear();
     }
     if let Ok(class) = env.find_class("com/suzu/saveeditor/SafAPI") {
         if let Ok(global_class) = env.new_global_ref(class) {
             let _ = SAF_API_CLASS.set(global_class);
         }
+    } else {
+        let _ = env.exception_clear();
     }
 }
 

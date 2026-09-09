@@ -46,7 +46,7 @@ export function SaveDetailsModal(props: {
        </Show>
       </div>
       <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row bg-[#0a0a0a]">
-        <div class="w-full md:w-2/5 border-r border-zinc-800 bg-black flex flex-col overflow-hidden">
+        <div class="w-full md:w-2/5 border-r border-zinc-800 bg-black flex flex-col overflow-hidden shrink-0">
          <Show when={localSave()?.game_cover_url}>
           <div class="w-full h-64 md:h-full relative shrink-0">
            <img src={localSave()?.game_cover_url} class={`w-full h-full object-cover ${localSave()?.is_nsfw && !props.showNSFW ? 'blur-xl scale-110' : ''}`} />
@@ -69,7 +69,7 @@ export function SaveDetailsModal(props: {
          <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
            <div class="flex items-center gap-3 bg-zinc-900 p-2 pr-4 border border-zinc-700 rounded-sm w-fit">
             <Show when={localSave()?.uploader_avatar_url}>
-             <img src={localSave()?.uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-600 rounded-full" referrerpolicy="no-referrer"/>
+             <img src={localSave()?.uploader_avatar_url} class="w-8 h-8 object-cover border border-zinc-600 rounded-full" referrerpolicy="no-referrer"/>
             </Show>
             <div class="flex flex-col">
              <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-widest leading-none">Uploader</span>

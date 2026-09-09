@@ -82,7 +82,7 @@ function VirtualSaveCard(props: any) {
   });
 
   return (
-    <div ref={ref} class="min-h-[350px]">
+    <div ref={ref} class={`h-full flex flex-col ${!isVisible() ? 'min-h-[250px]' : ''}`}>
       <Show when={isVisible()}>
         <SaveCard {...props} />
       </Show>
@@ -376,7 +376,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     try {
       const currentOs = osType();
       const isMobile = currentOs === 'android' || currentOs === 'ios';
-      const redirectUrl = isMobile ? 'suzu://auth/callback' : 'http://127.0.0.1:14225/callback';
+      const redirectUrl = isMobile ? 'https://suzuya4w.github.io/suzu-save-editor/' : 'http://127.0.0.1:14225/callback';
       
       const { data, error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: redirectUrl, skipBrowserRedirect: true } });
       if (error) throw error;

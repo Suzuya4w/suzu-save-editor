@@ -49,7 +49,7 @@ export function Modal(props: ModalProps) {
           />
           
           <div 
-            class={`relative w-full ${props.width || 'max-w-md'} bg-black shadow-[8px_8px_0px_#FF7A00] flex flex-col overflow-hidden font-mono text-zinc-200 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            class={`relative w-full ${props.width || 'max-w-md'} max-h-[90vh] bg-black shadow-[8px_8px_0px_#FF7A00] flex flex-col overflow-hidden font-mono text-zinc-200 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
               isVisible() ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
             }`}
             style={{
@@ -71,7 +71,7 @@ export function Modal(props: ModalProps) {
               </svg>
             </Show>
             {/* Header */}
-            <div class="flex items-center justify-between p-4 border-b-4 border-zinc-200 bg-zinc-900">
+            <div class="flex items-center justify-between p-4 border-b-4 border-zinc-200 bg-zinc-900 shrink-0">
               <div class="flex items-center gap-3 text-white">
                 <Show when={props.icon}>
                   <div class="text-[#FF7A00]">
@@ -82,14 +82,14 @@ export function Modal(props: ModalProps) {
               </div>
               <button 
                 onClick={props.onClose}
-                class="p-2 bg-black border-2 border-transparent hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors cursor-pointer text-white"
+                class="p-2 bg-black border-2 border-transparent hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors cursor-pointer text-white shrink-0"
               >
                 <X size={16} />
               </button>
             </div>
             
             {/* Body */}
-            <div class="p-6">
+            <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
               {props.children}
             </div>
           </div>

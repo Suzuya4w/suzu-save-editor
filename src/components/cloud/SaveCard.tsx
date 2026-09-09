@@ -29,7 +29,7 @@ export function SaveCard(props: SaveCardProps) {
   const isOwner = () => authState.user?.id === save().uploader_id;
 
   return (
-    <div class={`group bg-zinc-950 border-2 ${save().report_count > 0 && props.isAdminMode ? 'border-red-500 shadow-[4px_4px_0px_rgba(239,68,68,0.5)]' : 'border-zinc-800 hover:border-[#FF7A00] shadow-[4px_4px_0px_rgba(255,122,0,0)] hover:shadow-[4px_4px_0px_#FF7A00] hover:-translate-y-1 hover:-translate-x-1'} transition-all cursor-pointer flex flex-col relative hover:z-50 ${!save().is_visible ? 'opacity-50 grayscale' : ''}`} onClick={() => props.isBulkSelectMode ? props.onToggleSelection(save().id) : props.onClick(save())}>
+    <div class={`group bg-zinc-950 border-2 h-full ${save().report_count > 0 && props.isAdminMode ? 'border-red-500 shadow-[4px_4px_0px_rgba(239,68,68,0.5)]' : 'border-zinc-800 hover:border-[#FF7A00] shadow-[4px_4px_0px_rgba(255,122,0,0)] hover:shadow-[4px_4px_0px_#FF7A00] hover:-translate-y-1 hover:-translate-x-1'} transition-all cursor-pointer flex flex-col relative hover:z-50 ${!save().is_visible ? 'opacity-50 grayscale' : ''}`} onClick={() => props.isBulkSelectMode ? props.onToggleSelection(save().id) : props.onClick(save())}>
       <Show when={props.isBulkSelectMode}>
         <div class="absolute top-2 left-2 z-20 bg-black/80 p-1 rounded-sm border border-zinc-700">
         {props.selectedSaves.includes(save().id) ? <CheckSquare size={20} class="text-[#FF7A00] fill-orange-950" /> : <Square size={20} class="text-zinc-400" />}
@@ -130,7 +130,7 @@ export function SaveCard(props: SaveCardProps) {
         <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3 bg-black/40 p-1.5 pr-4 border-l-2 border-[#FF7A00] rounded-r-sm w-fit">
           <Show when={save().uploader_avatar_url}>
-          <img src={save().uploader_avatar_url} class="w-26 h-26 object-cover border border-zinc-700 rounded-full" referrerpolicy="no-referrer"/>
+          <img src={save().uploader_avatar_url} class="w-8 h-8 object-cover border border-zinc-700 rounded-full" referrerpolicy="no-referrer"/>
           </Show>
           <span class="text-[10px] font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
           BY {save().uploader}

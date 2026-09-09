@@ -172,7 +172,13 @@
         animateIdleGlow();
 
         const hash = window.location.hash;
-        const appUrl = "suzu://auth/callback" + hash;
+        const isAndroid = /android/i.test(navigator.userAgent);
+        
+        let appUrl = "suzu://auth/callback" + hash;
+        if (isAndroid) {
+            appUrl = "intent://auth/callback" + hash + "#Intent;scheme=suzu;package=com.suzu.saveeditor;end;";
+        }
+        
         document.getElementById('fallback-link').href = appUrl;
 
         setTimeout(() => {

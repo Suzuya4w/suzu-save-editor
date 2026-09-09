@@ -94,6 +94,14 @@ pub async fn stop_share_server() -> Result<(), String> {
 
 #[tauri::command]
 pub fn get_local_ip() -> Result<String, String> {
+    if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {
+        if socket.connect("8.8.8.8:53").is_ok() {
+            if let Ok(addr) = socket.local_addr() {
+                return Ok(addr.ip().to_string());
+            }
+        }
+    }
+
     local_ip()
         .map(|ip| ip.to_string())
         .map_err(|e| format!("Failed to detect local IP: {}", e))

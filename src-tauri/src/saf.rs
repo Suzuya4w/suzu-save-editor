@@ -53,9 +53,14 @@ pub fn write_content_uri(env: &mut JNIEnv, context: JObject, uri: &str, data: &[
             JValue::Object(&uri_jstring),
             JValue::Object(&byte_array),
         ],
-    ).map_err(|e| e.to_string())?;
+    );
 
-    let result_jstring = result.l().map_err(|e| e.to_string())?;
+    if let Err(e) = result {
+        let _ = env.exception_clear();
+        return Err(e.to_string());
+    }
+
+    let result_jstring = result.unwrap().l().map_err(|e| e.to_string())?;
     let result_string: String = env.get_string((&result_jstring).into()).map_err(|e| e.to_string())?.into();
 
     if result_string == "SUCCESS" {
@@ -106,12 +111,16 @@ pub async fn pick_file_for_write() -> Result<Option<String>, String> {
             let context = crate::shizuku::get_application_context(&mut env)?;
             let context_copy = env.new_local_ref(context).map_err(|e| e.to_string())?;
 
-            env.call_static_method(
+            let result = env.call_static_method(
                 class,
                 "pickFileForWrite",
                 "(Landroid/content/Context;)V",
                 &[jni::objects::JValue::Object(&context_copy)],
-            ).map_err(|e| e.to_string())?;
+            );
+            if let Err(e) = result {
+                let _ = env.exception_clear();
+                return Err(e.to_string());
+            }
         }
 
         rx.await.map_err(|e| e.to_string())

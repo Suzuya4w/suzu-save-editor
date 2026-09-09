@@ -2,7 +2,9 @@ package com.suzu.saveeditor
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.Keep
 
+@Keep
 object SafAPI {
     @JvmStatic
     fun writeContentUri(context: Context, uriString: String, data: ByteArray): String {

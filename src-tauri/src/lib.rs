@@ -864,7 +864,7 @@ pub fn run() {
                         
                     let router = axum::Router::new()
                         .route("/callback", axum::routing::get(|| async {
-                            axum::response::Html(r#"<!DOCTYPE html><html><head><title>Authentication</title></head><body style="background: black; color: white; font-family: monospace; text-align: center; padding-top: 50px;"><h2>Processing authentication...</h2><script>if (window.location.hash) { fetch('http://127.0.0.1:14225/token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: window.location.hash }) }).then(() => { document.body.innerHTML = '<h2 style="color: #FF7A00;">Login successful, you can close this tab.</h2>'; window.close(); }).catch(e => { document.body.innerHTML = '<h2 style="color: red;">Error processing authentication.</h2>'; }); } else { document.body.innerHTML = '<h2 style="color: red;">No token found in URL.</h2>'; }</script></body></html>"#)
+                            axum::response::Html(include_str!("oauth_desktop.html"))
                         }))
                         .route("/token", axum::routing::post({
                             let app = oauth_app.clone();
