@@ -411,16 +411,21 @@ async fn backup_colliding_files(app: tauri::AppHandle, dest_dir: String, files: 
 }
 
 #[tauri::command]
-fn check_device_rooted() -> Result<bool, String> {
+async fn check_device_rooted() -> Result<bool, String> {
     // Check Shizuku first
     if crate::shizuku::check_permission().unwrap_or(false) {
         return Ok(true);
     }
 
-    let output = std::process::Command::new("su")
-        .arg("-c")
-        .arg("id")
-        .output();
+    let Ok(output) = tokio::time::timeout(
+        std::time::Duration::from_secs(2),
+        tokio::process::Command::new("su")
+            .arg("-c")
+            .arg("id")
+            .output()
+    ).await else {
+        return Ok(false);
+    };
 
     match output {
         Ok(result) => Ok(result.status.success()),
@@ -432,7 +437,7 @@ fn check_device_rooted() -> Result<bool, String> {
 // 1. FUNGSI PULL: Membaca file game tertutup ke dalam memori
 // =====================================================================
 #[tauri::command]
-fn root_read_file(app: tauri::AppHandle, target_path: &str) -> Result<String, String> {
+async fn root_read_file(app: tauri::AppHandle, target_path: String) -> Result<String, String> {
     let has_shizuku = crate::shizuku::check_permission().unwrap_or(false);
     
     if has_shizuku {
@@ -453,11 +458,17 @@ fn root_read_file(app: tauri::AppHandle, target_path: &str) -> Result<String, St
     }
 
     // Fallback to SU
-    let output = std::process::Command::new("su")
-        .arg("-c")
-        .arg(format!("cat \"{}\"", target_path))
-        .output()
-        .map_err(|e| format!("Gagal memanggil eksekutor: {}", e))?;
+    let Ok(output) = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        tokio::process::Command::new("su")
+            .arg("-c")
+            .arg(format!("cat \"{}\"", target_path))
+            .output()
+    ).await else {
+        return Err("Root command timed out".to_string());
+    };
+
+    let output = output.map_err(|e| format!("Gagal memanggil eksekutor: {}", e))?;
 
     if output.status.success() {
         String::from_utf8(output.stdout).map_err(|_| "File save mengandung karakter non-UTF8!".to_string())
@@ -471,13 +482,13 @@ fn root_read_file(app: tauri::AppHandle, target_path: &str) -> Result<String, St
 // 2. FUNGSI PUSH: Menyuntikkan teks baru ke dalam file game
 // =====================================================================
 #[tauri::command]
-fn root_write_file(app: tauri::AppHandle, target_path: &str, new_content: &str) -> Result<(), String> {
+async fn root_write_file(app: tauri::AppHandle, target_path: String, new_content: String) -> Result<(), String> {
     let cache_dir = app.path().app_cache_dir().map_err(|_| "Gagal melacak direktori cache aplikasi".to_string())?;
     let _ = std::fs::create_dir_all(&cache_dir);
     let staging_file = cache_dir.join("payload_staging.tmp");
 
-    std::fs::write(&staging_file, new_content).map_err(|e| format!("Gagal menulis payload lokal: {}", e))?;
-    let staging_str = staging_file.to_str().ok_or("Path memuat karakter aneh")?;
+    tokio::fs::write(&staging_file, &new_content).await.map_err(|e| format!("Gagal menulis payload lokal: {}", e))?;
+    let staging_str = staging_file.to_str().ok_or("Path memuat karakter aneh")?.to_string();
 
     let has_shizuku = crate::shizuku::check_permission().unwrap_or(false);
     
@@ -485,18 +496,25 @@ fn root_write_file(app: tauri::AppHandle, target_path: &str, new_content: &str) 
         // Copy-Edit-Replace via Shizuku
         let cmd = format!("cp \"{}\" \"{}\"", staging_str, target_path);
         let result = crate::shizuku::execute_command(&cmd);
-        let _ = std::fs::remove_file(staging_file);
+        let _ = tokio::fs::remove_file(staging_file).await;
         return result.map(|_| ());
     }
 
     let cmd = format!("cat \"{}\" > \"{}\"", staging_str, target_path);
-    let output = std::process::Command::new("su")
-        .arg("-c")
-        .arg(&cmd)
-        .output()
-        .map_err(|e| e.to_string())?;
+    
+    let Ok(output) = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        tokio::process::Command::new("su")
+            .arg("-c")
+            .arg(&cmd)
+            .output()
+    ).await else {
+        let _ = tokio::fs::remove_file(staging_file).await;
+        return Err("Root command timed out".to_string());
+    };
 
-    let _ = std::fs::remove_file(staging_file);
+    let output = output.map_err(|e| e.to_string())?;
+    let _ = tokio::fs::remove_file(staging_file).await;
 
     if output.status.success() {
         Ok(())

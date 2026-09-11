@@ -9,8 +9,6 @@ import { useSettingsStore } from '../../store/settingsStore';
 import { supabase } from '../../lib/supabase';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-import { listen, UnlistenFn } from '@tauri-apps/api/event';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { open as openDialog, save } from '@tauri-apps/plugin-dialog';
 import { writeFile, remove, mkdir } from '@tauri-apps/plugin-fs';
 import { join, tempDir } from '@tauri-apps/api/path';
@@ -94,8 +92,6 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   const [shouldRender, setShouldRender] = createSignal(props.isOpen);
   const [isVisible, setIsVisible] = createSignal(props.isOpen);
 
-  let unlistenLocalServer: UnlistenFn | undefined;
-  let unlistenDeepLink: UnlistenFn | undefined;
   let rtSubscription: any;
 
   const [saves, setSaves] = createSignal<SaveFile[]>([]);
@@ -315,38 +311,13 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     }
   });
 
-  let configSubscription: any;
-
-  const processAuthToken = async (hashOrUrl: string) => {
-    try {
-      const hash = hashOrUrl.includes('#') ? hashOrUrl.split('#')[1] : (hashOrUrl.startsWith('#') ? hashOrUrl.substring(1) : hashOrUrl);
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-
-      if (accessToken && refreshToken) {
-        await setCustomSession(accessToken, refreshToken);
-        addToast('Login successful!', 'success');
-        setIsLoginModalOpen(false);
-      }
-    } catch (e) {
-      addToast('Login failed', 'error');
+  createEffect(() => {
+    if (authState.session && isLoginModalOpen()) {
+      setIsLoginModalOpen(false);
     }
-  };
+  });
 
   onMount(() => {
-    listen<string>('auth-success', async (event) => {
-      await processAuthToken(event.payload);
-    }).then(unlisten => { unlistenLocalServer = unlisten; }).catch(() => {});
-
-    onOpenUrl(async (urls) => {
-      for (const url of urls) {
-        if (url.includes('access_token=') && url.includes('refresh_token=')) {
-          await processAuthToken(url);
-        }
-      }
-    }).then(unlisten => { unlistenDeepLink = unlisten; }).catch(() => {});
-
     rtSubscription = supabase
       .channel('save_files_updates')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'save_files' }, (payload) => {
@@ -366,8 +337,6 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
   });
 
   onCleanup(() => {
-    if (unlistenLocalServer) unlistenLocalServer();
-    if (unlistenDeepLink) unlistenDeepLink();
     if (rtSubscription) supabase.removeChannel(rtSubscription);
     if (configSubscription) supabase.removeChannel(configSubscription);
   });
@@ -376,11 +345,14 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     try {
       const currentOs = osType();
       const isMobile = currentOs === 'android' || currentOs === 'ios';
-      const redirectUrl = isMobile ? 'https://suzuya4w.github.io/suzu-save-editor/' : 'http://127.0.0.1:14225/callback';
-      
+      const redirectUrl = isMobile ? 'suzu://auth/callback' : 'http://127.0.0.1:14225/callback';
+
       const { data, error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: redirectUrl, skipBrowserRedirect: true } });
       if (error) throw error;
-      if (data?.url) { await openUrl(data.url); }
+      if (data?.url) { 
+        console.log("LOGIN URL:", data.url);
+        await openUrl(data.url); 
+      }
     } catch (e: any) {
       addToast(e.message || 'Login failed', 'error');
     }

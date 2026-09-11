@@ -5,6 +5,7 @@ import androidx.activity.enableEdgeToEdge
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
+import java.io.File
 
 class MainActivity : TauriActivity() {
   external fun initShizukuJni(context: android.content.Context)
@@ -30,6 +31,29 @@ class MainActivity : TauriActivity() {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     initShizukuJni(this)
+    
+    // Fallback: Save initial intent to cache file for JS to read
+    intent?.data?.let { uri ->
+        saveIntentToCache(uri.toString())
+    }
+  }
+
+  override fun onNewIntent(intent: Intent) {
+      super.onNewIntent(intent)
+      intent.data?.let { uri ->
+          saveIntentToCache(uri.toString())
+      }
+  }
+
+  private fun saveIntentToCache(url: String) {
+      try {
+          if (url.startsWith("suzu://")) {
+              val cacheFile = File(cacheDir, "last_intent.txt")
+              cacheFile.writeText(url)
+          }
+      } catch (e: Exception) {
+          e.printStackTrace()
+      }
   }
 
   fun launchFilePicker(mimeTypes: Array<String>) {

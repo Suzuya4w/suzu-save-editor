@@ -24,7 +24,7 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 chrono = "0.4.44"
-tokio = { version = "1.52.3", features = ["fs", "io-util", "rt-multi-thread", "net", "sync", "macros", "time"] }
+tokio = { version = "1.52.3", features = ["fs", "io-util", "rt-multi-thread", "net", "sync", "macros", "time", "process"] }
 axum = "0.7.5"
 tower-http = { version = "0.5.2", features = ["cors"] }
 lz-str = "0.2.1"

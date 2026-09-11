@@ -32,6 +32,10 @@ import { relaunch, exit } from '@tauri-apps/plugin-process';
 import { type } from '@tauri-apps/plugin-os';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { ask } from '@tauri-apps/plugin-dialog';
+import { onOpenUrl, getCurrent } from '@tauri-apps/plugin-deep-link';
+import { listen } from '@tauri-apps/api/event';
+import { setCustomSession } from './store/authStore';
+import { readTextFile, remove, BaseDirectory } from '@tauri-apps/plugin-fs';
 
 export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
@@ -74,6 +78,38 @@ export const SUPPORTED_ENGINES = [
 
  function App() {
   const store = useEditorStore();
+
+  const processAuthToken = async (rawUrl: string) => {
+      try {
+          if (rawUrl.includes('code=')) {
+              const queryString = rawUrl.includes('?') ? rawUrl.split('?')[1] : rawUrl;
+              const params = new URLSearchParams(queryString);
+              const code = params.get('code');
+
+              if (code) {
+                  const { supabase } = await import('./lib/supabase');
+                  const { error } = await supabase.auth.exchangeCodeForSession(code);
+                  if (error) throw error;
+                  
+                  addToast('Login Successful!', 'success');
+              }
+          } 
+          else if (rawUrl.includes('access_token=')) {
+              const hash = rawUrl.includes('#') ? rawUrl.split('#')[1] : rawUrl;
+              const params = new URLSearchParams(hash);
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+
+              if (accessToken && refreshToken) {
+                  await setCustomSession(accessToken, refreshToken);
+                  addToast('Login Successful!', 'success');
+              }
+          }
+      } catch (e: any) {
+          console.error('Auth processing error:', e);
+          addToast('Login Error: ' + (e.message || String(e)), 'error');
+      }
+  };
  
  const [showAbout, setShowAbout] = createSignal(false);
  const [isCloudBrowserOpen, setIsCloudBrowserOpen] = createSignal(false);
@@ -248,6 +284,96 @@ export const SUPPORTED_ENGINES = [
     };
 
     initialize();
+
+    let isProcessingIntent = false;
+
+    // MANUAL FALLBACK FOR ANDROID: Read from cache_dir if intent plugin fails
+    const checkIntentCache = async () => {
+      if (isProcessingIntent) return;
+      try {
+        const url = await readTextFile('last_intent.txt', { baseDir: BaseDirectory.AppCache });
+        if (url && url.startsWith('suzu://')) {
+           isProcessingIntent = true;
+           // Delete immediately so concurrent polls don't read it again
+           await remove('last_intent.txt', { baseDir: BaseDirectory.AppCache }).catch(() => {});
+           
+           await processAuthToken(url);
+           
+           // Release lock after a short delay
+           setTimeout(() => { isProcessingIntent = false; }, 2000);
+        }
+      } catch (e) {
+        // File doesn't exist, just ignore
+      }
+    };
+    
+    // Check on mount and repeat every second for the first 5 seconds
+    checkIntentCache();
+    let pollCount = 0;
+    const pollInterval = setInterval(() => {
+        pollCount++;
+        checkIntentCache();
+        if (pollCount > 5) clearInterval(pollInterval);
+    }, 1000);
+
+    // Check again every time the app returns from the background (resume) using DOM events
+    const handleResume = () => {
+      // Poll multiple times because Kotlin might take a few milliseconds to write the file
+      checkIntentCache();
+      setTimeout(checkIntentCache, 300);
+      setTimeout(checkIntentCache, 1000);
+      setTimeout(checkIntentCache, 2000);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        handleResume();
+      }
+    });
+
+    window.addEventListener('focus', handleResume);
+
+    try {
+      listen('tauri://resume', handleResume);
+    } catch(e) {}
+
+    try {
+      getCurrent().then(async (initialUrls) => {
+        if (initialUrls && initialUrls.length > 0) {
+          for (const url of initialUrls) {
+            await processAuthToken(url);
+          }
+        }
+      }).catch(e => console.error('Failed to get initial deep link:', e));
+    } catch(e) { console.error(e); }
+
+    try {
+      onOpenUrl(async (urls) => {
+        for (const url of urls) {
+          await processAuthToken(url);
+        }
+      }).catch(e => console.error('Failed to register onOpenUrl:', e));
+    } catch(e) { console.error(e); }
+
+    try {
+      listen<string>('deep-link-received', async (event) => {
+        await processAuthToken(event.payload);
+      }).catch(e => console.error('Failed to listen to deep-link-received:', e));
+    } catch(e) {}
+
+    try {
+      listen<string[]>('tauri://deep-link', async (event) => {
+        for (const url of event.payload) {
+          await processAuthToken(url);
+        }
+      }).catch(e => console.error('Failed to listen to tauri://deep-link:', e));
+    } catch(e) {}
+
+    try {
+      listen<string>('auth-success', async (event) => {
+        await processAuthToken(event.payload);
+      }).catch(e => console.error('Failed to register local auth listener:', e));
+    } catch(e) {}
   });
 
  return (
@@ -516,7 +642,11 @@ export const SUPPORTED_ENGINES = [
 
    <Suspense fallback={<></>}>
     <CloudDatabaseBrowser isOpen={isCloudBrowserOpen()} onClose={() => setIsCloudBrowserOpen(false)} />
+   </Suspense>
+   <Suspense fallback={<></>}>
     <AndroidBrowserModal isOpen={isAndroidBrowserOpen()} onClose={() => setIsAndroidBrowserOpen(false)} />
+   </Suspense>
+   <Suspense fallback={<></>}>
     <SettingsModal />
    </Suspense>
 
