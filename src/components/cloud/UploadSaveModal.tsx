@@ -193,7 +193,7 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
 
       if (finalFileBytes.length > 50 * 1024 * 1024) throw new Error('File exceeds 50MB limit');
 
-      const { error: storageError } = await supabase.storage.from('saves').upload(finalFileName, finalFileBytes);
+      const { error: storageError } = await supabase.storage.from('saves').upload(finalFileName, finalFileBytes, { contentType: 'application/zip' });
       if (storageError) throw storageError;
       
       const { data: { publicUrl } } = supabase.storage.from('saves').getPublicUrl(finalFileName);

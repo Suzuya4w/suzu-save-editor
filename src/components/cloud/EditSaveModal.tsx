@@ -94,7 +94,7 @@ export function EditSaveModal(props: EditSaveModalProps) {
         const urlParts = localSave()!.file_url.split('/');
         const oldFileName = urlParts[urlParts.length - 1];
 
-        const { error: storageError } = await supabase.storage.from('saves').upload(oldFileName, bytes, { upsert: true });
+        const { error: storageError } = await supabase.storage.from('saves').upload(oldFileName, bytes, { upsert: true, contentType: 'application/zip' });
         if (storageError) throw storageError;
 
         let detected = localSave()!.detected_engine;
