@@ -30,10 +30,10 @@ export function useCloudDownloader(props: {
         let extractDir: string;
         
         if (isMobile) {
-          const { downloadDir } = await import('@tauri-apps/api/path');
-          const baseDir = await downloadDir();
+          const { appLocalDataDir } = await import('@tauri-apps/api/path');
+          const baseDir = await appLocalDataDir();
           const safeTitle = (saveFile.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Save') + `_${saveFile.id.substring(0, 8)}`;
-          extractDir = await join(baseDir, 'SuzuSaves', safeTitle);
+          extractDir = await join(baseDir, 'CloudSaves', safeTitle);
           await mkdir(extractDir, { recursive: true }).catch(() => {});
         } else {
           const picked = await openDialog({ directory: true, title: 'Select folder to extract the save to' });
@@ -123,7 +123,7 @@ export function useCloudDownloader(props: {
           await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
           
           if (isMobile) {
-             addToast(`Saved to Downloads/SuzuSaves`, 'success');
+             addToast(`Saved to Android/data/com.suzu.saveeditor/files/CloudSaves`, 'success');
           } else {
              addToast('Save extracted successfully!', 'success');
           }
@@ -131,7 +131,7 @@ export function useCloudDownloader(props: {
           try { await remove(tempZipPath); } catch(e) {}
         }
       } catch (e: any) {
-        addToast(`Failed: ${e.message}`, 'error');
+        addToast(`Failed: ${e.message || e}`, 'error');
       } finally {
         setDownloadProgress(0);
         setIsUploading(false);
@@ -150,9 +150,9 @@ export function useCloudDownloader(props: {
       
       let folderPath: string;
       if (isMobile) {
-        const { downloadDir } = await import('@tauri-apps/api/path');
-        const baseDir = await downloadDir();
-        folderPath = await join(baseDir, 'SuzuSaves', 'BulkDownload_' + Date.now());
+        const { appLocalDataDir } = await import('@tauri-apps/api/path');
+        const baseDir = await appLocalDataDir();
+        folderPath = await join(baseDir, 'CloudSaves', 'BulkDownload_' + Date.now());
         await mkdir(folderPath, { recursive: true }).catch(() => {});
       } else {
         const picked = await openDialog({ directory: true });
@@ -259,7 +259,7 @@ export function useCloudDownloader(props: {
         props.setSelectedSaves([]); 
         props.setIsBulkSelectMode(false);
       } catch (e: any) { 
-        addToast(`Error: ${e.message}`, 'error'); 
+        addToast(`Error: ${e.message || e}`, 'error'); 
       } finally { 
         setIsUploading(false); 
         setDownloadProgress(0);
