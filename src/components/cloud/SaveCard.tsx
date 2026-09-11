@@ -20,7 +20,7 @@ interface SaveCardProps {
   onAdminDelete: (id: string, fileUrl: string) => void;
   onReport: (id: string, title: string) => void;
   onEdit: (save: SaveFile) => void;
-  onDownload: (fileUrl: string, title: string) => void;
+  onDownload: (save: SaveFile) => void;
 }
 
 export function SaveCard(props: SaveCardProps) {
@@ -119,9 +119,11 @@ export function SaveCard(props: SaveCardProps) {
         </Show>
         <Show when={!props.isBulkSelectMode}>
           <Tooltip text="Download">
-          <button onClick={(e) => { e.stopPropagation(); props.onDownload(save().file_url, save().title); }} class="p-2 bg-zinc-900 text-zinc-500 group-hover:bg-[#FF7A00] group-hover:text-black transition-colors border-2 border-zinc-800 group-hover:border-black cursor-pointer inline-flex">
-            <Download size={20} strokeWidth={2.5} />
-          </button>
+            <div class="flex items-center gap-2 relative z-10 shrink-0">
+              <button onClick={(e) => { e.stopPropagation(); props.onDownload(save()); }} class="p-2 bg-zinc-900 text-zinc-500 group-hover:bg-[#FF7A00] group-hover:text-black transition-colors border-2 border-zinc-800 group-hover:border-black cursor-pointer inline-flex">
+                <Download size={18} class="group-hover:animate-bounce" />
+              </button>
+            </div>
           </Tooltip>
         </Show>
         </div>

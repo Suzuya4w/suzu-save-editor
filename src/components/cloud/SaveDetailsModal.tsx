@@ -11,7 +11,7 @@ export function SaveDetailsModal(props: {
   isOwner: boolean;
   onReport: (id: string, title: string) => void;
   onEdit: (save: any) => void;
-  onDownload: (url: string, title: string) => void;
+  onDownload: (save: any) => void;
 }) {
   // Memoize the save object to preserve it during the exit animation
   const [localSave, setLocalSave] = createSignal<any | null>(props.save);
@@ -149,7 +149,7 @@ export function SaveDetailsModal(props: {
          </button>
         </Show>
         <div class="flex-1" />
-        <button onClick={() => { props.onDownload(localSave()!.file_url, localSave()!.title); }} class="px-8 py-3 bg-[#FF7A00] text-black border-2 border-black hover:bg-white hover:border-black transition-colors uppercase font-black tracking-widest text-xs shadow-[4px_4px_0px_#ffffff] flex items-center gap-2 cursor-pointer">
+        <button onClick={() => { props.onDownload(localSave()!); }} class="px-8 py-3 bg-[#FF7A00] text-black border-2 border-black hover:bg-white hover:border-black transition-colors uppercase font-black tracking-widest text-xs shadow-[4px_4px_0px_#ffffff] flex items-center gap-2 cursor-pointer">
          <Download size={16} /> DOWNLOAD
         </button>
        </div>
