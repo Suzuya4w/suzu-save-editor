@@ -48,7 +48,7 @@ export function SaveDetailsModal(props: {
       <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row bg-[#0a0a0a]">
         <div class="w-full md:w-2/5 border-r border-zinc-800 bg-black flex flex-col overflow-hidden shrink-0">
          <Show when={localSave()?.game_cover_url}>
-          <div class="w-full h-80 md:h-full relative shrink-0">
+          <div class="w-full h-96 md:h-full relative shrink-0">
            <img src={localSave()?.game_cover_url} class={`w-full h-full object-cover ${localSave()?.is_nsfw && !props.showNSFW ? 'blur-xl scale-110' : ''}`} />
            <Show when={localSave()?.is_nsfw && !props.showNSFW}>
             <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-red-500 font-black uppercase tracking-widest text-sm text-center p-4">
@@ -59,7 +59,7 @@ export function SaveDetailsModal(props: {
           </div>
          </Show>
          <Show when={!localSave()?.game_cover_url}>
-          <div class="w-full h-80 md:h-full bg-zinc-900 flex items-center justify-center">
+          <div class="w-full h-96 md:h-full bg-zinc-900 flex items-center justify-center">
             <Gamepad2 size={64} class="text-zinc-800" />
           </div>
          </Show>
