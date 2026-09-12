@@ -944,6 +944,7 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       saveData={editSaveModal()}
       onUpdateComplete={() => fetchSaves(false)}
       requestConfirm={requestConfirm}
+      closeConfirm={closeConfirm}
     />
 
    </div>

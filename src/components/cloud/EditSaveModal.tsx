@@ -15,6 +15,7 @@ interface EditSaveModalProps {
   saveData: SaveFile | null;
   onUpdateComplete: () => void;
   requestConfirm: (title: string, message: string, kind: 'warning' | 'info' | 'danger', onConfirm: () => void, onCancel?: () => void) => void;
+  closeConfirm: (isCancel?: boolean | Event) => void;
 }
 
 export function EditSaveModal(props: EditSaveModalProps) {
@@ -48,6 +49,7 @@ export function EditSaveModal(props: EditSaveModalProps) {
   const handleInfoSubmit = async () => {
     if (!localSave()) return;
     props.requestConfirm('UPDATE DETAILS', 'Are you sure you want to update the save details?', 'info', async () => {
+      props.closeConfirm(false);
       try {
         setIsUpdating(true);
         const { error } = await supabase.from('save_files').update({
@@ -81,6 +83,7 @@ export function EditSaveModal(props: EditSaveModalProps) {
     if (!newFilePath() || !localSave()) return;
     
     props.requestConfirm('REPLACE SAVE FILE', 'Are you sure you want to replace the existing save file? This action cannot be undone.', 'danger', async () => {
+      props.closeConfirm(false);
       try {
         setIsUpdating(true);
         const bytes = await readFile(newFilePath());
