@@ -135,7 +135,11 @@ export const SUPPORTED_ENGINES = [
     
     const osType = await type();
     if (osType === 'android' || osType === 'ios') {
-      addToast("System updates are handled automatically by your device's App Store.", "info");
+      const response = await ask("Updates for mobile are available on our GitHub releases page. Would you like to open it now?", { title: 'Mobile Updates', kind: 'info' });
+      if (response) {
+         const { open } = await import('@tauri-apps/plugin-shell');
+         await open("https://github.com/Suzuya4w/suzu-save-editor/releases");
+      }
       return;
     }
     

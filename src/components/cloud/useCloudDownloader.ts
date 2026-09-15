@@ -48,49 +48,41 @@ export function useCloudDownloader(props: {
         const tempZipName = `temp_${Date.now()}.zip`;
         const tempZipPath = await join(extractDir as string, tempZipName);
 
-        if (isMobile) {
-          const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
-          const response = await tauriFetch(saveFile.file_url, { method: 'GET' });
-          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const response = await fetch(saveFile.file_url, { method: 'GET' });
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const contentLength = +(response.headers.get('Content-Length') || 0);
+        let receivedLength = 0;
+        
+        if (response.body) {
+          const reader = response.body.getReader();
+          const chunks = [];
+          
+          while(true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            chunks.push(value);
+            receivedLength += value.length;
+            if (contentLength > 0) {
+              setDownloadProgress((receivedLength / contentLength) * 100);
+              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)} / ${formatBytes(contentLength)}`);
+            } else {
+              setDownloadProgress(50);
+              setDownloadStatus(`Downloading: ${formatBytes(receivedLength)}`);
+            }
+          }
+          
+          const buffer = new Uint8Array(receivedLength);
+          let position = 0;
+          for(let chunk of chunks) {
+            buffer.set(chunk, position);
+            position += chunk.length;
+          }
+          await writeFile(tempZipPath, buffer);
+        } else {
           setDownloadStatus(`Downloading via native client...`);
           const buffer = await response.arrayBuffer();
           await writeFile(tempZipPath, new Uint8Array(buffer));
-        } else {
-          const response = await fetch(saveFile.file_url, { method: 'GET' });
-          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-          
-          const contentLength = +(response.headers.get('Content-Length') || 0);
-          let receivedLength = 0;
-          
-          if (response.body) {
-            const reader = response.body.getReader();
-            const chunks = [];
-            
-            while(true) {
-              const {done, value} = await reader.read();
-              if (done) break;
-              chunks.push(value);
-              receivedLength += value.length;
-              if (contentLength > 0) {
-                setDownloadProgress((receivedLength / contentLength) * 100);
-                setDownloadStatus(`Downloading: ${formatBytes(receivedLength)} / ${formatBytes(contentLength)}`);
-              } else {
-                setDownloadProgress(50);
-                setDownloadStatus(`Downloading: ${formatBytes(receivedLength)}`);
-              }
-            }
-            
-            const buffer = new Uint8Array(receivedLength);
-            let position = 0;
-            for(let chunk of chunks) {
-              buffer.set(chunk, position);
-              position += chunk.length;
-            }
-            await writeFile(tempZipPath, buffer);
-          } else {
-            const buffer = await response.arrayBuffer();
-            await writeFile(tempZipPath, new Uint8Array(buffer));
-          }
         }
 
         setDownloadStatus('Checking for file collisions...');
@@ -132,7 +124,7 @@ export function useCloudDownloader(props: {
           await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
           
           if (isMobile) {
-             addToast(`Saved to Download/SuzuCloudSaves`, 'success');
+             addToast(`Saved to Android/data/com.suzu.saveeditor/files/Download/SuzuCloudSaves`, 'success');
           } else {
              addToast('Save extracted successfully!', 'success');
           }
@@ -204,53 +196,40 @@ export function useCloudDownloader(props: {
           
           const tempZipPath = await join(folderPath as string, `temp_bulk_${id}.zip`);
         
-          if (isMobile) {
-            const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
-            const response = await tauriFetch(saveFile.file_url, { method: 'GET' });
-            if (!response.ok) {
-              updateItem(id, 'error', 0);
-              failedCount++;
-              continue;
+          const response = await fetch(saveFile.file_url, { method: 'GET' });
+          if (!response.ok) {
+            updateItem(id, 'error', 0);
+            failedCount++;
+            continue;
+          }
+
+          const contentLength = +(response.headers.get('Content-Length') || 0);
+          let receivedLength = 0;
+
+          if (response.body) {
+            const reader = response.body.getReader();
+            const chunks = [];
+            while(true) {
+              const {done, value} = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              receivedLength += value.length;
+              if (contentLength > 0) {
+                const prog = (receivedLength / contentLength) * 100;
+                setDownloadProgress(prog);
+                updateItem(id, 'downloading', prog);
+              }
             }
+            const buffer = new Uint8Array(receivedLength);
+            let position = 0;
+            for(let chunk of chunks) {
+              buffer.set(chunk, position);
+              position += chunk.length;
+            }
+            await writeFile(tempZipPath, buffer);
+          } else {
             const buffer = await response.arrayBuffer();
             await writeFile(tempZipPath, new Uint8Array(buffer));
-            updateItem(id, 'downloading', 100);
-          } else {
-            const response = await fetch(saveFile.file_url, { method: 'GET' });
-            if (!response.ok) {
-              updateItem(id, 'error', 0);
-              failedCount++;
-              continue;
-            }
-
-            const contentLength = +(response.headers.get('Content-Length') || 0);
-            let receivedLength = 0;
-
-            if (response.body) {
-              const reader = response.body.getReader();
-              const chunks = [];
-              while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                receivedLength += value.length;
-                if (contentLength > 0) {
-                  const prog = (receivedLength / contentLength) * 100;
-                  setDownloadProgress(prog);
-                  updateItem(id, 'downloading', prog);
-                }
-              }
-              const buffer = new Uint8Array(receivedLength);
-              let position = 0;
-              for(let chunk of chunks) {
-                buffer.set(chunk, position);
-                position += chunk.length;
-              }
-              await writeFile(tempZipPath, buffer);
-            } else {
-              const buffer = await response.arrayBuffer();
-              await writeFile(tempZipPath, new Uint8Array(buffer));
-            }
           }
 
           updateItem(id, 'extracting', 100);
