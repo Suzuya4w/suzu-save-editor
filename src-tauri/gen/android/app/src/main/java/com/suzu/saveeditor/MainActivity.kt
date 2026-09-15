@@ -11,6 +11,8 @@ class MainActivity : TauriActivity() {
   external fun initShizukuJni(context: android.content.Context)
   external fun onFilePicked(uri: String?)
 
+  external fun onFolderPicked(uri: String?)
+
   private val openDocumentLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
       if (uri != null) {
           try {
@@ -24,6 +26,22 @@ class MainActivity : TauriActivity() {
           onFilePicked(uri.toString())
       } else {
           onFilePicked(null)
+      }
+  }
+
+  private val openDocumentTreeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+      if (uri != null) {
+          try {
+              contentResolver.takePersistableUriPermission(
+                  uri,
+                  Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+              )
+          } catch (e: Exception) {
+              e.printStackTrace()
+          }
+          onFolderPicked(uri.toString())
+      } else {
+          onFolderPicked(null)
       }
   }
 
@@ -58,5 +76,9 @@ class MainActivity : TauriActivity() {
 
   fun launchFilePicker(mimeTypes: Array<String>) {
       openDocumentLauncher.launch(mimeTypes)
+  }
+
+  fun launchFolderPicker() {
+      openDocumentTreeLauncher.launch(null)
   }
 }

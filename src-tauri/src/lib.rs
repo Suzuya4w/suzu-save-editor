@@ -998,6 +998,8 @@ pub fn run() {
             shizuku_execute_command,
             crate::saf::write_content_uri_bytes,
             crate::saf::pick_file_for_write,
+            crate::saf::pick_folder_for_export,
+            crate::saf::copy_folder_to_tree,
             load_save_file,
             toggle_mcp,
             close_save_file,
