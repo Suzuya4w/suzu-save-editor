@@ -165,6 +165,8 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
     }
   };
 
+  const [uploadStatus, setUploadStatus] = createSignal('');
+
   const submitUpload = async () => {
     if (!uploadForm().title || uploadForm().file_paths.length === 0) {
       addToast('Title and File are required', 'error');
@@ -172,11 +174,18 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
     }
     try {
       setIsUploading(true);
+      setUploadStatus('READING FILES...');
+      await new Promise(r => setTimeout(r, 100)); // Yield to allow DOM update
+      
       let finalFileBytes: Uint8Array;
       let finalFileName: string;
 
       const jszip = new JSZip();
-      for (const path of uploadForm().file_paths) {
+      for (let i = 0; i < uploadForm().file_paths.length; i++) {
+        const path = uploadForm().file_paths[i];
+        setUploadStatus(`READING FILES (${i + 1}/${uploadForm().file_paths.length})...`);
+        await new Promise(r => setTimeout(r, 20)); // Yield to allow DOM update
+        
         const bytes = await readFile(path);
         
         // SECURITY FIX: Re-implement isSafeFile check!
@@ -187,17 +196,26 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
         
         jszip.file(path.split(/[\\/]/).pop() || 'unknown', bytes);
       }
-      finalFileBytes = await jszip.generateAsync({ type: 'uint8array' });
+      
+      setUploadStatus('COMPRESSING DATA...');
+      await new Promise(r => setTimeout(r, 100)); // Yield to allow DOM update
+      
+      finalFileBytes = await jszip.generateAsync({ type: 'uint8array' }, (meta) => {
+          setUploadStatus(`COMPRESSING... ${meta.percent.toFixed(0)}%`);
+      });
+      
       const safeTitle = uploadForm().title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'SaveData';
       finalFileName = `${Date.now()}_${safeTitle}.zip`;
 
       if (finalFileBytes.length > 50 * 1024 * 1024) throw new Error('File exceeds 50MB limit');
 
+      setUploadStatus('UPLOADING TO DATABASE...');
       const { error: storageError } = await supabase.storage.from('saves').upload(finalFileName, finalFileBytes, { contentType: 'application/zip' });
       if (storageError) throw storageError;
       
       const { data: { publicUrl } } = supabase.storage.from('saves').getPublicUrl(finalFileName);
 
+      setUploadStatus('FINALIZING ENTRY...');
       const { error: dbError } = await supabase.from('save_files').insert({
         title: uploadForm().title,
         description: uploadForm().description,
@@ -225,6 +243,7 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
       addToast(e.message || 'Upload failed', 'error');
     } finally {
       setIsUploading(false);
+      setUploadStatus('');
     }
   };
 
@@ -367,7 +386,7 @@ export function UploadSaveModal(props: { isOpen: boolean; onClose: () => void; o
 
        <button onClick={submitUpload} disabled={isUploading()} class="mt-4 w-full py-4 bg-[#FF7A00] hover:bg-white text-black font-black uppercase tracking-widest text-lg flex items-center justify-center gap-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
         <Show when={isUploading()} fallback={<><Upload size={20} strokeWidth={3}/> INITIATE UPLOAD</>}>
-         <Loader2 class="animate-spin" size={20} /> UPLOADING...
+         <Loader2 class="animate-spin" size={20} /> {uploadStatus() || 'UPLOADING...'}
         </Show>
        </button>
      </div>
