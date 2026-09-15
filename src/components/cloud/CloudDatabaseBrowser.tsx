@@ -21,6 +21,8 @@ import { EditSaveModal } from './EditSaveModal';
 import { CloudLoginModal } from './CloudLoginModal';
 import { CloudReportModal } from './CloudReportModal';
 import { AdminReportsModal } from './AdminReportsModal';
+import { ShizukuExportModal } from './ShizukuExportModal';
+import { SafExportModal } from './SafExportModal';
 import { SaveCard } from './SaveCard';
 import { SaveFile } from '../../types/database';
 import { useCloudDownloader } from './useCloudDownloader';
@@ -184,7 +186,12 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
     downloadStatus,
     bulkDownloadQueue,
     handleDownload,
-    handleBulkDownload
+    handleBulkDownload,
+    showShizukuExport,
+    setShowShizukuExport,
+    showSafExport,
+    setShowSafExport,
+    exportSourcePath
   } = useCloudDownloader({
     requestConfirm,
     closeConfirm,
@@ -945,6 +952,20 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       onUpdateComplete={() => fetchSaves(false)}
       requestConfirm={requestConfirm}
       closeConfirm={closeConfirm}
+    />
+
+    <ShizukuExportModal
+      isOpen={showShizukuExport()}
+      onClose={() => setShowShizukuExport(false)}
+      sourcePath={exportSourcePath()}
+      onExportComplete={() => {}}
+    />
+
+    <SafExportModal
+      isOpen={showSafExport()}
+      onClose={() => setShowSafExport(false)}
+      sourcePath={exportSourcePath()}
+      onExportComplete={() => {}}
     />
 
    </div>

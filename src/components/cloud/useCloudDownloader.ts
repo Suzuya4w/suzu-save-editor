@@ -19,6 +19,10 @@ export function useCloudDownloader(props: {
   const [downloadStatus, setDownloadStatus] = createSignal('');
   const [bulkDownloadQueue, setBulkDownloadQueue] = createSignal<any[]>([]);
 
+  const [showShizukuExport, setShowShizukuExport] = createSignal(false);
+  const [showSafExport, setShowSafExport] = createSignal(false);
+  const [exportSourcePath, setExportSourcePath] = createSignal('');
+
   const handleDownload = async (saveFile: any) => {
     const { type: osType } = await import('@tauri-apps/plugin-os');
     const os = osType();
@@ -124,7 +128,13 @@ export function useCloudDownloader(props: {
           await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
           
           if (isMobile) {
-             addToast(`Saved to Android/data/com.suzu.saveeditor/files/Download/SuzuCloudSaves`, 'success');
+             const hasShizuku = await invoke<boolean>('shizuku_check_permission').catch(() => false);
+             setExportSourcePath(extractDir);
+             if (hasShizuku) {
+                 setShowShizukuExport(true);
+             } else {
+                 setShowSafExport(true);
+             }
           } else {
              addToast('Save extracted successfully!', 'success');
           }
@@ -275,6 +285,11 @@ export function useCloudDownloader(props: {
     downloadStatus,
     bulkDownloadQueue,
     handleDownload,
-    handleBulkDownload
+    handleBulkDownload,
+    showShizukuExport,
+    setShowShizukuExport,
+    showSafExport,
+    setShowSafExport,
+    exportSourcePath
   };
 }
