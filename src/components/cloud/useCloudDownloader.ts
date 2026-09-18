@@ -124,6 +124,9 @@ export function useCloudDownloader(props: {
         setDownloadProgress(100);
         setDownloadStatus('Extracting save data...');
         setIsUploading(true);
+        // Beri waktu 50ms agar UI sempat memperbarui teks sebelum memanggil fungsi berat
+        await new Promise(r => setTimeout(r, 50));
+        
         try {
           await invoke('extract_save_zip', { zipPath: tempZipPath, destDir: extractDir as string });
           

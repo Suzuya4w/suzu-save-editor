@@ -137,7 +137,7 @@ export const SUPPORTED_ENGINES = [
     if (osType === 'android' || osType === 'ios') {
       const response = await ask("Updates for mobile are available on our GitHub releases page. Would you like to open it now?", { title: 'Mobile Updates', kind: 'info' });
       if (response) {
-         const { open } = await import('@tauri-apps/plugin-shell');
+         const { open } = await import('@tauri-apps/plugin-opener');
          await open("https://github.com/Suzuya4w/suzu-save-editor/releases");
       }
       return;

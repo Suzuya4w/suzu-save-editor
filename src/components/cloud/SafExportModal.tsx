@@ -1,13 +1,27 @@
-import { createSignal, Show } from 'solid-js';
+import { createSignal, Show, createEffect, onCleanup } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { Modal } from '../Modal';
-import { Folder, Loader2, Download, CheckSquare, Info } from 'lucide-solid';
+import { Folder, Loader2, CheckSquare, Info } from 'lucide-solid';
 import { addToast } from '../../store/toastStore';
 import { Tooltip } from '../Tooltip';
 
-export function SafExportModal(props: { isOpen: boolean; onClose: () => void; sourcePath: string; onExportComplete: () => void; }) {
+export function SafExportModal(props: { isOpen: boolean; onClose: () => void; sourcePath: string; onExportComplete: () => void; onShizukuEnabled?: () => void; }) {
   const [isExporting, setIsExporting] = createSignal(false);
   const [autoDelete, setAutoDelete] = createSignal(true);
+  const [isPollingShizuku, setIsPollingShizuku] = createSignal(false);
+
+  let pollInterval: any;
+
+  onCleanup(() => {
+    if (pollInterval) clearInterval(pollInterval);
+  });
+
+  createEffect(() => {
+    if (!props.isOpen && pollInterval) {
+      clearInterval(pollInterval);
+      setIsPollingShizuku(false);
+    }
+  });
 
   const startExport = async () => {
     try {
@@ -59,7 +73,17 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
   const openShizuku = async () => {
      try {
        await invoke('shizuku_open_manager');
-       props.onClose(); // Close so they can enable Shizuku
+       setIsPollingShizuku(true);
+       pollInterval = setInterval(async () => {
+         try {
+           const hasShizuku = await invoke<boolean>('shizuku_check_permission');
+           if (hasShizuku) {
+             clearInterval(pollInterval);
+             setIsPollingShizuku(false);
+             props.onShizukuEnabled?.();
+           }
+         } catch(e) {}
+       }, 2000);
      } catch(e) {
        addToast('Failed to open Shizuku. Please install it from the Play Store.', 'error');
      }
@@ -83,7 +107,7 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
           </button>
           <span>Auto-delete temporary files</span>
           
-          <Tooltip text="Suzu Editor stores a temporary copy in your hidden app storage. Keep this checked to delete it after exporting, preventing your storage from filling up." position="top">
+          <Tooltip content="Suzu Editor stores a temporary copy in your hidden app storage. Keep this checked to delete it after exporting, preventing your storage from filling up." position="top">
             <Info size={14} class="text-zinc-500 hover:text-white transition-colors" />
           </Tooltip>
         </label>
@@ -106,10 +130,12 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
 
         <button 
           onClick={openShizuku} 
-          disabled={isExporting()}
+          disabled={isExporting() || isPollingShizuku()}
           class="w-full border border-yellow-600/50 hover:bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
         >
-          ⚡ ENABLE DIRECT EXPORT (OPEN SHIZUKU)
+          <Show when={isPollingShizuku()} fallback={<>⚡ ENABLE DIRECT EXPORT (OPEN SHIZUKU)</>}>
+            <Loader2 size={18} class="animate-spin" /> WAITING FOR SHIZUKU...
+          </Show>
         </button>
 
       </div>

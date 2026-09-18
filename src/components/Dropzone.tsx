@@ -1,18 +1,18 @@
-// @ts-nocheck
 import { createSignal, onMount, onCleanup } from 'solid-js';
-import { useEditorStore, loadSaveData } from '../store/editorStore';
-import { useToastStore, addToast } from '../store/toastStore';
+import { loadSaveData } from '../store/editorStore';
+import { addToast } from '../store/toastStore';
 import { FileUp, Loader2 } from 'lucide-solid';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openSaveFile } from '../services/ipc';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { invoke } from '@tauri-apps/api/core';
+import { ImportMethodModal, ShizukuImportBrowser } from './ShizukuImportModals';
 
 export function Dropzone() {
-  const store = useEditorStore();
-  const toastStore = useToastStore();
   const [isDragging, setIsDragging] = createSignal(false);
   const [isLoading, setIsLoading] = createSignal(false);
+  const [showImportMethodModal, setShowImportMethodModal] = createSignal(false);
+  const [showShizukuBrowser, setShowShizukuBrowser] = createSignal(false);
 
   let unlistenDragDrop: () => void;
 
@@ -74,19 +74,19 @@ export function Dropzone() {
     e.preventDefault(); 
   };
 
-  const handleSelect = async (e: any) => {
+  const handleSelect = async () => {
     if (isLoading() || isPasting()) return;
     try {
-      let selected: any = null;
       const { platform } = await import('@tauri-apps/plugin-os');
       const os = await platform();
       if (os === 'android') {
-          selected = await invoke('pick_file_for_write');
-      } else {
-          selected = await open({
-            multiple: false,
-          });
+          setShowImportMethodModal(true);
+          return;
       }
+      
+      let selected: any = await open({
+        multiple: false,
+      });
       
       if (selected && typeof selected === 'string') {
         await processFile(selected);
@@ -94,6 +94,18 @@ export function Dropzone() {
     } catch (err) {
       console.error(err);
       addToast('File selection cancelled or failed', 'error');
+    }
+  };
+
+  const handleDefaultAndroidSelect = async () => {
+    setShowImportMethodModal(false);
+    try {
+      let selected: any = await invoke('pick_file_for_write');
+      if (selected && typeof selected === 'string') {
+        await processFile(selected);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -184,6 +196,24 @@ export function Dropzone() {
           </div>
         </>
       )}
+
+      <ImportMethodModal 
+        isOpen={showImportMethodModal()} 
+        onClose={() => setShowImportMethodModal(false)}
+        onSelectDefault={handleDefaultAndroidSelect}
+        onShizukuReady={() => {
+          setShowImportMethodModal(false);
+          setShowShizukuBrowser(true);
+        }}
+      />
+
+      <ShizukuImportBrowser 
+        isOpen={showShizukuBrowser()} 
+        onClose={() => setShowShizukuBrowser(false)}
+        onFileSelected={(path) => {
+          processFile(path);
+        }}
+      />
     </div>
   );
 }

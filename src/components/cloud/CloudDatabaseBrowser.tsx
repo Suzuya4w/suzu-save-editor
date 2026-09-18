@@ -966,6 +966,10 @@ export function CloudDatabaseBrowser(props: { isOpen: boolean; onClose: () => vo
       onClose={() => setShowSafExport(false)}
       sourcePath={exportSourcePath()}
       onExportComplete={() => {}}
+      onShizukuEnabled={() => {
+        setShowSafExport(false);
+        setShowShizukuExport(true);
+      }}
     />
 
    </div>

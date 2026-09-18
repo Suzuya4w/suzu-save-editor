@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, For, createEffect } from 'solid-js';
+import { createSignal, Show, For, createEffect } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { Modal } from '../Modal';
 import { Folder, ArrowLeft, Loader2, Download } from 'lucide-solid';
@@ -15,7 +15,8 @@ export function ShizukuExportModal(props: { isOpen: boolean; onClose: () => void
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const cmd = `find "${path}" -mindepth 1 -maxdepth 1 -type d | sort`;
+      // Menambahkan / di akhir path agar find menembus symlink (seperti /sdcard)
+      const cmd = `find "${path}/" -mindepth 1 -maxdepth 1 -type d | sort`;
       const result: string = await invoke('shizuku_execute_command', { command: cmd });
       
       const lines = result.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -72,10 +73,10 @@ export function ShizukuExportModal(props: { isOpen: boolean; onClose: () => void
         
         {/* Breadcrumb / Path */}
         <div class="flex items-center gap-2 bg-zinc-900 p-2 border border-zinc-800">
-           <button onClick={goUp} class="p-1 hover:bg-zinc-800 disabled:opacity-50 cursor-pointer" disabled={currentPath() === '/sdcard'}>
-             <ArrowLeft size={16} />
+           <button onClick={goUp} class="p-3 bg-zinc-800 rounded hover:bg-zinc-700 disabled:opacity-50 cursor-pointer flex-shrink-0" disabled={currentPath() === '/sdcard'}>
+             <ArrowLeft size={20} />
            </button>
-           <div class="font-mono text-[10px] truncate flex-1 tracking-wider text-green-400">{currentPath()}</div>
+           <div class="font-mono text-xs truncate flex-1 tracking-wider text-green-400 pl-2">{currentPath()}</div>
         </div>
 
         {/* Folder List */}
