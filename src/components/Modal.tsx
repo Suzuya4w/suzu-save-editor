@@ -45,10 +45,14 @@ export function Modal(props: ModalProps) {
           {/* Backdrop */}
           <div 
             class="absolute inset-0 bg-black/95 cursor-default"
-            onClick={props.onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onClose();
+            }}
           />
           
           <div 
+            onClick={(e) => e.stopPropagation()}
             class={`relative w-full ${props.width || 'max-w-md'} max-h-[90vh] bg-black shadow-[8px_8px_0px_#FF7A00] flex flex-col overflow-hidden font-mono text-zinc-200 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
               isVisible() ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
             }`}
@@ -81,7 +85,10 @@ export function Modal(props: ModalProps) {
                 <h2 class="text-lg font-bold tracking-widest uppercase">{props.title}</h2>
               </div>
               <button 
-                onClick={props.onClose}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.onClose();
+                }}
                 class="p-2 bg-black border-2 border-transparent hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors cursor-pointer text-white shrink-0"
               >
                 <X size={16} />

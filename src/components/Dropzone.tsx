@@ -140,7 +140,8 @@ export function Dropzone() {
   };
 
   return (
-    <div
+    <>
+      <div
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -196,24 +197,25 @@ export function Dropzone() {
           </div>
         </>
       )}
-
-      <ImportMethodModal 
-        isOpen={showImportMethodModal()} 
-        onClose={() => setShowImportMethodModal(false)}
-        onSelectDefault={handleDefaultAndroidSelect}
-        onShizukuReady={() => {
-          setShowImportMethodModal(false);
-          setShowShizukuBrowser(true);
-        }}
-      />
-
-      <ShizukuImportBrowser 
-        isOpen={showShizukuBrowser()} 
-        onClose={() => setShowShizukuBrowser(false)}
-        onFileSelected={(path) => {
-          processFile(path);
-        }}
-      />
     </div>
-  );
+
+    <ImportMethodModal 
+      isOpen={showImportMethodModal()} 
+      onClose={() => setShowImportMethodModal(false)}
+      onSelectDefault={handleDefaultAndroidSelect}
+      onShizukuReady={() => {
+        setShowImportMethodModal(false);
+        setShowShizukuBrowser(true);
+      }}
+    />
+
+    <ShizukuImportBrowser 
+      isOpen={showShizukuBrowser()} 
+      onClose={() => setShowShizukuBrowser(false)}
+      onFileSelected={(path) => {
+        processFile(path);
+      }}
+    />
+  </>
+);
 }

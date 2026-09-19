@@ -101,6 +101,17 @@ export function ImportMethodModal(props: {
               <span class="tracking-widest flex items-center gap-2"><Loader2 size={16} class="animate-spin"/> CHECKING...</span>
             </Show>
           </button>
+
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onClose();
+            }}
+            class="w-full mt-1 py-3 text-xs text-zinc-400 hover:text-white uppercase font-bold tracking-wider cursor-pointer border border-zinc-800 hover:border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+          >
+            Cancel
+          </button>
         </Show>
 
         <Show when={needsSetup()}>

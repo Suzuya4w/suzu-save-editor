@@ -45,18 +45,19 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
       
       // Step 3: Auto-delete internal copy if checked
       if (autoDelete()) {
-         const cmd = `rm -rf "${props.sourcePath}"`;
-         try { 
-            const hasShizuku: boolean = await invoke('shizuku_is_available');
-            if (hasShizuku) {
-              await invoke('shizuku_execute_command', { command: cmd });
-            } else {
-              // Wait, rm -rf requires shell, but maybe standard fs works?
-              const { remove } = await import('@tauri-apps/plugin-fs');
-              await remove(props.sourcePath, { recursive: true });
+         try {
+            const { remove } = await import('@tauri-apps/plugin-fs');
+            await remove(props.sourcePath, { recursive: true });
+         } catch(fsErr) {
+            try { 
+               const hasShizuku: boolean = await invoke('shizuku_check_permission');
+               if (hasShizuku) {
+                 const cmd = `rm -rf "${props.sourcePath}"`;
+                 await invoke('shizuku_execute_command', { command: cmd });
+               }
+            } catch(e) {
+               console.error("Failed to delete temp files", e);
             }
-         } catch(e) {
-            console.error("Failed to delete temp files", e);
          }
       }
       
