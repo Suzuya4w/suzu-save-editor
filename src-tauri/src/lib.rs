@@ -543,8 +543,23 @@ fn shizuku_request_permission() -> Result<(), String> {
 }
 
 #[tauri::command]
-fn shizuku_open_manager() -> Result<(), String> {
+fn shizuku_open_manager() -> Result<String, String> {
     crate::shizuku::open_manager()
+}
+
+#[tauri::command]
+fn shizuku_is_installed() -> Result<bool, String> {
+    crate::shizuku::is_installed()
+}
+
+#[tauri::command]
+fn shizuku_pull_file(remote_path: String, local_path: String) -> Result<(), String> {
+    crate::shizuku::pull_file(&remote_path, &local_path)
+}
+
+#[tauri::command]
+fn shizuku_push_file(local_path: String, remote_path: String) -> Result<(), String> {
+    crate::shizuku::push_file(&local_path, &remote_path)
 }
 
 #[tauri::command]
@@ -994,6 +1009,9 @@ pub fn run() {
             shizuku_check_permission,
             shizuku_request_permission,
             shizuku_open_manager,
+            shizuku_is_installed,
+            shizuku_pull_file,
+            shizuku_push_file,
             shizuku_get_status,
             shizuku_execute_command,
             crate::saf::write_content_uri_bytes,

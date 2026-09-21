@@ -83,11 +83,11 @@ export async function writeSaveFile(modifiedData: StandardJson, path: string, ac
             
             await writeFile(tempFile, new Uint8Array(bytes));
             
-            // Use Shizuku to copy the temp file to the real restricted path
-            const cmd = `cp "${tempFile}" "${realPath}" && rm "${tempFile}"`;
-            const out = await invoke<string>('shizuku_execute_command', { command: cmd });
-            if (out.includes('ERROR:')) {
-              throw new Error(out);
+            try {
+              await invoke('shizuku_push_file', { localPath: tempFile, remotePath: realPath });
+            } finally {
+              const { remove } = await import('@tauri-apps/plugin-fs');
+              await remove(tempFile).catch(() => {});
             }
             return path;
           }

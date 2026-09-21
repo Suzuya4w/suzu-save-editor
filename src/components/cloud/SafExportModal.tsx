@@ -71,19 +71,45 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
     }
   };
 
+  const stopPollingShizuku = () => {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = null;
+    setIsPollingShizuku(false);
+  };
+
   const openShizuku = async () => {
      try {
-       await invoke('shizuku_open_manager');
+       const res: string = await invoke('shizuku_open_manager');
+       if (res === 'NOT_INSTALLED_OPENED_STORE' || res === 'NOT_INSTALLED') {
+         addToast('Shizuku is not installed. Opening store page...', 'info');
+         return;
+       }
+
        setIsPollingShizuku(true);
+       let attempts = 0;
+       const MAX_ATTEMPTS = 15; // 30 seconds
+
+       if (pollInterval) clearInterval(pollInterval);
        pollInterval = setInterval(async () => {
+         attempts++;
          try {
+           const isAvail = await invoke<boolean>('shizuku_is_available').catch(() => false);
+           if (isAvail) {
+             await invoke('shizuku_request_permission').catch(() => {});
+           }
+
            const hasShizuku = await invoke<boolean>('shizuku_check_permission');
            if (hasShizuku) {
-             clearInterval(pollInterval);
-             setIsPollingShizuku(false);
+             stopPollingShizuku();
              props.onShizukuEnabled?.();
+             return;
            }
          } catch(e) {}
+
+         if (attempts >= MAX_ATTEMPTS) {
+           stopPollingShizuku();
+           addToast('Timed out waiting for Shizuku. Please ensure the Shizuku service is running.', 'warning');
+         }
        }, 2000);
      } catch(e) {
        addToast('Failed to open Shizuku. Please install it from the Play Store.', 'error');
@@ -129,15 +155,27 @@ export function SafExportModal(props: { isOpen: boolean; onClose: () => void; so
            <div class="h-px bg-zinc-800 flex-1"></div>
         </div>
 
-        <button 
-          onClick={openShizuku} 
-          disabled={isExporting() || isPollingShizuku()}
-          class="w-full border border-yellow-600/50 hover:bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
-        >
-          <Show when={isPollingShizuku()} fallback={<>⚡ ENABLE DIRECT EXPORT (OPEN SHIZUKU)</>}>
-            <Loader2 size={18} class="animate-spin" /> WAITING FOR SHIZUKU...
-          </Show>
-        </button>
+        <Show when={isPollingShizuku()} fallback={
+          <button 
+            onClick={openShizuku} 
+            disabled={isExporting()}
+            class="w-full border border-yellow-600/50 hover:bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            ⚡ ENABLE DIRECT EXPORT (OPEN SHIZUKU)
+          </button>
+        }>
+          <div class="flex flex-col gap-2 w-full">
+            <div class="w-full border border-yellow-600/50 bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 text-xs">
+              <Loader2 size={16} class="animate-spin" /> WAITING FOR SHIZUKU (MAX 30S)...
+            </div>
+            <button 
+              onClick={stopPollingShizuku}
+              class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider cursor-pointer border border-zinc-700"
+            >
+              Cancel Waiting
+            </button>
+          </div>
+        </Show>
 
       </div>
     </Modal>

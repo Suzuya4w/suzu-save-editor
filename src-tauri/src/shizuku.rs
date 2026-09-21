@@ -77,6 +77,21 @@ pub fn is_available() -> Result<bool, String> {
 }
 
 #[cfg(target_os = "android")]
+pub fn is_installed() -> Result<bool, String> {
+    let vm = get_vm()?;
+    let mut env = vm.attach_current_thread().map_err(|e| e.to_string())?;
+    let context_obj = get_application_context(&mut env)?;
+    let class = get_api_class(&mut env)?;
+    let result = env.call_static_method(
+        class, 
+        "isInstalled", 
+        "(Landroid/content/Context;)Z", 
+        &[JValue::Object(context_obj)]
+    ).map_err(|e| e.to_string())?;
+    result.z().map_err(|e| e.to_string())
+}
+
+#[cfg(target_os = "android")]
 pub fn check_permission() -> Result<bool, String> {
     let vm = get_vm()?;
     let mut env = vm.attach_current_thread().map_err(|e| e.to_string())?;
@@ -116,19 +131,68 @@ pub fn execute_command(cmd: &str) -> Result<String, String> {
 }
 
 #[cfg(target_os = "android")]
-pub fn open_manager() -> Result<(), String> {
+pub fn open_manager() -> Result<String, String> {
     let vm = get_vm()?;
     let mut env = vm.attach_current_thread().map_err(|e| e.to_string())?;
     let context_obj = get_application_context(&mut env)?;
     
     let class = get_api_class(&mut env)?;
-    env.call_static_method(
+    let result = env.call_static_method(
         class, 
         "openManager", 
-        "(Landroid/content/Context;)V", 
+        "(Landroid/content/Context;)Ljava/lang/String;", 
         &[JValue::Object(context_obj)]
     ).map_err(|e| e.to_string())?;
-    Ok(())
+
+    let j_str = result.l().map_err(|e| e.to_string())?.into();
+    let r_str: String = env.get_string(&j_str).map_err(|e| e.to_string())?.into();
+    Ok(r_str)
+}
+
+#[cfg(target_os = "android")]
+pub fn pull_file(remote_path: &str, local_path: &str) -> Result<(), String> {
+    let vm = get_vm()?;
+    let mut env = vm.attach_current_thread().map_err(|e| e.to_string())?;
+    let class = get_api_class(&mut env)?;
+    let j_remote = env.new_string(remote_path).map_err(|e| e.to_string())?;
+    let j_local = env.new_string(local_path).map_err(|e| e.to_string())?;
+    let result = env.call_static_method(
+        class, 
+        "pullFile", 
+        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", 
+        &[JValue::Object(&j_remote.into()), JValue::Object(&j_local.into())]
+    ).map_err(|e| e.to_string())?;
+    
+    let j_str = result.l().map_err(|e| e.to_string())?.into();
+    let r_str: String = env.get_string(&j_str).map_err(|e| e.to_string())?.into();
+    if r_str == "SUCCESS" {
+        Ok(())
+    } else {
+        Err(r_str)
+    }
+}
+
+#[cfg(target_os = "android")]
+pub fn push_file(local_path: &str, remote_path: &str) -> Result<(), String> {
+    let vm = get_vm()?;
+    let mut env = vm.attach_current_thread().map_err(|e| e.to_string())?;
+    let class = get_api_class(&mut env)?;
+    let j_local = env.new_string(local_path).map_err(|e| e.to_string())?;
+    let j_remote = env.new_string(remote_path).map_err(|e| e.to_string())?;
+    let result = env.call_static_method(
+        class, 
+        "pushFile", 
+        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", 
+        &[JValue::Object(&j_local.into()), JValue::Object(&j_remote.into())]
+    ).map_err(|e| e.to_string())?;
+    
+    let j_str = result.l().map_err(|e| e.to_string())?.into();
+    let r_str: String = env.get_string(&j_str).map_err(|e| e.to_string())?.into();
+    if r_str == "SUCCESS" {
+        Ok(())
+    } else {
+        Err(r_str)
+    }
 }
 
 #[cfg(target_os = "android")]
@@ -155,6 +219,9 @@ pub fn get_status() -> Result<String, String> {
 pub fn is_available() -> Result<bool, String> { Ok(false) }
 
 #[cfg(not(target_os = "android"))]
+pub fn is_installed() -> Result<bool, String> { Ok(false) }
+
+#[cfg(not(target_os = "android"))]
 pub fn check_permission() -> Result<bool, String> { Ok(false) }
 
 #[cfg(not(target_os = "android"))]
@@ -164,7 +231,13 @@ pub fn request_permission() -> Result<(), String> { Ok(()) }
 pub fn execute_command(_cmd: &str) -> Result<String, String> { Err("Shizuku is only available on Android".to_string()) }
 
 #[cfg(not(target_os = "android"))]
-pub fn open_manager() -> Result<(), String> { Ok(()) }
+pub fn open_manager() -> Result<String, String> { Ok("NOT_ANDROID".to_string()) }
+
+#[cfg(not(target_os = "android"))]
+pub fn pull_file(_remote_path: &str, _local_path: &str) -> Result<(), String> { Err("Shizuku is only available on Android".to_string()) }
+
+#[cfg(not(target_os = "android"))]
+pub fn push_file(_local_path: &str, _remote_path: &str) -> Result<(), String> { Err("Shizuku is only available on Android".to_string()) }
 
 #[cfg(not(target_os = "android"))]
 pub fn get_status() -> Result<String, String> { Ok("NOT_ANDROID".to_string()) }

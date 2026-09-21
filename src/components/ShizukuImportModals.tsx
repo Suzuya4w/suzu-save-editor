@@ -1,4 +1,3 @@
-//
 import { createSignal, Show, createEffect, onCleanup, For } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { Modal } from './Modal';
@@ -14,18 +13,25 @@ export function ImportMethodModal(props: {
   const [isChecking, setIsChecking] = createSignal(false);
   const [needsSetup, setNeedsSetup] = createSignal(false);
   const [isPolling, setIsPolling] = createSignal(false);
+  const [notInstalled, setNotInstalled] = createSignal(false);
 
   let pollInterval: any;
 
-  onCleanup(() => {
+  const stopPolling = () => {
     if (pollInterval) clearInterval(pollInterval);
+    pollInterval = null;
+    setIsPolling(false);
+  };
+
+  onCleanup(() => {
+    stopPolling();
   });
 
   createEffect(() => {
     if (!props.isOpen) {
-      if (pollInterval) clearInterval(pollInterval);
-      setIsPolling(false);
+      stopPolling();
       setNeedsSetup(false);
+      setNotInstalled(false);
       setIsChecking(false);
     }
   });
@@ -37,6 +43,8 @@ export function ImportMethodModal(props: {
       if (hasShizuku) {
         props.onShizukuReady();
       } else {
+        const isInst = await invoke<boolean>('shizuku_is_installed').catch(() => true);
+        setNotInstalled(!isInst);
         setNeedsSetup(true);
       }
     } catch(e) {
@@ -48,17 +56,39 @@ export function ImportMethodModal(props: {
 
   const openShizuku = async () => {
     try {
-      await invoke('shizuku_open_manager');
+      const res: string = await invoke('shizuku_open_manager');
+      if (res === 'NOT_INSTALLED_OPENED_STORE' || res === 'NOT_INSTALLED') {
+        setNotInstalled(true);
+        addToast('Shizuku is not installed. Opening store page...', 'info');
+        return;
+      }
+
+      setNotInstalled(false);
       setIsPolling(true);
+      let attempts = 0;
+      const MAX_ATTEMPTS = 15; // 30 seconds
+
+      if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
+        attempts++;
         try {
+          const isAvail = await invoke<boolean>('shizuku_is_available').catch(() => false);
+          if (isAvail) {
+            await invoke('shizuku_request_permission').catch(() => {});
+          }
+
           const hasShizuku = await invoke<boolean>('shizuku_check_permission');
           if (hasShizuku) {
-            clearInterval(pollInterval);
-            setIsPolling(false);
+            stopPolling();
             props.onShizukuReady();
+            return;
           }
         } catch(e) {}
+
+        if (attempts >= MAX_ATTEMPTS) {
+          stopPolling();
+          addToast('Timed out waiting for Shizuku. Please ensure the Shizuku service is running.', 'warning');
+        }
       }, 2000);
     } catch(e) {
       addToast('Failed to open Shizuku.', 'error');
@@ -115,32 +145,73 @@ export function ImportMethodModal(props: {
         </Show>
 
         <Show when={needsSetup()}>
-          <div class="text-center bg-zinc-900 border border-zinc-700 p-4 flex flex-col items-center gap-3">
-            <Info size={24} class="text-yellow-500" />
-            <h3 class="font-bold text-yellow-500 uppercase tracking-widest">Shizuku Not Ready</h3>
-            <p class="text-xs text-zinc-400 font-serif mb-2">
-              We couldn't detect Shizuku access. Please make sure Shizuku is running and permission is granted to Suzu Editor.
-            </p>
-            <button 
-              onClick={openShizuku} 
-              disabled={isPolling()}
-              class="w-full border border-yellow-600/50 hover:bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
-            >
-              <Show when={isPolling()} fallback={<>OPEN SHIZUKU MANAGER</>}>
-                <Loader2 size={18} class="animate-spin" /> WAITING FOR SHIZUKU...
+          <Show when={notInstalled()} fallback={
+            <div class="text-center bg-zinc-900 border border-zinc-700 p-4 flex flex-col items-center gap-3">
+              <Info size={24} class="text-yellow-500" />
+              <h3 class="font-bold text-yellow-500 uppercase tracking-widest">Shizuku Not Ready</h3>
+              <p class="text-xs text-zinc-400 font-serif mb-2">
+                We couldn't detect Shizuku access. Please make sure Shizuku is running and permission is granted to Suzu Editor.
+              </p>
+              
+              <Show when={isPolling()} fallback={
+                <button 
+                  onClick={openShizuku} 
+                  class="w-full border border-yellow-600/50 hover:bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors cursor-pointer"
+                >
+                  OPEN SHIZUKU MANAGER
+                </button>
+              }>
+                <div class="flex flex-col gap-2 w-full">
+                  <div class="w-full border border-yellow-600/50 bg-yellow-600/10 text-yellow-500 font-bold uppercase py-3 flex justify-center items-center gap-2 text-xs">
+                    <Loader2 size={16} class="animate-spin" /> WAITING FOR SHIZUKU (MAX 30S)...
+                  </div>
+                  <button 
+                    onClick={stopPolling}
+                    class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider cursor-pointer border border-zinc-700"
+                  >
+                    Cancel Waiting
+                  </button>
+                </div>
               </Show>
-            </button>
-            <button onClick={() => setNeedsSetup(false)} class="text-xs text-zinc-500 hover:text-white underline mt-2 cursor-pointer">
-              Back to choices
-            </button>
-          </div>
+
+              <button onClick={() => { stopPolling(); setNeedsSetup(false); }} class="text-xs text-zinc-500 hover:text-white underline mt-2 cursor-pointer">
+                Back to choices
+              </button>
+            </div>
+          }>
+            <div class="text-center bg-zinc-900 border border-zinc-700 p-4 flex flex-col items-center gap-3">
+              <Info size={24} class="text-yellow-500" />
+              <h3 class="font-bold text-yellow-500 uppercase tracking-widest">Shizuku Not Installed</h3>
+              <p class="text-xs text-zinc-400 font-serif mb-2">
+                Shizuku is not installed on your device. Please install Shizuku, start the service, and grant permission to Suzu Editor.
+              </p>
+              <button 
+                onClick={openShizuku} 
+                class="w-full bg-[#FF7A00] hover:bg-white text-black font-bold uppercase py-3 flex justify-center items-center gap-2 transition-colors cursor-pointer"
+              >
+                Install / Open Store
+              </button>
+              <button 
+                onClick={handleShizukuClick}
+                disabled={isChecking()}
+                class="w-full border border-zinc-600 hover:bg-zinc-800 text-white font-bold uppercase py-2.5 flex justify-center items-center gap-2 transition-colors cursor-pointer text-xs"
+              >
+                <Show when={isChecking()} fallback={<>Check Again</>}>
+                  <Loader2 size={14} class="animate-spin" /> Checking...
+                </Show>
+              </button>
+              <button onClick={() => { setNeedsSetup(false); setNotInstalled(false); }} class="text-xs text-zinc-500 hover:text-white underline mt-1 cursor-pointer">
+                Back to choices
+              </button>
+            </div>
+          </Show>
         </Show>
       </div>
     </Modal>
   );
 }
 
-export function ShizukuImportBrowser(props: { isOpen: boolean; onClose: () => void; onFileSelected: (path: string) => void; }) {
+export function ShizukuImportBrowser(props: { isOpen: boolean; onClose: () => void; onFileSelected: (localPath: string, remotePath: string) => void; }) {
   const [currentPath, setCurrentPath] = createSignal('/sdcard/Android/data');
   const [items, setItems] = createSignal<{name: string, isDir: boolean}[]>([]);
   const [isLoading, setIsLoading] = createSignal(false);
@@ -195,12 +266,14 @@ export function ShizukuImportBrowser(props: { isOpen: boolean; onClose: () => vo
         const { mkdir } = await import('@tauri-apps/plugin-fs');
         const baseDir = await appDataDir();
         await mkdir(baseDir, { recursive: true }).catch(() => {});
-        const tempFile = baseDir + '/shizuku_import_temp_' + Date.now() + '.dat';
         
-        const cmd = `cp "${fullPath}" "${tempFile}"`;
-        await invoke('shizuku_execute_command', { command: cmd });
+        // Preserve original extension and name
+        const safeName = item.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const tempFile = baseDir + '/shizuku_' + Date.now() + '_' + safeName;
         
-        props.onFileSelected(tempFile);
+        await invoke('shizuku_pull_file', { remotePath: fullPath, localPath: tempFile });
+        
+        props.onFileSelected(tempFile, fullPath);
         props.onClose();
       } catch (err: any) {
          addToast(err.message || 'Failed to copy file via Shizuku', 'error');

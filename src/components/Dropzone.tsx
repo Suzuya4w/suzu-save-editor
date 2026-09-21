@@ -1,5 +1,5 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
-import { loadSaveData } from '../store/editorStore';
+import { loadSaveData, setShizukuRemotePath } from '../store/editorStore';
 import { addToast } from '../store/toastStore';
 import { FileUp, Loader2 } from 'lucide-solid';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -41,12 +41,15 @@ export function Dropzone() {
     if (unlistenDragDrop) unlistenDragDrop();
   });
 
-  const processFile = async (filePath: string) => {
+  const processFile = async (filePath: string, remotePath?: string) => {
     try {
       setIsLoading(true);
       addToast('Parsing save file...', 'info');
       const data = await openSaveFile(filePath);
       loadSaveData(data, filePath, null);
+      if (remotePath) {
+        setShizukuRemotePath(remotePath);
+      }
       addToast('File loaded successfully', 'success');
     } catch (err: any) {
       console.error(err);
@@ -212,8 +215,8 @@ export function Dropzone() {
     <ShizukuImportBrowser 
       isOpen={showShizukuBrowser()} 
       onClose={() => setShowShizukuBrowser(false)}
-      onFileSelected={(path) => {
-        processFile(path);
+      onFileSelected={(localPath, remotePath) => {
+        processFile(localPath, remotePath);
       }}
     />
   </>

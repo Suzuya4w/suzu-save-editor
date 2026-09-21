@@ -43,6 +43,7 @@ interface EditorState {
   isHistoryModalOpen: boolean;
   adbDeviceId: string | null;
   adbRemotePath: string | null;
+  shizukuRemotePath: string | null;
   mcpPulse: boolean;
   isMcpEnabled: boolean;
   pendingAiMutation: Record<string, any> | null;
@@ -144,6 +145,7 @@ export const [editorState, setEditorState] = createStore<EditorState>({
   isBackupManagerOpen: false,
   adbDeviceId: null,
   adbRemotePath: null,
+  shizukuRemotePath: null,
   mcpPulse: false,
   isMcpEnabled: false,
   pendingAiMutation: null,
@@ -204,6 +206,7 @@ export const loadSaveData = (data: StandardJson, path: string, profileRules: any
     state.stardewActiveTab = 'identity';
     state.pinnedPaths = new Set<string>();
     state.isModified = false;
+    state.shizukuRemotePath = null;
     
     if (data.parsed_variables?._is_binary_format === true || data.parsed_variables?.is_encrypted_binary === true) {
       state.editorMode = 'hex';
@@ -246,6 +249,7 @@ export const closeFile = async () => {
     isDatabaseTranslated: false,
     adbDeviceId: null,
     adbRemotePath: null,
+    shizukuRemotePath: null,
     hasUsedRawMode: false,
     isModified: false,
   });
@@ -266,6 +270,10 @@ export const closeFile = async () => {
 export const setAdbInfo = (deviceId: string | null, remotePath: string | null) => setEditorState(produce((state) => {
   state.adbDeviceId = deviceId;
   state.adbRemotePath = remotePath;
+}));
+
+export const setShizukuRemotePath = (remotePath: string | null) => setEditorState(produce((state) => {
+  state.shizukuRemotePath = remotePath;
 }));
 
 export const updateValue = (path: string, value: any) => setEditorState(produce((state) => {

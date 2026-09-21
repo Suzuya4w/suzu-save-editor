@@ -623,7 +623,7 @@ export function Header() {
       Are you absolutely sure you want to overwrite the original save file?
      </p>
      <p class="text-xs font-desc text-zinc-400 bg-zinc-900/50 p-2 border border-zinc-800 break-words">
-      {editorState.filePath || 'Unknown File'}
+      {editorState.shizukuRemotePath || editorState.filePath || 'Unknown File'}
      </p>
     </div>
     <div class="flex gap-4">
@@ -665,6 +665,17 @@ export function Header() {
                 remotePath: editorState.adbRemotePath
               });
               addToast("File saved and pushed to Android successfully!", "success");
+            } else if (editorState.shizukuRemotePath) {
+              addToast("Writing back to game folder via Shizuku...", "info");
+              try {
+                await invoke('shizuku_push_file', {
+                  localPath: editorState.filePath,
+                  remotePath: editorState.shizukuRemotePath
+                });
+                addToast("File saved and updated in game folder via Shizuku!", "success");
+              } catch (shizukuErr: any) {
+                addToast(`Warning: Local file saved, but failed to write to game folder: ${shizukuErr.message || String(shizukuErr)}`, "error");
+              }
             } else {
               addToast("File saved successfully! Backend backup created.", "success");
             }
