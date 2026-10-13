@@ -1,5 +1,5 @@
 import { createSignal, Show, JSX, onMount, createEffect } from 'solid-js';
-import { ShieldCheck, Wrench, Search, FileCode, ChevronDown, ChevronUp, BookOpen, MousePointerClick, Lightbulb, HelpCircle, Gamepad2, Info, AlignLeft, Code, Database, FolderPlus, RefreshCw } from 'lucide-solid';
+import { ShieldCheck, Wrench, Search, FileCode, ChevronDown, ChevronUp, BookOpen, MousePointerClick, Lightbulb, HelpCircle, Gamepad2, Info, AlignLeft, Code, Database, FolderPlus, RefreshCw, Swords } from 'lucide-solid';
 import { useEditorStore, setHelpModalSection } from '../store/editorStore';
 import { addToast } from '../store/toastStore';
 import { check } from '@tauri-apps/plugin-updater';
@@ -109,11 +109,76 @@ export const HelpModal = (props: { isOpen: boolean; onClose: () => void }) => {
 
           <AccordionItem title="How To Use" id="how_to_use" activeSection={activeSection()} onToggle={handleToggle} icon={MousePointerClick}>
             <div class="space-y-2">
-              <p>1. Click <strong>Open Save File</strong> and locate your game's save data.</p>
+              <p>1. Open your save file by dragging it into Suzu, clicking <strong>Open Save File</strong>, or right-clicking any save file in Windows and choosing <strong>Open with &rarr; Suzu Save Editor</strong>.</p>
               <p>2. Use <strong>Simple Mode</strong> for easy editing (Gold, HP, MP) or <strong>Advanced Mode</strong> to dig into raw variables.</p>
               <p>3. Make your desired changes in the input fields.</p>
               <p>4. Click the <strong>Save</strong> button in the top right corner.</p>
               <p>5. Choose to overwrite the existing file (a <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">.bak</code> backup will be created) or save as a new copy.</p>
+            </div>
+          </AccordionItem>
+
+          <AccordionItem title="RPG Save Editing Guide" id="rpg_guide" activeSection={activeSection()} onToggle={handleToggle} icon={Swords}>
+            <div class="space-y-4">
+              <div class="bg-cyan-500/10 border-l-2 border-cyan-500 p-3">
+                <p class="text-xs text-cyan-300 leading-relaxed">
+                  <strong>Save Game Mastery:</strong> RPG Maker (MV, MZ, XP, VX, Ace) and WOLF RPG store party statistics, inventory, progression switches, and gallery flags directly inside save files. Follow this guide to edit safely and unlock content quickly.
+                </p>
+              </div>
+
+              <div>
+                <strong class="text-cyan-400 block mb-1">1. Simple Mode vs. Advanced Mode</strong>
+                <ul class="list-disc pl-5 space-y-1.5 text-zinc-300">
+                  <li><span class="text-white font-semibold">Simple Mode (Dashboard):</span> Best for quick edits on RPG Maker MV/MZ and Stardew Valley. Adjust Party levels, current & max HP/MP, Gold, and inventory quantities with clean UI inputs without touching raw JSON hierarchies.</li>
+                  <li><span class="text-white font-semibold">Advanced Mode (Tree View):</span> Gives complete access to the raw variable tree, switches, nested actor tables, and custom plugin states. Perfect when you need to change complex quest variables.</li>
+                </ul>
+              </div>
+
+              <div>
+                <strong class="text-cyan-400 block mb-1">2. Unlocking Galleries, CGs & Recollections</strong>
+                <p class="mb-2 text-zinc-300">RPG Maker games typically control CG galleries and scene recollections through two mechanisms:</p>
+                <ul class="list-disc pl-5 space-y-2 text-zinc-300">
+                  <li>
+                    <strong class="text-yellow-400">Global / System Save File:</strong> Many RPGs store unlocked CG galleries, memory rooms, and achievement flags in a separate global save file (such as <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">global.rpgsave</code> or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">config.rpgsave</code>), rather than in slot saves (<code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">file1.rpgsave</code>). If gallery CGs remain locked in the main menu after editing your game slot, check the game save directory for <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">global.rpgsave</code> and edit that file!
+                  </li>
+                  <li>
+                    <strong class="text-yellow-400">In-Game Switches (Event Flags):</strong> Other games use in-game Switches (Boolean <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">true</code> / <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">false</code>). In Simple Mode (Switches tab) or in Advanced Mode, use the Search bar to search for terms like <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">cg</code>, <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">memory</code>, <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">gallery</code>, <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">recap</code>, <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">scene</code>, or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">omake</code>, and toggle them to <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">true</code>.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <strong class="text-cyan-400 block mb-1">3. Translating Items & Names ("Load Game DB")</strong>
+                <p class="text-zinc-300 leading-relaxed mb-1.5">
+                  Untranslated Japanese or indie RPGs often show variables as obscure numbers like <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">Item_34</code> or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">Variable_12</code>.
+                </p>
+                <ul class="list-disc pl-5 space-y-1.5 text-zinc-300">
+                  <li>Click <strong>Load DB</strong> in the top toolbar and select the game's <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">data/</code> or <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">www/data/</code> folder.</li>
+                  <li>Suzu automatically maps confusing IDs to their real English names (e.g. "Excalibur", "High Potion").</li>
+                  <li>You can also click <strong>Translate DB</strong> to auto-translate Japanese text to English in real time!</li>
+                </ul>
+              </div>
+
+              <div>
+                <strong class="text-cyan-400 block mb-1">4. Safe Value Limits (Crash Prevention)</strong>
+                <p class="text-zinc-300 leading-relaxed mb-2">
+                  RPG engines have strict internal integer limits. For standard RPG Maker:
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] font-mono">
+                  <div class="p-2 bg-zinc-900 border border-zinc-800"><span class="text-zinc-400">Max Gold:</span> <span class="text-cyan-300 font-bold">9,999,999</span></div>
+                  <div class="p-2 bg-zinc-900 border border-zinc-800"><span class="text-zinc-400">Max HP / MP:</span> <span class="text-cyan-300 font-bold">9,999</span></div>
+                  <div class="p-2 bg-zinc-900 border border-zinc-800"><span class="text-zinc-400">Max Level:</span> <span class="text-cyan-300 font-bold">99</span></div>
+                </div>
+                <p class="text-xs text-yellow-500/90 mt-2">
+                  ⚠️ Entering extreme numbers (e.g., 999,999,999) can cause memory overflow and crash the game when opening inventory or battle screens.
+                </p>
+              </div>
+
+              <div>
+                <strong class="text-cyan-400 block mb-1">5. Safe Auto-Backups & Easy Rollback</strong>
+                <p class="text-zinc-300 leading-relaxed">
+                  Every time you save or overwrite a file, Suzu creates an automatic backup with a <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">.bak</code> extension in the same folder. If the game glitches, simply delete the modified save and remove the <code class="bg-zinc-800 px-1 py-0.5 text-orange-400 font-mono">.bak</code> extension from the backup file to instantly restore your original state.
+                </p>
+              </div>
             </div>
           </AccordionItem>
 

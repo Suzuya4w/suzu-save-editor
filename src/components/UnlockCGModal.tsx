@@ -1021,7 +1021,7 @@ function BuilderTab(props: any) {
     </div>
     <div class="flex flex-col gap-2">
      <label class="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">Game Version (Optional)</label>
-     <input type="text" value={props.profileVersion()} onInput={(e) => props.setProfileVersion(e.currentTarget.value)} placeholder="e.g. 1.0.4" class="bg-[#0a0a0a] border border-zinc-800 px-4 py-2 text-zinc-300 text-sm font-brains focus:outline-none focus:border-red-500" />
+     <input type="text" value={props.profileVersion()} onInput={(e) => props.setProfileVersion(e.currentTarget.value)} placeholder="e.g. 1.0.5" class="bg-[#0a0a0a] border border-zinc-800 px-4 py-2 text-zinc-300 text-sm font-brains focus:outline-none focus:border-red-500" />
     </div>
     <div class="flex flex-col gap-2">
      <label class="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">Notes / Desc (Optional)</label>

@@ -824,16 +824,46 @@ async fn save_file_bytes(
 }
 
 pub struct AdbState(pub std::sync::Mutex<Option<String>>);
+pub struct InitialFileState(pub std::sync::Mutex<Option<String>>);
+
+#[tauri::command]
+fn get_initial_file_path(state: State<'_, InitialFileState>) -> Option<String> {
+    state.0.lock().ok()?.take()
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let _ = rustls::crypto::CryptoProvider::install_default(rustls::crypto::ring::default_provider());
     let shared_state = SharedSaveState::default();
     
+    let initial_file_path = std::env::args().skip(1).find_map(|arg| {
+        if arg.starts_with('-') || arg.starts_with("suzu://") {
+            return None;
+        }
+        let p = std::path::Path::new(&arg);
+        if p.is_file() {
+            if p.is_absolute() {
+                Some(arg)
+            } else if let Ok(cwd) = std::env::current_dir() {
+                let abs = cwd.join(p);
+                if abs.is_file() {
+                    Some(abs.to_string_lossy().to_string())
+                } else {
+                    Some(arg)
+                }
+            } else {
+                Some(arg)
+            }
+        } else {
+            None
+        }
+    });
+
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .manage(shared_state.clone())
         .manage(AdbState(std::sync::Mutex::new(None)))
+        .manage(InitialFileState(std::sync::Mutex::new(initial_file_path)))
         .setup(move |app| {
             let app_handle = app.handle().clone();
             
@@ -953,21 +983,43 @@ pub fn run() {
                     )
                     .build(),
             )
-            .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
                 let _ = app.get_webview_window("main").map(|w| {
-                    for arg in args {
+                    for arg in &args {
                         if arg.starts_with("suzu://") {
                             let _ = w.emit("deep-link-received", arg);
+                        } else if !arg.starts_with('-') {
+                            let p = std::path::Path::new(arg);
+                            let resolved = if p.is_file() {
+                                if p.is_absolute() {
+                                    Some(arg.clone())
+                                } else {
+                                    let abs = std::path::Path::new(&cwd).join(p);
+                                    if abs.is_file() {
+                                        Some(abs.to_string_lossy().to_string())
+                                    } else {
+                                        Some(arg.clone())
+                                    }
+                                }
+                            } else {
+                                None
+                            };
+
+                            if let Some(file_path) = resolved {
+                                let _ = w.emit("open-file-requested", file_path);
+                            }
                         }
                     }
                     let _ = w.show();
-                    w.set_focus()
+                    let _ = w.unminimize();
+                    let _ = w.set_focus();
                 });
             }));
     }
 
     builder
         .invoke_handler(tauri::generate_handler![
+            get_initial_file_path,
             calculate_entropy,
             extract_strings,
             xor_decrypt,

@@ -1,6 +1,6 @@
 import { Switch, Match, For, createSignal, Show } from 'solid-js';
-import { useEditorStore, setActiveTab, setGameDatabase, setOriginalGameDatabase, setTranslatedGameDatabase, setDatabaseTranslated } from '../../store/editorStore';
-import { Users, Package, Sword, Shield, ToggleLeft, Hash, Database, Languages } from 'lucide-solid';
+import { useEditorStore, setActiveTab, setGameDatabase, setOriginalGameDatabase, setTranslatedGameDatabase, setDatabaseTranslated, setIsHelpModalOpen, setHelpModalSection } from '../../store/editorStore';
+import { Users, Package, Sword, Shield, ToggleLeft, Hash, Database, Languages, HelpCircle } from 'lucide-solid';
 import { PartyView } from './PartyView';
 import { ItemsView } from './ItemsView';
 import { WeaponsView } from './WeaponsView';
@@ -196,6 +196,16 @@ const [translationProgress, setTranslationProgress] = createSignal("");
         <p class="hidden md:block text-[12px] text-zinc-400 font-brains mt-4 text-center px-2 leading-relaxed">
           Map IDs to real names (Select data/ folder)
         </p>
+
+        <button
+          onClick={() => {
+            setHelpModalSection('rpg_guide');
+            setIsHelpModalOpen(true);
+          }}
+          class="hidden md:flex items-center justify-center gap-1.5 mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider font-bold cursor-pointer"
+        >
+          <HelpCircle size={13} /> RPG Editing Guide
+        </button>
         </div>
 
         <div class="overflow-x-auto md:overflow-y-auto p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-6 custom-scrollbar shrink-0 md:flex-1 items-center md:items-stretch">

@@ -24,6 +24,7 @@ const BackupManagerModal = lazy(() => import('./components/BackupManagerModal').
 const LocalShareModal = lazy(() => import('./components/LocalShareModal').then(m => ({ default: m.LocalShareModal })));
 import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
 import { useEditorStore, loadSaveData, setIsHelpModalOpen, setIsShareModalOpen } from "./store/editorStore";
+import { openSaveFile } from "./services/ipc";
 import { setIsSettingsOpen } from "./store/settingsStore";
 import { McpBridge } from "./components/McpBridge";
 import { addToast } from "./store/toastStore";
@@ -111,6 +112,18 @@ export const SUPPORTED_ENGINES = [
       }
   };
  
+  const openFileFromExternal = async (filePath: string) => {
+    try {
+      addToast('Opening save file...', 'info');
+      const data = await openSaveFile(filePath);
+      loadSaveData(data, filePath, null);
+      addToast('File loaded successfully', 'success');
+    } catch (err: any) {
+      console.error('Failed to open file from external/CLI:', err);
+      addToast(err.message || 'Failed to open file', 'error');
+    }
+  };
+
  const [showAbout, setShowAbout] = createSignal(false);
  const [isCloudBrowserOpen, setIsCloudBrowserOpen] = createSignal(false);
  const [isAndroidBrowserOpen, setIsAndroidBrowserOpen] = createSignal(false);
@@ -205,7 +218,7 @@ export const SUPPORTED_ENGINES = [
     // Expose debug function for testing UI in regular browser
     (window as any).__DEBUG_LOAD_DEMO__ = () => {
        loadSaveData({
-         "game_info": { "name": "Demo RPG Game", "playtime": "120:45:00", "version": "1.0.4" },
+         "game_info": { "name": "Demo RPG Game", "playtime": "120:45:00", "version": "1.0.5" },
          "player": { "name": "Suzuya", "level": 99, "hp": 9999, "mp": 999 },
          "inventory": { "gold": 9999999, "items": ["Excalibur", "Potion x99"] },
          "flags": { "boss_defeated": true, "tutorial_done": true },
@@ -377,6 +390,22 @@ export const SUPPORTED_ENGINES = [
       listen<string>('auth-success', async (event) => {
         await processAuthToken(event.payload);
       }).catch(e => console.error('Failed to register local auth listener:', e));
+    } catch(e) {}
+
+    try {
+      invoke<string | null>('get_initial_file_path').then(async (initialPath) => {
+        if (initialPath) {
+          await openFileFromExternal(initialPath);
+        }
+      }).catch(e => console.error('Failed to get initial file path:', e));
+    } catch(e) { console.error(e); }
+
+    try {
+      listen<string>('open-file-requested', async (event) => {
+        if (event.payload) {
+          await openFileFromExternal(event.payload);
+        }
+      }).catch(e => console.error('Failed to listen to open-file-requested:', e));
     } catch(e) {}
   });
 
