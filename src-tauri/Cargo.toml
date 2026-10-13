@@ -1,6 +1,6 @@
 [package]
 name = "suzu-save-editor"
-version = "1.0.0"
+version = "1.0.4"
 description = "Ultimate Save Game Manager & Editor"
 authors = ["Suzuya4w"]
 edition = "2024"
