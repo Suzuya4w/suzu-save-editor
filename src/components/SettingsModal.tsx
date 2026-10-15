@@ -5,6 +5,7 @@ import { Settings, Plug, FolderOpen, RefreshCw, AlertTriangle, ShieldCheck, Info
 import { useSettingsStore, setIsSettingsOpen, toggleEffects } from '../store/settingsStore';
 import { addToast } from '../store/toastStore';
 import { Tooltip } from './Header';
+import { APP_VERSION } from '../utils/version';
 
 interface PluginMetadata {
     name: string;
@@ -122,6 +123,16 @@ export function SettingsModal() {
                                 >
                                     <div class={`w-5 h-5 bg-white transition-transform ${settings.enableEffects ? 'translate-x-14' : 'translate-x-0'}`} />
                                 </button>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-[#0a0a0a] border border-zinc-800">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-zinc-200 tracking-wider">APPLICATION VERSION</span>
+                                    <span class="text-xs font-desc text-zinc-500">Current build release</span>
+                                </div>
+                                <span class="font-mono text-xs font-bold px-3 py-1 bg-zinc-900 border border-zinc-700 text-[#00F0FF] tracking-widest">
+                                    v{APP_VERSION}
+                                </span>
                             </div>
                         </div>
                     </Show>

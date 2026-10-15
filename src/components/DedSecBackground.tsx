@@ -1,19 +1,15 @@
 import { useSettingsStore } from '../store/settingsStore';
 import { Show, createSignal, onMount } from 'solid-js';
+import { APP_VERSION } from '../utils/version';
 
 export function DedSecBackground(props: { isModalOpen?: boolean }) {
   const settings = useSettingsStore();
 
-  const [appVersion, setAppVersion] = createSignal('');
   const [typedText, setTypedText] = createSignal('');
   const [isDoneTyping, setIsDoneTyping] = createSignal(false);
   const fullText = "Welcome";
 
-  onMount(async () => {
-    try {
-      const { getVersion } = await import('@tauri-apps/plugin-app');
-      setAppVersion(await getVersion());
-    } catch(e) {}
+  onMount(() => {
 
     let index = 0;
     function type() {
@@ -101,7 +97,7 @@ export function DedSecBackground(props: { isModalOpen?: boolean }) {
           {/* Floating ASCII / Terminal Text */}
           <div class="absolute top-36 md:top-10 left-4 md:left-10 text-[10px] md:text-xs text-zinc-400 opacity-60 leading-relaxed uppercase tracking-wider">
             {">"} system boot up sequence_<br/>
-            {">"} welcome to suzu save editor {appVersion() || '1.0.0'}<br/>
+            {">"} welcome to suzu save editor {APP_VERSION}<br/>
             {">"} you can unlock cg or changing stats<br/>
             {">"} note:it's only working with offline or single-player games<br/>
             {">"} this program is made just for fun<br/>
@@ -111,7 +107,7 @@ export function DedSecBackground(props: { isModalOpen?: boolean }) {
           <div class="absolute top-2 md:top-10 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-70">
             <div class="h-[2px] w-32 md:w-56 bg-zinc-400 mb-1"></div>
             <div class="px-2 md:px-4 py-1 bg-zinc-300 text-black font-bold text-[10px] md:text-sm tracking-widest uppercase">
-              {'>'}SUZU_SAVE APP {appVersion() || '1.0.0'}
+              {'>'}SUZU_SAVE APP {APP_VERSION}
             </div>
             <div class="h-[1px] w-32 md:w-56 bg-zinc-400 mt-1"></div>
             <div class="h-[2px] w-32 md:w-56 bg-zinc-400 mt-1"></div>

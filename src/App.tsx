@@ -37,6 +37,7 @@ import { onOpenUrl, getCurrent } from '@tauri-apps/plugin-deep-link';
 import { listen } from '@tauri-apps/api/event';
 import { setCustomSession } from './store/authStore';
 import { readTextFile, remove, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { APP_VERSION } from './utils/version';
 
 export function Tooltip(props: { text: string, position?: 'top' | 'bottom', align?: 'center' | 'left' | 'right', class?: string, children: any }) {
   const [show, setShow] = createSignal(false);
@@ -130,7 +131,7 @@ export const SUPPORTED_ENGINES = [
  const [isConverterOpen, setIsConverterOpen] = createSignal(false);
  const [installedGames, setInstalledGames] = createSignal<any[] | null>(null);
  const [showInstalledGames, setShowInstalledGames] = createSignal(false);
- const [appVersion, setAppVersion] = createSignal('');
+ const [appVersion, setAppVersion] = createSignal(APP_VERSION);
  const [isRooted, setIsRooted] = createSignal(false);
  const [hasShizuku, setHasShizuku] = createSignal(false);
  const [osType, setOsType] = createSignal('');
@@ -168,7 +169,7 @@ export const SUPPORTED_ENGINES = [
      addToast("UPDATE SUCCESSFUL! RESTARTING SYSTEM...", "success");
      await relaunch();
     } else {
-     addToast(`SYSTEM IS UP TO DATE [v${appVersion() || '1.0.0'}]`, "success");
+     addToast(`SYSTEM IS UP TO DATE [v${appVersion() || APP_VERSION}]`, "success");
     }
    } catch (err: any) {
     console.error("Update failed:", err);
@@ -632,7 +633,7 @@ export const SUPPORTED_ENGINES = [
        
         <div class="flex md:hidden items-center justify-center gap-6 mt-6 text-xs font-bold uppercase tracking-widest text-zinc-500 opacity-0 stagger-5">
           <button onClick={checkForUpdates} class="hover:text-[#00F0FF] cursor-pointer p-2 -m-2">
-            [ v{appVersion() || '1.0.0'} ]
+            [ v{appVersion() || APP_VERSION} ]
           </button>
           
           <Show when={osType() === 'android'}>
@@ -772,7 +773,7 @@ export const SUPPORTED_ENGINES = [
            onClick={checkForUpdates}
            class="hover:text-[#00F0FF] hover:underline decoration-2 underline-offset-4 cursor-pointer transition-all"
          >
-           [ v{appVersion() || '1.0.0'} ]
+           [ v{appVersion() || APP_VERSION} ]
          </button>
        </Tooltip>
        <span class="text-zinc-700">|</span>

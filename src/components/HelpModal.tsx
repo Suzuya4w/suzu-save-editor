@@ -1,4 +1,4 @@
-import { createSignal, Show, JSX, onMount, createEffect } from 'solid-js';
+import { createSignal, Show, JSX, createEffect } from 'solid-js';
 import { ShieldCheck, Wrench, Search, FileCode, ChevronDown, ChevronUp, BookOpen, MousePointerClick, Lightbulb, HelpCircle, Gamepad2, Info, AlignLeft, Code, Database, FolderPlus, RefreshCw, Swords } from 'lucide-solid';
 import { useEditorStore, setHelpModalSection } from '../store/editorStore';
 import { addToast } from '../store/toastStore';
@@ -6,6 +6,7 @@ import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 
 import { Modal } from './Modal'; 
+import { APP_VERSION } from '../utils/version';
 
 const AccordionItem = (props: { title: string; id: string; activeSection: string; onToggle: (id: string) => void; icon: any; children: JSX.Element }) => {
   const isOpen = () => props.activeSection === props.id;
@@ -40,14 +41,6 @@ const AccordionItem = (props: { title: string; id: string; activeSection: string
 export const HelpModal = (props: { isOpen: boolean; onClose: () => void }) => {
   const editorState = useEditorStore();
   const [activeSection, setActiveSection] = createSignal(editorState.helpModalSection || 'how_to_use');
-  const [appVersion, setAppVersion] = createSignal('');
-
-  onMount(async () => {
-    try {
-      const { getVersion } = await import('@tauri-apps/plugin-app');
-      setAppVersion(await getVersion());
-    } catch(e) {}
-  });
 
   createEffect(() => {
     if (props.isOpen && editorState.helpModalSection) {
@@ -69,7 +62,7 @@ export const HelpModal = (props: { isOpen: boolean; onClose: () => void }) => {
         addToast("UPDATE SUCCESSFUL! RESTARTING SYSTEM...", "success");
         await relaunch();
       } else {
-        addToast(`SYSTEM IS UP TO DATE [v${appVersion() || '1.0.0'}]`, "success");
+        addToast(`SYSTEM IS UP TO DATE [v${APP_VERSION}]`, "success");
       }
     } catch (err: any) {
       console.error("Update failed:", err);
@@ -342,7 +335,7 @@ export const HelpModal = (props: { isOpen: boolean; onClose: () => void }) => {
             <>
               <div class="text-center space-y-3 py-4">
                 <h3 class="font-bold text-cyan-400 text-base uppercase tracking-widest">
-                  Suzu Save Editor v{appVersion() || '1.0.0'}
+                  Suzu Save Editor v{APP_VERSION}
                 </h3>
                 <p class="font-bold text-zinc-300">Ultimate Save Data Modifier & Analyzer</p>
                 <p class="text-zinc-500 max-w-lg mx-auto text-xs leading-relaxed">

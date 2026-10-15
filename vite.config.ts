@@ -3,6 +3,11 @@ import solid from "vite-plugin-solid";
 import tailwindcss from "@tailwindcss/vite";
 import { internalIpV4 } from "internal-ip";
 import { visualizer } from 'rollup-plugin-visualizer';
+import { readFileSync } from "node:fs";
+
+const pkg = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf-8")
+);
 
 // https://vite.dev/config/
 export default defineConfig(async () => {
@@ -10,6 +15,9 @@ export default defineConfig(async () => {
   const host = process.env.TAURI_DEV_HOST || await internalIpV4();
 
   return {
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     plugins: [
       solid(), 
       tailwindcss(),
