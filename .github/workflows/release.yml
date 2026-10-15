@@ -47,7 +47,7 @@ jobs:
           releaseDraft: true
           prerelease: true
 
-generate-checksums:
+  generate-checksums:
     needs: build
     runs-on: ubuntu-latest
     steps:
