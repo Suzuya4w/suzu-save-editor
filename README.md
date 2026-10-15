@@ -4,7 +4,7 @@
   <p><b>Free, Open-Source, and Offline Save Game Manager & Editor</b></p>
 
   <p>
-    <img src="https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge" alt="Version 1.0.5" />
+    <img src="https://img.shields.io/badge/version-1.0.5-blue.svg?style=for-the-badge" alt="Version 1.0.5" />
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-lightgrey.svg?style=for-the-badge" alt="Platforms Supported" />
     <img src="https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
     <img src="https://img.shields.io/badge/tauri-%2324C8DB.svg?style=for-the-badge&logo=tauri&logoColor=%23FFFFFF" alt="Tauri" />
