@@ -17,7 +17,7 @@
 
 ## Overview
 
-**Suzu Save Editor** is a fast, lightweight, and cross-platform save game manager tailored for RPGs, Visual Novels, and JSON-based save files. It allows you to tweak stats, edit raw memory data, and transfer saves seamlessly across desktop and mobile devices.
+**Suzu Save Editor** is a fast, lightweight, and cross-platform save game manager for RPGs, Visual Novels, and JSON-based save files. Mainly for High-Level Programming Language**
 
 ---
 
