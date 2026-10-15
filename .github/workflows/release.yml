@@ -56,17 +56,15 @@ generate-checksums:
 
       - name: Generate and Upload Checksums
         env:
-      - name: Generate and Upload Checksums
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           sleep 10
           
-          mkdir -p ./release-assets
-          cd ./release-assets
+          mkdir -p release-assets
 
-          gh release download ${{ github.ref_name }} --clobber
+          gh release download ${{ github.ref_name }} --repo ${{ github.repository }} --dir ./release-assets --clobber
 
+          cd release-assets
           sha256sum * > sha256sums.txt
 
-          gh release upload ${{ github.ref_name }} sha256sums.txt --clobber
+          gh release upload ${{ github.ref_name }} sha256sums.txt --repo ${{ github.repository }} --clobber
