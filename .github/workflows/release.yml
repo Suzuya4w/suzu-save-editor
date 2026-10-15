@@ -46,3 +46,22 @@ jobs:
           releaseName: 'Suzu Save Editor ${{ github.ref_name }}'
           releaseDraft: true
           prerelease: true
+
+  generate-checksums:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate and Upload Checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 10
+          
+          mkdir -p ./release-assets
+          cd ./release-assets
+
+          gh release download ${{ github.ref_name }} --clobber
+
+          sha256sum * > sha256sums.txt
+
+          gh release upload ${{ github.ref_name }} sha256sums.txt --clobber
